@@ -10,10 +10,16 @@ type SwipesProps = {
     nowGenerating: boolean
     isGreeting: boolean
     index: number
+    immersive?: boolean
 }
 
-const ChatSwipes: React.FC<SwipesProps> = ({ nowGenerating, isGreeting, index }) => {
-    const styles = useStyles()
+const ChatSwipes: React.FC<SwipesProps> = ({
+    nowGenerating,
+    isGreeting,
+    index,
+    immersive = false,
+}) => {
+    const styles = useStyles(immersive)
     const { color } = Theme.useTheme()
 
     const { swipeChat, addSwipe } = Chats.useSwipes()
@@ -96,14 +102,17 @@ const ChatSwipes: React.FC<SwipesProps> = ({ nowGenerating, isGreeting, index })
 
 export default ChatSwipes
 
-const useStyles = () => {
+const useStyles = (immersive: boolean) => {
     const { color, spacing } = Theme.useTheme()
     return StyleSheet.create({
         swipesItem: {
             flexDirection: 'row',
             justifyContent: 'space-evenly',
-            flex: 1,
-            marginTop: spacing.sm,
+            alignItems: 'center',
+            alignSelf: 'stretch',
+            minHeight: 40,
+            marginTop: immersive ? 0 : spacing.sm,
+            marginBottom: immersive ? spacing.xs : 0,
             zIndex: 32,
         },
 

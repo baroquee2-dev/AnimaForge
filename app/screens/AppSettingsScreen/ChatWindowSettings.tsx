@@ -13,6 +13,7 @@ const ChatWindowSettings = () => {
     const [saveScroll, setSaveScroll] = useMMKVBoolean(AppSettings.SaveScrollPosition)
     const [alternate, setAlternate] = useMMKVBoolean(AppSettings.AlternatingChatMode)
     const [wide, setWide] = useMMKVBoolean(AppSettings.WideChatMode)
+    const [immersive, setImmersive] = useMMKVBoolean(AppSettings.ImmersiveChatMode)
 
     const [showTokensPerSecond, setShowTokensPerSecond] = useMMKVBoolean(
         AppSettings.ShowTokenPerSecond
@@ -55,6 +56,13 @@ const ChatWindowSettings = () => {
                 value={saveScroll}
                 onChangeValue={setSaveScroll}
                 description="Automatically move to last scrolled position in chat"
+            />
+
+            <ThemedSwitch
+                label="Immersive Chat (Visual Novel)"
+                value={immersive}
+                onChangeValue={setImmersive}
+                description="Large character portrait and dialogue box for the latest reply. Earlier messages are collapsed."
             />
 
             <ThemedSwitch

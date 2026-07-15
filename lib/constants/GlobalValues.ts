@@ -142,6 +142,7 @@ export enum AppSettings {
     AutoGenerateTitle = 'settings-auto-generate-title',
     WideChatMode = 'settings-wide-chat-mode',
     AlternatingChatMode = 'settings-alternative-chat-mode',
+    ImmersiveChatMode = 'settings-immersive-chat-mode',
     KeepAwake = 'settings-keep-awake',
 }
 
@@ -179,6 +180,7 @@ export const AppSettingsDefault: Record<AppSettings, boolean> = {
     [AppSettings.AutoGenerateTitle]: true,
     [AppSettings.WideChatMode]: false,
     [AppSettings.AlternatingChatMode]: false,
+    [AppSettings.ImmersiveChatMode]: false,
     [AppSettings.KeepAwake]: true,
 }
 

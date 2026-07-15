@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { ImageBackground } from 'expo-image'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { FlatList } from 'react-native'
 import { useMMKVBoolean } from 'react-native-mmkv'
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated'
@@ -21,6 +21,8 @@ import ChatFooter from './ChatFooter'
 import ChatHeaderGradient from './ChatHeaderGradient'
 import ChatItem from './ChatItem'
 import ChatModelName from './ChatModelName'
+import ImmersiveChatLayout from './ImmersiveChatLayout'
+import ImmersiveHistoryBar from './ImmersiveHistoryBar'
 
 type ListItem = {
     index: number
@@ -36,6 +38,8 @@ const ChatWindow = () => {
     const [saveScroll] = useMMKVBoolean(AppSettings.SaveScrollPosition)
     const [showModelname] = useMMKVBoolean(AppSettings.ShowModelInChat)
     const [autoScroll] = useMMKVBoolean(AppSettings.AutoScroll)
+    const [immersive] = useMMKVBoolean(AppSettings.ImmersiveChatMode)
+    const [historyExpanded, setHistoryExpanded] = useState(false)
     const chatInputHeight = useInputHeightStore(useShallow((state) => state.height))
     const { data: { background_image: backgroundImage } = {} } = useLiveQuery(
         Characters.db.query.backgroundImageQuery(charId ?? -1)
@@ -66,7 +70,21 @@ const ChatWindow = () => {
         }))
         .reverse()
 
+    const historyCount = Math.max(0, (chat?.messages?.length ?? 0) - 1)
+    const lastMessage = chat?.messages?.at(-1)
+    const lastMessageIndex = Math.max(0, (chat?.messages?.length ?? 1) - 1)
+    const immersiveCollapsed = immersive && !historyExpanded
+    const showImmersivePortrait =
+        immersiveCollapsed && !!lastMessage && !lastMessage.is_user
+    const visibleList = immersiveCollapsed ? list.filter((item) => item.isLastMessage) : list
+    const collapsedLastItem = visibleList[0]
+
     useEffect(() => {
+        if (!immersive) setHistoryExpanded(false)
+    }, [immersive, chat?.id])
+
+    useEffect(() => {
+        if (immersive) return
         if (!scrollCause || !scrollIndex) return
         const isSave = scrollCause === 'saveScroll'
         if (!saveScroll && isSave) return
@@ -78,87 +96,112 @@ const ChatWindow = () => {
                 animated: scrollCause === 'search',
                 viewOffset: 32,
             })
-    }, [scrollCause, scrollIndex, saveScroll])
+    }, [scrollCause, scrollIndex, saveScroll, immersive])
 
     const renderItems = ({ item }: { item: ListItem }) => {
+        const message = chat?.messages?.[item.index]
         return (
             <ChatItem
                 index={item.index}
                 isLastMessage={item.isLastMessage}
                 isGreeting={item.isGreeting}
+                immersive={immersive}
+                historyCompact={immersive && historyExpanded && !item.isLastMessage}
+                immersivePortraitExternal={false}
             />
         )
     }
 
+    const backgroundSource = {
+        uri: backgroundImage
+            ? Characters.getImageDir(backgroundImage)
+            : image
+              ? AppDirectory.Assets + image
+              : '',
+    }
+
     return (
-        <ImageBackground
-            cachePolicy="none"
-            style={{ flex: 1 }}
-            source={{
-                uri: backgroundImage
-                    ? Characters.getImageDir(backgroundImage)
-                    : image
-                      ? AppDirectory.Assets + image
-                      : '',
-            }}>
+        <ImageBackground cachePolicy="none" style={{ flex: 1 }} source={backgroundSource}>
             {showModelname && appMode === 'local' && (
                 <HeaderTitle headerTitle={() => !showSettings && !showChat && <ChatModelName />} />
             )}
 
-            <FlatList
-                CellRendererComponent={(props: any) => (
-                    <Animated.View
-                        {...props}
-                        layout={LinearTransition.duration(250)
-                            .springify()
-                            .mass(0.3)
-                            .damping(20)
-                            .stiffness(300)}
-                        exiting={FadeOut.duration(150)}
-                        entering={FadeIn.duration(150).delay(100)}
-                    />
-                )}
-                ref={flatlistRef}
-                maintainVisibleContentPosition={
-                    autoScroll ? null : { minIndexForVisible: 1, autoscrollToTopThreshold: 50 }
-                }
-                keyboardShouldPersistTaps="handled"
-                inverted
-                data={list}
-                keyExtractor={(item) => item.key}
-                renderItem={renderItems}
-                scrollEventThrottle={16}
-                onViewableItemsChanged={(item) => {
-                    const index = item.viewableItems?.at(0)?.index
+            {immersive && historyCount > 0 && (
+                <ImmersiveHistoryBar
+                    variant="floating"
+                    count={historyCount}
+                    expanded={historyExpanded}
+                    onToggle={() => setHistoryExpanded((value) => !value)}
+                />
+            )}
 
-                    if (index && chat?.id)
-                        updateScrollPosition(
-                            index - (item.viewableItems.length === 1 ? 1 : 0),
-                            chat.id
-                        )
-                }}
-                onScrollToIndexFailed={(error) => {
-                    flatlistRef.current?.scrollToOffset({
-                        offset: error.averageItemLength * error.index,
-                        animated: true,
-                    })
-                    setTimeout(() => {
-                        if (list.length !== 0 && flatlistRef.current !== null) {
-                            flatlistRef.current?.scrollToIndex({
-                                index: error.index,
-                                animated: true,
-                                viewOffset: 32,
-                            })
-                        }
-                    }, 100)
-                }}
-                contentContainerStyle={{
-                    paddingTop: chatInputHeight,
-                    paddingBottom: 32,
-                    rowGap: 8,
-                }}
-                ListFooterComponent={() => <ChatFooter />}
-            />
+            {immersiveCollapsed ? (
+                <ImmersiveChatLayout
+                    lastItem={collapsedLastItem}
+                    lastMessageIndex={lastMessageIndex}
+                    showPortrait={showImmersivePortrait}
+                />
+            ) : (
+                <FlatList
+                    CellRendererComponent={(props: any) => (
+                        <Animated.View
+                            {...props}
+                            layout={LinearTransition.duration(250)
+                                .springify()
+                                .mass(0.3)
+                                .damping(20)
+                                .stiffness(300)}
+                            exiting={FadeOut.duration(150)}
+                            entering={FadeIn.duration(150).delay(100)}
+                        />
+                    )}
+                    ref={flatlistRef}
+                    maintainVisibleContentPosition={
+                        immersive
+                            ? null
+                            : autoScroll
+                              ? null
+                              : { minIndexForVisible: 1, autoscrollToTopThreshold: 50 }
+                    }
+                    keyboardShouldPersistTaps="handled"
+                    inverted
+                    data={visibleList}
+                    keyExtractor={(item) => item.key}
+                    renderItem={renderItems}
+                    scrollEventThrottle={16}
+                    onViewableItemsChanged={(item) => {
+                        if (immersive) return
+                        const index = item.viewableItems?.at(0)?.index
+
+                        if (index && chat?.id)
+                            updateScrollPosition(
+                                index - (item.viewableItems.length === 1 ? 1 : 0),
+                                chat.id
+                            )
+                    }}
+                    onScrollToIndexFailed={(error) => {
+                        flatlistRef.current?.scrollToOffset({
+                            offset: error.averageItemLength * error.index,
+                            animated: true,
+                        })
+                        setTimeout(() => {
+                            if (list.length !== 0 && flatlistRef.current !== null) {
+                                flatlistRef.current?.scrollToIndex({
+                                    index: error.index,
+                                    animated: true,
+                                    viewOffset: 32,
+                                })
+                            }
+                        }, 100)
+                    }}
+                    contentContainerStyle={{
+                        paddingTop: chatInputHeight,
+                        paddingBottom: 32,
+                        rowGap: immersive ? 0 : 8,
+                    }}
+                    ListFooterComponent={() => <ChatFooter />}
+                />
+            )}
 
             <ChatHeaderGradient />
         </ImageBackground>

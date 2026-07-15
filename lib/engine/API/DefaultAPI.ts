@@ -579,6 +579,7 @@ export const defaultTemplates: APIConfiguration[] = [
             firstMessage: '',
             key: '',
             model: undefined,
+            geminiSearchGrounding: false,
         },
 
         features: {
@@ -587,6 +588,7 @@ export const defaultTemplates: APIConfiguration[] = [
             useKey: true,
             useModel: true,
             multipleModels: false,
+            useGeminiGrounding: true,
         },
 
         request: {

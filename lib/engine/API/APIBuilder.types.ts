@@ -23,6 +23,7 @@ export interface APIValues {
     model: any
     // config name is unique and defines which template to use on generation
     configName: string
+    geminiSearchGrounding?: boolean
 }
 
 // Enable and disable features as needed
@@ -32,6 +33,7 @@ export interface APIFeatures {
     useKey: boolean
     useModel: boolean
     multipleModels: boolean
+    useGeminiGrounding?: boolean
 }
 
 export interface APIRequestFormat {

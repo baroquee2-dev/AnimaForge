@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { View, Animated, Easing, useAnimatedValue } from 'react-native'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { ScrollView, View, Animated, Easing, useAnimatedValue } from 'react-native'
 import Markdown from 'react-native-markdown-display'
+import { useShallow } from 'zustand/react/shallow'
 
 import ThemedButton from '@components/buttons/ThemedButton'
 import AnimatedEllipsis from '@components/text/AnimatedEllipsis'
@@ -8,12 +9,16 @@ import { useTextFilter } from '@lib/hooks/TextFilter'
 import { MarkdownStyle } from '@lib/markdown/Markdown'
 import { Chats, useInference } from '@lib/state/Chat'
 
+import { useInputHeightStore } from '../ChatInput'
+import { getImmersiveDialogueMaxHeight } from './ChatFrame'
+
 type ChatTextProps = {
     nowGenerating: boolean
     index: number
+    immersive?: boolean
 }
 
-const ChatTextLast: React.FC<ChatTextProps> = ({ nowGenerating, index }) => {
+const ChatTextLast: React.FC<ChatTextProps> = ({ nowGenerating, index, immersive = false }) => {
     const { markdown, rules, style } = MarkdownStyle.useCustomFormatting()
 
     const { swipeText, swipeId } = Chats.useSwipeData(index)
@@ -21,10 +26,16 @@ const ChatTextLast: React.FC<ChatTextProps> = ({ nowGenerating, index }) => {
 
     const [showHidden, setShowHidden] = useState(false)
     const viewRef = useRef<View>(null)
+    const scrollRef = useRef<ScrollView>(null)
     const currentSwipeId = useInference((state) => state.currentSwipeId)
     const animHeight = useAnimatedValue(-1)
     const targetHeight = useRef(-1)
     const firstRender = useRef(true)
+    const inputHeight = useInputHeightStore(useShallow((state) => state.height))
+    const immersiveMaxHeight = useMemo(
+        () => getImmersiveDialogueMaxHeight(inputHeight),
+        [inputHeight]
+    )
 
     const updateHeight = useCallback(() => {
         if (firstRender.current) return (firstRender.current = false)
@@ -56,32 +67,51 @@ const ChatTextLast: React.FC<ChatTextProps> = ({ nowGenerating, index }) => {
 
     const filteredText = useTextFilter(swipeText?.trim() ?? '')
     const renderedText = showHidden ? swipeText?.trim() : filteredText.result
+    const displayText =
+        nowGenerating && swipeId === currentSwipeId ? buffer.data.trim() : renderedText
+
+    const markdownContent = (
+        <>
+            {swipeId === currentSwipeId && nowGenerating && buffer.data === '' && <AnimatedEllipsis />}
+            <Markdown mergeStyle={false} markdownit={markdown} rules={rules} style={style}>
+                {displayText}
+            </Markdown>
+            {filteredText.found && (
+                <View style={{ flexDirection: 'row' }}>
+                    <ThemedButton
+                        onPress={() => setShowHidden(!showHidden)}
+                        variant="secondary"
+                        label={showHidden ? 'Hide Filtered' : 'Show Filtered'}
+                        labelStyle={{ flex: 0, fontSize: 12 }}
+                        buttonStyle={{
+                            paddingVertical: 0,
+                            paddingHorizontal: 0,
+                            borderWidth: 0,
+                        }}
+                    />
+                </View>
+            )}
+        </>
+    )
+
+    if (immersive) {
+        return (
+            <ScrollView
+                ref={scrollRef}
+                style={{ height: immersiveMaxHeight }}
+                nestedScrollEnabled
+                scrollEnabled
+                showsVerticalScrollIndicator
+                keyboardShouldPersistTaps="handled">
+                {markdownContent}
+            </ScrollView>
+        )
+    }
+
     return (
         <Animated.View style={{ overflow: 'scroll', height: animHeight }}>
             <View style={{ minHeight: 10 }} ref={viewRef} onLayout={updateHeight}>
-                {swipeId === currentSwipeId && nowGenerating && buffer.data === '' && (
-                    <AnimatedEllipsis />
-                )}
-                <Markdown mergeStyle={false} markdownit={markdown} rules={rules} style={style}>
-                    {nowGenerating && swipeId === currentSwipeId
-                        ? buffer.data.trim()
-                        : renderedText}
-                </Markdown>
-                {filteredText.found && (
-                    <View style={{ flexDirection: 'row' }}>
-                        <ThemedButton
-                            onPress={() => setShowHidden(!showHidden)}
-                            variant="secondary"
-                            label={showHidden ? 'Hide Filtered' : 'Show Filtered'}
-                            labelStyle={{ flex: 0, fontSize: 12 }}
-                            buttonStyle={{
-                                paddingVertical: 0,
-                                paddingHorizontal: 0,
-                                borderWidth: 0,
-                            }}
-                        />
-                    </View>
-                )}
+                {markdownContent}
             </View>
         </Animated.View>
     )

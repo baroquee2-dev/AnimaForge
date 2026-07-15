@@ -21,6 +21,7 @@ import ContextMenu from '@components/views/ContextMenu'
 import { XAxisOnlyTransition } from '@lib/animations/transitions'
 import { AppSettings } from '@lib/constants/GlobalValues'
 import { generateResponse } from '@lib/engine/Inference'
+import { useSpeechInput } from '@lib/hooks/useSpeechInput'
 import { useUnfocusTextInput } from '@lib/hooks/UnfocusTextInput'
 import { Characters } from '@lib/state/Characters'
 import { Chats, useInference } from '@lib/state/Chat'
@@ -81,6 +82,11 @@ const ChatInput = () => {
             setNewMessage: state.setText,
         }))
     )
+
+    const { isListening, toggleListening } = useSpeechInput((text) => {
+        setHideOptions(!!text)
+        setNewMessage(text)
+    })
 
     const abortResponse = async () => {
         Logger.info(`Aborting Generation`)
@@ -305,6 +311,28 @@ const ChatInput = () => {
                     submitBehavior={sendOnEnter ? 'blurAndSubmit' : 'newline'}
                     onSubmitEditing={sendOnEnter ? handleSend : undefined}
                 />
+                <Animated.View layout={XAxisOnlyTransition}>
+                    <TouchableOpacity
+                        disabled={nowGenerating}
+                        style={{
+                            borderRadius: borderRadius.m,
+                            backgroundColor: isListening
+                                ? color.error._500
+                                : color.neutral._200,
+                            padding: spacing.m,
+                            opacity: nowGenerating ? 0.4 : 1,
+                        }}
+                        onPress={() => {
+                            inputRef.current?.blur()
+                            toggleListening(newMessage)
+                        }}>
+                        <MaterialIcons
+                            name={isListening ? 'mic' : 'mic-none'}
+                            color={isListening ? color.neutral._100 : color.text._400}
+                            size={24}
+                        />
+                    </TouchableOpacity>
+                </Animated.View>
                 <Animated.View layout={XAxisOnlyTransition}>
                     <TouchableOpacity
                         style={{

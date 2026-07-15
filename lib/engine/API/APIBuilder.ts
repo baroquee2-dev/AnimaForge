@@ -8,6 +8,11 @@ import { getNestedValue } from '@lib/utils/Parsing'
 
 import { APIConfiguration } from './APIBuilder.types'
 import { buildContext, ContextBuilderParams } from './ContextBuilder'
+import {
+    buildGeminiGroundingPayload,
+    getGeminiGroundingEndpoint,
+    parseGeminiGroundingText,
+} from './GeminiGrounding'
 import { buildRequest, RequestBuilderParams } from './RequestBuilder'
 
 export interface APIBuilderParams
@@ -60,14 +65,42 @@ export const buildAndSendRequest = async ({
             return
         }
 
-        payload = await buildRequest({
-            apiConfig,
-            apiValues,
-            samplers,
-            instruct,
-            prompt,
-            stopSequence,
-        })
+        const useGeminiGrounding =
+            apiConfig.features.useGeminiGrounding &&
+            apiValues.geminiSearchGrounding &&
+            apiConfig.request.completionType.type === 'chatCompletions'
+
+        let endpoint = apiValues.endpoint
+        if (useGeminiGrounding) {
+            if (!Array.isArray(prompt)) {
+                Logger.errorToast('Gemini grounding requires chat completion context')
+                stopGenerating()
+                return
+            }
+
+            payload = buildGeminiGroundingPayload(
+                prompt,
+                apiConfig.request.completionType.contentName,
+                samplers,
+                stopSequence
+            )
+            endpoint = getGeminiGroundingEndpoint(apiConfig, apiValues)
+            if (!endpoint) {
+                Logger.errorToast('Could not resolve Gemini model name for grounding')
+                stopGenerating()
+                return
+            }
+            Logger.info(`Using Gemini grounding: ${endpoint}`)
+        } else {
+            payload = await buildRequest({
+                apiConfig,
+                apiValues,
+                samplers,
+                instruct,
+                prompt,
+                stopSequence,
+            })
+        }
 
         if (!payload) {
             Logger.errorToast(`Payload construction failed`)
@@ -84,9 +117,15 @@ export const buildAndSendRequest = async ({
             const anthropicVersion =
                 apiConfig.name === 'Claude' ? { 'anthropic-version': CLAUDE_VERSION } : {}
 
-            header = {
-                ...anthropicVersion,
-                [apiConfig.request.authHeader]: apiConfig.request.authPrefix + apiValues.key,
+            if (useGeminiGrounding) {
+                header = {
+                    'x-goog-api-key': apiValues.key,
+                }
+            } else {
+                header = {
+                    ...anthropicVersion,
+                    [apiConfig.request.authHeader]: apiConfig.request.authPrefix + apiValues.key,
+                }
             }
         }
 
@@ -115,13 +154,30 @@ export const buildAndSendRequest = async ({
             }
             return false
         }
+
+        const parseGeminiOutput = (event: any) => {
+            try {
+                const text = parseGeminiGroundingText(event).replaceAll(replaceStrings, '')
+                if (text) onData(text)
+                return !!text?.trim()
+            } catch (e) {
+                Logger.error(JSON.stringify(e))
+            }
+            return false
+        }
+
         let inReasoning = false
         const isChatCompletions = apiConfig.request.completionType.type === 'chatCompletions'
 
         return response({
-            endpoint: apiValues.endpoint,
+            endpoint: endpoint,
             payload: payload,
             onEvent: (event) => {
+                if (useGeminiGrounding) {
+                    parseGeminiOutput(event)
+                    return
+                }
+
                 if (
                     parseOutput(event, apiConfig.request.responseParsePattern, false, inReasoning)
                 ) {

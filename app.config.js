@@ -90,6 +90,13 @@ module.exports = {
                 },
             ],
             ['expo-sqlite', { withSQLiteVecExtension: true }],
+            [
+                'expo-speech-recognition',
+                {
+                    microphonePermission:
+                        'Allow ChatterUI to use the microphone for voice input.',
+                },
+            ],
             'expo-localization',
             'expo-router',
             'expo-font',

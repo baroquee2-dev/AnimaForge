@@ -6,6 +6,7 @@ import { useShallow } from 'zustand/react/shallow'
 
 import HeartbeatButton from '@components/buttons/HeartbeatButton'
 import ThemedButton from '@components/buttons/ThemedButton'
+import ThemedSwitch from '@components/input/ThemedSwitch'
 import DropdownSheet from '@components/input/DropdownSheet'
 import MultiDropdownSheet from '@components/input/MultiDropdownSheet'
 import ThemedTextInput from '@components/input/ThemedTextInput'
@@ -228,6 +229,17 @@ const AddConnection = () => {
                         />
                         <Text style={styles.hintText}>Prefill before model response</Text>
                     </View>
+                )}
+
+                {template.features.useGeminiGrounding && (
+                    <ThemedSwitch
+                        label="Search Grounding"
+                        value={values.geminiSearchGrounding ?? false}
+                        onChangeValue={(enabled) => {
+                            setValues({ ...values, geminiSearchGrounding: enabled })
+                        }}
+                        description="Uses Gemini native API to search the web for up-to-date answers. Requires Gemini 2.0+ models."
+                    />
                 )}
             </ScrollView>
             <ThemedButton

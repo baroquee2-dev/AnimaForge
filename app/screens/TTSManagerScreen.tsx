@@ -11,7 +11,7 @@ import ThemedTextInput from '@components/input/ThemedTextInput'
 import SectionTitle from '@components/text/SectionTitle'
 import HeaderTitle from '@components/views/HeaderTitle'
 import { Logger } from '@lib/state/Logger'
-import { useTTS } from '@lib/state/TTS'
+import { useTTS, type TTSProvider } from '@lib/state/TTS'
 import { Theme } from '@lib/theme/ThemeManager'
 import { groupBy } from '@lib/utils/Array'
 
@@ -19,14 +19,163 @@ type LanguageListItem = {
     [key: string]: Speech.Voice[]
 }
 
+type ElevenLabsModel = {
+    model_id: string
+    name: string
+    description?: string
+    can_do_text_to_speech?: boolean
+}
+
+const fallbackElevenLabsModels: ElevenLabsModel[] = [
+    { model_id: 'eleven_v3', name: 'Eleven v3' },
+    { model_id: 'eleven_flash_v2_5', name: 'Eleven Flash v2.5' },
+    { model_id: 'eleven_turbo_v2_5', name: 'Eleven Turbo v2.5' },
+    { model_id: 'eleven_multilingual_v2', name: 'Eleven Multilingual v2' },
+]
+
+type GeminiVoice = {
+    name: string
+    description: string
+}
+
+type GeminiModel = {
+    model_id: string
+    name: string
+}
+
+const geminiVoices: GeminiVoice[] = [
+    { name: 'Zephyr', description: 'Bright' },
+    { name: 'Puck', description: 'Upbeat' },
+    { name: 'Charon', description: 'Informative' },
+    { name: 'Kore', description: 'Firm' },
+    { name: 'Fenrir', description: 'Excitable' },
+    { name: 'Leda', description: 'Youthful' },
+    { name: 'Orus', description: 'Firm' },
+    { name: 'Aoede', description: 'Breezy' },
+    { name: 'Callirrhoe', description: 'Easy-going' },
+    { name: 'Autonoe', description: 'Bright' },
+    { name: 'Enceladus', description: 'Breathy' },
+    { name: 'Iapetus', description: 'Clear' },
+    { name: 'Umbriel', description: 'Easy-going' },
+    { name: 'Algieba', description: 'Smooth' },
+    { name: 'Despina', description: 'Smooth' },
+    { name: 'Erinome', description: 'Clear' },
+    { name: 'Algenib', description: 'Gravelly' },
+    { name: 'Rasalgethi', description: 'Informative' },
+    { name: 'Laomedeia', description: 'Upbeat' },
+    { name: 'Achernar', description: 'Soft' },
+    { name: 'Alnilam', description: 'Firm' },
+    { name: 'Schedar', description: 'Even' },
+    { name: 'Gacrux', description: 'Mature' },
+    { name: 'Pulcherrima', description: 'Forward' },
+    { name: 'Achird', description: 'Friendly' },
+    { name: 'Zubenelgenubi', description: 'Casual' },
+    { name: 'Vindemiatrix', description: 'Gentle' },
+    { name: 'Sadachbia', description: 'Lively' },
+    { name: 'Sadaltager', description: 'Knowledgeable' },
+    { name: 'Sulafat', description: 'Warm' },
+]
+
+const geminiModels: GeminiModel[] = [
+    { model_id: 'gemini-3.1-flash-tts-preview', name: 'Gemini 3.1 Flash TTS' },
+    { model_id: 'gemini-2.5-flash-preview-tts', name: 'Gemini 2.5 Flash TTS' },
+    { model_id: 'gemini-2.5-pro-preview-tts', name: 'Gemini 2.5 Pro TTS' },
+]
+
+const providerLabels: Record<TTSProvider, string> = {
+    device: 'Device voice',
+    elevenlabs: 'ElevenLabs',
+    gemini: 'Gemini',
+    cartesia: 'Cartesia',
+}
+
+type CartesiaVoice = {
+    id: string
+    name: string
+    description: string
+    language: string
+}
+
+type CartesiaModel = {
+    model_id: string
+    name: string
+    description: string
+}
+
+const cartesiaModels: CartesiaModel[] = [
+    {
+        model_id: 'sonic-3.5',
+        name: 'Sonic 3.5',
+        description: 'Latest, fast and expressive',
+    },
+    { model_id: 'sonic-3', name: 'Sonic 3', description: 'Stable, low latency' },
+    { model_id: 'sonic-latest', name: 'Sonic Latest', description: 'Preview track' },
+]
+
+const cartesiaLanguages = [
+    { code: 'zh', label: 'Chinese (zh)' },
+    { code: 'en', label: 'English (en)' },
+    { code: 'ja', label: 'Japanese (ja)' },
+    { code: 'ko', label: 'Korean (ko)' },
+    { code: 'fr', label: 'French (fr)' },
+    { code: 'de', label: 'German (de)' },
+    { code: 'es', label: 'Spanish (es)' },
+    { code: 'pt', label: 'Portuguese (pt)' },
+]
+
+const fallbackCartesiaVoices: CartesiaVoice[] = [
+    {
+        id: 'db6b0ed5-d5d3-463d-ae85-518a07d3c2b4',
+        name: 'Skylar',
+        description: 'Friendly Guide',
+        language: 'en',
+    },
+]
+
 const TTSManagerScreen = () => {
     const { color } = Theme.useTheme()
-    const { voice, setVoice, enabled, setEnabled, auto, setAuto, rate, setRate, live, setLive } =
-        useTTS()
+    const {
+        voice,
+        setVoice,
+        enabled,
+        setEnabled,
+        auto,
+        setAuto,
+        rate,
+        setRate,
+        live,
+        setLive,
+        provider,
+        setProvider,
+        elevenLabsApiKey,
+        setElevenLabsApiKey,
+        elevenLabsVoiceId,
+        setElevenLabsVoiceId,
+        elevenLabsModel,
+        setElevenLabsModel,
+        geminiApiKey,
+        setGeminiApiKey,
+        geminiVoiceName,
+        setGeminiVoiceName,
+        geminiModel,
+        setGeminiModel,
+        cartesiaApiKey,
+        setCartesiaApiKey,
+        cartesiaVoiceId,
+        setCartesiaVoiceId,
+        cartesiaModel,
+        setCartesiaModel,
+        cartesiaLanguage,
+        setCartesiaLanguage,
+        startTTS,
+        stopTTS,
+    } = useTTS()
     const [lang, setLang] = useState(voice?.language ?? 'en-US')
     const [modelList, setModelList] = useState<Speech.Voice[]>([])
     const languageList: LanguageListItem = groupBy(modelList, 'language')
     const [testAudioText, setTestAudioText] = useState('This is a test audio')
+    const [elevenLabsModels, setElevenLabsModels] = useState(fallbackElevenLabsModels)
+    const [cartesiaVoices, setCartesiaVoices] = useState(fallbackCartesiaVoices)
 
     const languages = Object.keys(languageList)
         .sort()
@@ -40,6 +189,90 @@ const TTSManagerScreen = () => {
 
     const getVoices = (value = false) => {
         Speech.getAvailableVoicesAsync().then((list) => setModelList(list))
+    }
+
+    const getCartesiaVoices = async () => {
+        if (!cartesiaApiKey.trim()) {
+            Logger.warnToast('Enter a Cartesia API Key first')
+            return
+        }
+        try {
+            const voices: CartesiaVoice[] = []
+            let cursor: string | null = null
+            let hasMore = true
+
+            while (hasMore && voices.length < 200) {
+                const params = new URLSearchParams({ limit: '100' })
+                if (cursor) params.set('starting_after', cursor)
+                const response = await fetch(`https://api.cartesia.ai/voices?${params.toString()}`, {
+                    headers: {
+                        Authorization: `Bearer ${cartesiaApiKey}`,
+                        'Cartesia-Version': '2026-03-01',
+                    },
+                })
+                if (!response.ok) throw new Error(`Request failed (${response.status})`)
+                const result = (await response.json()) as {
+                    data?: {
+                        id: string
+                        name: string
+                        description?: string
+                        language?: string
+                    }[]
+                    has_more?: boolean
+                    next_page?: string | null
+                }
+                voices.push(
+                    ...(result.data ?? []).map((voice) => ({
+                        id: voice.id,
+                        name: voice.name,
+                        description: voice.description ?? '',
+                        language: voice.language ?? '',
+                    }))
+                )
+                hasMore = !!result.has_more
+                cursor = result.next_page ?? null
+                if (!cursor) hasMore = false
+            }
+
+            if (voices.length) {
+                setCartesiaVoices(voices)
+                if (!voices.some((voice) => voice.id === cartesiaVoiceId)) {
+                    setCartesiaVoiceId(voices[0].id)
+                }
+            } else {
+                Logger.warnToast('No Cartesia voices returned')
+            }
+        } catch (error) {
+            Logger.errorToast(
+                error instanceof Error ? `Cartesia: ${error.message}` : 'Could not load voices'
+            )
+        }
+    }
+
+    const getElevenLabsModels = async () => {
+        if (!elevenLabsApiKey.trim()) {
+            Logger.warnToast('Enter an ElevenLabs API Key first')
+            return
+        }
+        try {
+            const response = await fetch('https://api.elevenlabs.io/v1/models', {
+                headers: { 'xi-api-key': elevenLabsApiKey },
+            })
+            if (!response.ok) throw new Error(`Request failed (${response.status})`)
+            const models = (await response.json()) as ElevenLabsModel[]
+            const ttsModels = models.filter((model) => model.can_do_text_to_speech)
+            setElevenLabsModels(ttsModels.length ? ttsModels : fallbackElevenLabsModels)
+            if (
+                ttsModels.length &&
+                !ttsModels.some((model) => model.model_id === elevenLabsModel)
+            ) {
+                setElevenLabsModel(ttsModels[0].model_id)
+            }
+        } catch (error) {
+            Logger.errorToast(
+                error instanceof Error ? `ElevenLabs: ${error.message}` : 'Could not load models'
+            )
+        }
     }
 
     return (
@@ -59,7 +292,7 @@ const TTSManagerScreen = () => {
                 onChangeValue={(value) => {
                     if (value) {
                         getVoices(true)
-                    } else Speech.stop()
+                    } else void stopTTS()
                     setEnabled(value)
                 }}
             />
@@ -95,70 +328,231 @@ const TTSManagerScreen = () => {
                 onValueChange={setRate}
             />
 
-            <SectionTitle style={{ marginTop: 8 }}>
-                Language ({Object.keys(languageList).length})
-            </SectionTitle>
-            <View style={{ marginTop: 8 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}>
+            <SectionTitle style={{ marginTop: 8 }}>Speech Provider</SectionTitle>
+            <DropdownSheet
+                selected={provider}
+                data={['device', 'elevenlabs', 'gemini', 'cartesia'] as const}
+                labelExtractor={(item) => providerLabels[item]}
+                onChangeValue={setProvider}
+            />
+
+            {provider === 'elevenlabs' && (
+                <>
+                    <ThemedTextInput
+                        label="ElevenLabs API Key"
+                        value={elevenLabsApiKey}
+                        onChangeText={setElevenLabsApiKey}
+                        secureTextEntry
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                        placeholder="xi-api-key"
+                    />
+                    <ThemedTextInput
+                        label="Voice ID (optional)"
+                        description="Uses the default ElevenLabs voice when left unchanged."
+                        value={elevenLabsVoiceId}
+                        onChangeText={setElevenLabsVoiceId}
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                        placeholder="21m00Tcm4TlvDq8ikWAM"
+                    />
+                    <SectionTitle>ElevenLabs Model</SectionTitle>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}>
+                        <DropdownSheet
+                            containerStyle={{ flex: 1 }}
+                            selected={elevenLabsModels.find(
+                                (model) => model.model_id === elevenLabsModel
+                            )}
+                            data={elevenLabsModels}
+                            labelExtractor={(model) => `${model.name} (${model.model_id})`}
+                            placeholder="Select ElevenLabs model"
+                            onChangeValue={(model) => setElevenLabsModel(model.model_id)}
+                        />
+                        <ThemedButton
+                            iconName="reload"
+                            iconSize={20}
+                            variant="secondary"
+                            onPress={() => void getElevenLabsModels()}
+                        />
+                    </View>
+                    <ThemedButton
+                        label="Test ElevenLabs Voice"
+                        variant="secondary"
+                        onPress={() => startTTS(testAudioText, -1)}
+                    />
+                </>
+            )}
+
+            {provider === 'gemini' && (
+                <>
+                    <ThemedTextInput
+                        label="Gemini API Key"
+                        value={geminiApiKey}
+                        onChangeText={setGeminiApiKey}
+                        secureTextEntry
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                        placeholder="AIza..."
+                    />
+                    <SectionTitle>Gemini Voice</SectionTitle>
                     <DropdownSheet
-                        containerStyle={{ flex: 1 }}
-                        selected={lang}
-                        data={languages}
-                        labelExtractor={(item) => item}
-                        placeholder="Select Language"
-                        onChangeValue={(item) => setLang(item)}
+                        search
+                        modalTitle="Select Gemini Voice"
+                        selected={geminiVoices.find((voice) => voice.name === geminiVoiceName)}
+                        data={geminiVoices}
+                        labelExtractor={(voice) => `${voice.name} — ${voice.description}`}
+                        placeholder="Select Gemini voice"
+                        onChangeValue={(voice) => setGeminiVoiceName(voice.name)}
+                    />
+                    <SectionTitle>Gemini Model</SectionTitle>
+                    <DropdownSheet
+                        selected={geminiModels.find((model) => model.model_id === geminiModel)}
+                        data={geminiModels}
+                        labelExtractor={(model) => `${model.name} (${model.model_id})`}
+                        placeholder="Select Gemini model"
+                        onChangeValue={(model) => setGeminiModel(model.model_id)}
                     />
                     <ThemedButton
-                        iconName="reload"
-                        iconSize={20}
-                        onPress={() => getVoices()}
+                        label="Test Gemini Voice"
                         variant="secondary"
+                        onPress={() => startTTS(testAudioText, -1)}
                     />
-                </View>
-            </View>
+                </>
+            )}
 
-            <SectionTitle style={{ marginTop: 8 }}>
-                Voices ({modelList.filter((item) => item.language === lang).length})
-            </SectionTitle>
+            {provider === 'cartesia' && (
+                <>
+                    <ThemedTextInput
+                        label="Cartesia API Key"
+                        value={cartesiaApiKey}
+                        onChangeText={setCartesiaApiKey}
+                        secureTextEntry
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                        placeholder="sk_car_..."
+                    />
+                    <SectionTitle>Cartesia Voice</SectionTitle>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}>
+                        <DropdownSheet
+                            containerStyle={{ flex: 1 }}
+                            search
+                            modalTitle="Select Cartesia Voice"
+                            selected={cartesiaVoices.find((voice) => voice.id === cartesiaVoiceId)}
+                            data={cartesiaVoices}
+                            labelExtractor={(voice) =>
+                                `${voice.name}${voice.language ? ` (${voice.language})` : ''}`
+                            }
+                            placeholder="Select Cartesia voice"
+                            onChangeValue={(voice) => setCartesiaVoiceId(voice.id)}
+                        />
+                        <ThemedButton
+                            iconName="reload"
+                            iconSize={20}
+                            variant="secondary"
+                            onPress={() => void getCartesiaVoices()}
+                        />
+                    </View>
+                    <ThemedTextInput
+                        label="Voice ID (optional)"
+                        description="Paste a voice ID from play.cartesia.ai if you prefer manual entry."
+                        value={cartesiaVoiceId}
+                        onChangeText={setCartesiaVoiceId}
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                        placeholder="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4"
+                    />
+                    <SectionTitle>Cartesia Model</SectionTitle>
+                    <DropdownSheet
+                        selected={cartesiaModels.find((model) => model.model_id === cartesiaModel)}
+                        data={cartesiaModels}
+                        labelExtractor={(model) => `${model.name} — ${model.description}`}
+                        placeholder="Select Cartesia model"
+                        onChangeValue={(model) => setCartesiaModel(model.model_id)}
+                    />
+                    <SectionTitle>Language</SectionTitle>
+                    <DropdownSheet
+                        selected={cartesiaLanguages.find((item) => item.code === cartesiaLanguage)}
+                        data={cartesiaLanguages}
+                        labelExtractor={(item) => item.label}
+                        placeholder="Select language"
+                        onChangeValue={(item) => setCartesiaLanguage(item.code)}
+                    />
+                    <ThemedButton
+                        label="Test Cartesia Voice"
+                        variant="secondary"
+                        onPress={() => startTTS(testAudioText, -1)}
+                    />
+                </>
+            )}
 
-            <DropdownSheet
-                style={{ marginBottom: 8 }}
-                search
-                modalTitle="Select Voice"
-                selected={voice}
-                data={languageList?.[lang] ?? []}
-                labelExtractor={(item) => item.identifier}
-                placeholder="Select Voice"
-                onChangeValue={(item) => setVoice(item)}
-            />
-            <View
-                style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    columnGap: 8,
-                    backgroundColor: color.neutral._100,
-                }}>
-                <ThemedTextInput
-                    value={testAudioText}
-                    onChangeText={setTestAudioText}
-                    style={{ color: color.text._400, fontStyle: 'italic' }}
-                />
-                <ThemedButton
-                    label="Test"
-                    variant="secondary"
-                    onPress={() => {
-                        if (voice === undefined) {
-                            Logger.warnToast(`No Speaker Chosen`)
-                            return
-                        }
-                        Speech.speak(testAudioText, {
-                            language: voice.language,
-                            voice: voice.identifier,
-                            rate: rate,
-                        })
-                    }}
-                />
-            </View>
+            {provider === 'device' && (
+                <>
+                    <SectionTitle style={{ marginTop: 8 }}>
+                        Language ({Object.keys(languageList).length})
+                    </SectionTitle>
+                    <View style={{ marginTop: 8 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}>
+                            <DropdownSheet
+                                containerStyle={{ flex: 1 }}
+                                selected={lang}
+                                data={languages}
+                                labelExtractor={(item) => item}
+                                placeholder="Select Language"
+                                onChangeValue={(item) => setLang(item)}
+                            />
+                            <ThemedButton
+                                iconName="reload"
+                                iconSize={20}
+                                onPress={() => getVoices()}
+                                variant="secondary"
+                            />
+                        </View>
+                    </View>
+
+                    <SectionTitle style={{ marginTop: 8 }}>
+                        Voices ({modelList.filter((item) => item.language === lang).length})
+                    </SectionTitle>
+
+                    <DropdownSheet
+                        style={{ marginBottom: 8 }}
+                        search
+                        modalTitle="Select Voice"
+                        selected={voice}
+                        data={languageList?.[lang] ?? []}
+                        labelExtractor={(item) => item.identifier}
+                        placeholder="Select Voice"
+                        onChangeValue={(item) => setVoice(item)}
+                    />
+                    <View
+                        style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            columnGap: 8,
+                            backgroundColor: color.neutral._100,
+                        }}>
+                        <ThemedTextInput
+                            value={testAudioText}
+                            onChangeText={setTestAudioText}
+                            style={{ color: color.text._400, fontStyle: 'italic' }}
+                        />
+                        <ThemedButton
+                            label="Test"
+                            variant="secondary"
+                            onPress={() => {
+                                if (voice === undefined) {
+                                    Logger.warnToast(`No Speaker Chosen`)
+                                    return
+                                }
+                                Speech.speak(testAudioText, {
+                                    language: voice.language,
+                                    voice: voice.identifier,
+                                    rate: rate,
+                                })
+                            }}
+                        />
+                    </View>
+                </>
+            )}
         </KeyboardAwareScrollView>
     )
 }
