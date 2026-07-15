@@ -47,15 +47,21 @@ export const useSpeechInput = (onTextUpdate: (text: string) => void) => {
         Logger.warnToast(`Voice input: ${event.message ?? event.error}`)
     })
 
-    const stopListening = useCallback(() => {
-        if (!isListeningRef.current) return
-        ExpoSpeechRecognitionModule.stop()
+    const turnOffListening = useCallback(() => {
+        // Reset mic UI immediately; native `end` events are not always emitted on send.
+        isListeningRef.current = false
+        setIsListening(false)
+        try {
+            ExpoSpeechRecognitionModule.stop()
+        } catch {
+            // Session may already have ended without firing the `end` event.
+        }
     }, [])
 
     const toggleListening = useCallback(
         async (currentText: string) => {
             if (isListeningRef.current) {
-                stopListening()
+                turnOffListening()
                 return
             }
 
@@ -83,8 +89,8 @@ export const useSpeechInput = (onTextUpdate: (text: string) => void) => {
                 Logger.warnToast('Failed to start voice input')
             }
         },
-        [stopListening]
+        [turnOffListening]
     )
 
-    return { isListening, toggleListening, stopListening }
+    return { isListening, toggleListening, turnOffListening }
 }

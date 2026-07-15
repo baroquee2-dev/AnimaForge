@@ -83,7 +83,7 @@ const ChatInput = () => {
         }))
     )
 
-    const { isListening, toggleListening } = useSpeechInput((text) => {
+    const { isListening, toggleListening, turnOffListening } = useSpeechInput((text) => {
         setHideOptions(!!text)
         setNewMessage(text)
     })
@@ -94,6 +94,8 @@ const ChatInput = () => {
     }
 
     const handleSend = async () => {
+        // Close the mic icon after send; recording may already have stopped in the background.
+        turnOffListening()
         if (newMessage.trim() !== '' || attachments.length > 0)
             await addEntry(
                 userName ?? '',
