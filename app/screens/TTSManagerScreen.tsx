@@ -26,11 +26,22 @@ type ElevenLabsModel = {
     can_do_text_to_speech?: boolean
 }
 
+type ElevenLabsVoice = {
+    voice_id: string
+    name: string
+    category?: string
+    description?: string
+}
+
 const fallbackElevenLabsModels: ElevenLabsModel[] = [
     { model_id: 'eleven_v3', name: 'Eleven v3' },
     { model_id: 'eleven_flash_v2_5', name: 'Eleven Flash v2.5' },
     { model_id: 'eleven_turbo_v2_5', name: 'Eleven Turbo v2.5' },
     { model_id: 'eleven_multilingual_v2', name: 'Eleven Multilingual v2' },
+]
+
+const fallbackElevenLabsVoices: ElevenLabsVoice[] = [
+    { voice_id: '21m00Tcm4TlvDq8ikWAM', name: 'Rachel', category: 'premade' },
 ]
 
 type GeminiVoice = {
@@ -175,6 +186,7 @@ const TTSManagerScreen = () => {
     const languageList: LanguageListItem = groupBy(modelList, 'language')
     const [testAudioText, setTestAudioText] = useState('This is a test audio')
     const [elevenLabsModels, setElevenLabsModels] = useState(fallbackElevenLabsModels)
+    const [elevenLabsVoices, setElevenLabsVoices] = useState(fallbackElevenLabsVoices)
     const [cartesiaVoices, setCartesiaVoices] = useState(fallbackCartesiaVoices)
 
     const languages = Object.keys(languageList)
@@ -275,6 +287,33 @@ const TTSManagerScreen = () => {
         }
     }
 
+    const getElevenLabsVoices = async () => {
+        if (!elevenLabsApiKey.trim()) {
+            Logger.warnToast('Enter an ElevenLabs API Key first')
+            return
+        }
+        try {
+            const response = await fetch('https://api.elevenlabs.io/v1/voices', {
+                headers: { 'xi-api-key': elevenLabsApiKey },
+            })
+            if (!response.ok) throw new Error(`Request failed (${response.status})`)
+            const result = (await response.json()) as { voices?: ElevenLabsVoice[] }
+            const voices = result.voices ?? []
+            if (voices.length) {
+                setElevenLabsVoices(voices)
+                if (!voices.some((voice) => voice.voice_id === elevenLabsVoiceId)) {
+                    setElevenLabsVoiceId(voices[0].voice_id)
+                }
+            } else {
+                Logger.warnToast('No ElevenLabs voices returned')
+            }
+        } catch (error) {
+            Logger.errorToast(
+                error instanceof Error ? `ElevenLabs: ${error.message}` : 'Could not load voices'
+            )
+        }
+    }
+
     return (
         <KeyboardAwareScrollView
             style={{
@@ -347,9 +386,32 @@ const TTSManagerScreen = () => {
                         autoCorrect={false}
                         placeholder="xi-api-key"
                     />
+                    <SectionTitle>ElevenLabs Voice</SectionTitle>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}>
+                        <DropdownSheet
+                            containerStyle={{ flex: 1 }}
+                            search
+                            modalTitle="Select ElevenLabs Voice"
+                            selected={elevenLabsVoices.find(
+                                (voice) => voice.voice_id === elevenLabsVoiceId
+                            )}
+                            data={elevenLabsVoices}
+                            labelExtractor={(voice) =>
+                                `${voice.name}${voice.category ? ` (${voice.category})` : ''}`
+                            }
+                            placeholder="Select ElevenLabs voice"
+                            onChangeValue={(voice) => setElevenLabsVoiceId(voice.voice_id)}
+                        />
+                        <ThemedButton
+                            iconName="reload"
+                            iconSize={20}
+                            variant="secondary"
+                            onPress={() => void getElevenLabsVoices()}
+                        />
+                    </View>
                     <ThemedTextInput
                         label="Voice ID (optional)"
-                        description="Uses the default ElevenLabs voice when left unchanged."
+                        description="Paste a voice ID manually if it does not appear in the list."
                         value={elevenLabsVoiceId}
                         onChangeText={setElevenLabsVoiceId}
                         autoCapitalize="none"

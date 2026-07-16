@@ -165,7 +165,14 @@ const ChatBubble: React.FC<ChatTextProps> = ({
                 />
             )}
             {isImmersiveDialogue ? (
-                <View style={bubbleStyle}>{bubbleContent}</View>
+                <Pressable
+                    onPress={() => {
+                        setShowOptions(nowGenerating ? undefined : index)
+                    }}
+                    style={bubbleStyle}
+                    onLongPress={handleEnableEdit}>
+                    {bubbleContent}
+                </Pressable>
             ) : (
                 <Pressable
                     onPress={() => {
