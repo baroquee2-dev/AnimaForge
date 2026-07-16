@@ -3,7 +3,7 @@ import { randomUUID } from 'expo-crypto'
 import { getDocumentAsync } from 'expo-document-picker'
 import { Image } from 'expo-image'
 import React, { useState } from 'react'
-import { TextInput, TouchableOpacity, View } from 'react-native'
+import { Keyboard, TextInput, TouchableOpacity, View } from 'react-native'
 import { useMMKVBoolean } from 'react-native-mmkv'
 import Animated, {
     BounceIn,
@@ -94,6 +94,8 @@ const ChatInput = () => {
     }
 
     const handleSend = async () => {
+        // Hide the keyboard after send so the chat view stays unobstructed.
+        Keyboard.dismiss()
         // Close the mic icon after send; recording may already have stopped in the background.
         turnOffListening()
         if (newMessage.trim() !== '' || attachments.length > 0)
