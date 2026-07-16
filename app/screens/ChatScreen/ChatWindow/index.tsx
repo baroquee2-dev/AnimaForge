@@ -1,5 +1,4 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
-import { ImageBackground } from 'expo-image'
 import { useEffect, useRef, useState } from 'react'
 import { FlatList } from 'react-native'
 import { useMMKVBoolean } from 'react-native-mmkv'
@@ -17,6 +16,7 @@ import { Chats } from '@lib/state/Chat'
 import { AppDirectory } from '@lib/utils/File'
 
 import { useInputHeightStore } from '../ChatInput'
+import AnimatedChatBackground from './AnimatedChatBackground'
 import ChatFooter from './ChatFooter'
 import ChatHeaderGradient from './ChatHeaderGradient'
 import ChatItem from './ChatItem'
@@ -122,7 +122,7 @@ const ChatWindow = () => {
     }
 
     return (
-        <ImageBackground cachePolicy="none" style={{ flex: 1 }} source={backgroundSource}>
+        <AnimatedChatBackground uri={backgroundSource.uri}>
             {showModelname && appMode === 'local' && (
                 <HeaderTitle headerTitle={() => !showSettings && !showChat && <ChatModelName />} />
             )}
@@ -208,7 +208,7 @@ const ChatWindow = () => {
             )}
 
             <ChatHeaderGradient />
-        </ImageBackground>
+        </AnimatedChatBackground>
     )
 }
 

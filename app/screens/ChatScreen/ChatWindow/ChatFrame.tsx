@@ -1,6 +1,7 @@
 import { ReactNode, useMemo } from 'react'
 import { Dimensions, Text, TouchableOpacity, View } from 'react-native'
 import { useMMKVBoolean } from 'react-native-mmkv'
+import Animated from 'react-native-reanimated'
 
 import Avatar from '@components/views/Avatar'
 import { AppSettings } from '@lib/constants/GlobalValues'
@@ -10,6 +11,7 @@ import { useAvatarViewerStore } from '@lib/state/components/AvatarViewer'
 import { Theme } from '@lib/theme/ThemeManager'
 
 import PortraitBreathing from './PortraitBreathing'
+import { portraitEntrance } from './chatAnimations'
 
 type ChatFrameProps = {
     children?: ReactNode
@@ -88,21 +90,23 @@ const ChatFrame: React.FC<ChatFrameProps> = ({
 
         return (
             <View style={{ alignItems: 'center', paddingTop: spacing.sm }}>
-                <PortraitBreathing active={nowGenerating}>
-                    <TouchableOpacity onPress={() => setShowViewer(true, false)}>
-                        <Avatar
-                            contentFit="cover"
-                            style={{
-                                width: immersivePortraitSize.width,
-                                height: immersivePortraitSize.height,
-                                borderRadius: borderRadius.xl2,
-                                borderWidth: 2,
-                                borderColor: color.neutral._100 + '88',
-                            }}
-                            targetImage={Characters.getImageDir(charImageId)}
-                        />
-                    </TouchableOpacity>
-                </PortraitBreathing>
+                <Animated.View key={charImageId} entering={portraitEntrance}>
+                    <PortraitBreathing active={nowGenerating}>
+                        <TouchableOpacity onPress={() => setShowViewer(true, false)}>
+                            <Avatar
+                                contentFit="cover"
+                                style={{
+                                    width: immersivePortraitSize.width,
+                                    height: immersivePortraitSize.height,
+                                    borderRadius: borderRadius.xl2,
+                                    borderWidth: 2,
+                                    borderColor: color.neutral._100 + '88',
+                                }}
+                                targetImage={Characters.getImageDir(charImageId)}
+                            />
+                        </TouchableOpacity>
+                    </PortraitBreathing>
+                </Animated.View>
                 <Text
                     style={{
                         fontSize: fontSize.xl2,

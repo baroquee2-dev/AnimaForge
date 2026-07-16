@@ -1,9 +1,11 @@
 import { Ionicons } from '@expo/vector-icons'
 import { StyleSheet, Text, View } from 'react-native'
+import Animated from 'react-native-reanimated'
 
 import { Chats } from '@lib/state/Chat'
 import { Theme } from '@lib/theme/ThemeManager'
 
+import { drawerItemEntrance } from '../ChatWindow/chatAnimations'
 import ChatEditPopup from './ChatDrawerOptions'
 
 type ListItem = Awaited<ReturnType<typeof Chats.db.query.chatListQuery>>[0]
@@ -11,16 +13,18 @@ type ListItem = Awaited<ReturnType<typeof Chats.db.query.chatListQuery>>[0]
 type ChatDrawerItemProps = {
     item: ListItem
     onLoad: (id: number) => void
+    index: number
 }
 
-const ChatDrawerItem: React.FC<ChatDrawerItemProps> = ({ item, onLoad }) => {
+const ChatDrawerItem: React.FC<ChatDrawerItemProps> = ({ item, onLoad, index }) => {
     const styles = useStyles()
     const { spacing, color } = Theme.useTheme()
     const date = new Date(item.last_modified ?? 0)
     const { chatId } = Chats.useChat()
     return (
-        <ChatEditPopup item={item} onPress={() => onLoad(item.id)}>
-            <View style={item.id === chatId ? styles.chatItemActive : styles.chatItem}>
+        <Animated.View entering={drawerItemEntrance(index)}>
+            <ChatEditPopup item={item} onPress={() => onLoad(item.id)}>
+                <View style={item.id === chatId ? styles.chatItemActive : styles.chatItem}>
                 <View
                     style={{ flex: 1, paddingHorizontal: spacing.xs, paddingVertical: spacing.m }}>
                     <Text style={styles.title}>{item.name}</Text>
@@ -43,6 +47,7 @@ const ChatDrawerItem: React.FC<ChatDrawerItemProps> = ({ item, onLoad }) => {
                 </View>
             </View>
         </ChatEditPopup>
+        </Animated.View>
     )
 }
 

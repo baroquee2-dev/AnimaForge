@@ -92,6 +92,22 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
     )
 
     const [anchor, setAnchor] = useState<LayoutRectangle | null>(null)
+    const pressScale = useSharedValue(1)
+
+    const triggerAnimatedStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: pressScale.value }],
+        opacity: isOpen ? 0.5 : 1,
+    }))
+
+    const handlePressIn = (event: GestureResponderEvent) => {
+        pressScale.value = withTiming(0.975, { duration: 90 })
+        if (longPress) return
+        handleOpen(event)
+    }
+
+    const handlePressOut = () => {
+        pressScale.value = withTiming(1, { duration: 140 })
+    }
 
     const handleOpen = (event: GestureResponderEvent) => {
         const ne = event.nativeEvent
@@ -127,13 +143,11 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
     return (
         <>
             <TouchableOpacity
-                activeOpacity={0.5}
-                style={{ opacity: isOpen ? 0.5 : 1 }}
+                activeOpacity={1}
+                style={{ opacity: 1 }}
                 ref={triggerRef}
-                onPressIn={(event) => {
-                    if (longPress) return
-                    handleOpen(event)
-                }}
+                onPressIn={handlePressIn}
+                onPressOut={handlePressOut}
                 onPress={() => onPress?.()}
                 delayLongPress={delayLongPress ?? 300}
                 onLongPress={(event) => {
@@ -142,13 +156,15 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
                     handleOpen(event)
                 }}
                 disabled={disabled}>
-                {children || (
-                    <AntDesign
-                        size={triggerIconSize}
-                        style={[styles.menuText, triggerStyle]}
-                        name={triggerIcon}
-                    />
-                )}
+                <Animated.View style={triggerAnimatedStyle}>
+                    {children || (
+                        <AntDesign
+                            size={triggerIconSize}
+                            style={[styles.menuText, triggerStyle]}
+                            name={triggerIcon}
+                        />
+                    )}
+                </Animated.View>
             </TouchableOpacity>
 
             {isOpen && anchor && (

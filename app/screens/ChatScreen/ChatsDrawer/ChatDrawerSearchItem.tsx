@@ -1,45 +1,56 @@
 import { Text, TouchableOpacity, View } from 'react-native'
+import Animated from 'react-native-reanimated'
 
 import { Chats } from '@lib/state/Chat'
 import { Theme } from '@lib/theme/ThemeManager'
 import { getFriendlyTimeStamp } from '@lib/utils/Time'
 
+import { drawerItemEntrance } from '../ChatWindow/chatAnimations'
+
 type ChatDrawerSearchItemProps = {
     query: string
     item: Awaited<ReturnType<typeof Chats.db.query.searchChat>>[0]
     onLoad: (id: number, setOffset?: { type: 'index' | 'entryId'; value: number }) => void
+    index: number
 }
 
-const ChatDrawerSearchItem: React.FC<ChatDrawerSearchItemProps> = ({ item, onLoad, query }) => {
+const ChatDrawerSearchItem: React.FC<ChatDrawerSearchItemProps> = ({
+    item,
+    onLoad,
+    query,
+    index,
+}) => {
     const { color, spacing, fontSize } = Theme.useTheme()
 
     const segmented = segmentText(item.swipe, query)
 
     return (
-        <TouchableOpacity
-            onPress={() => onLoad(item.chatId, { type: 'entryId', value: item.chatEntryId })}
-            style={{
-                paddingHorizontal: spacing.m,
-                paddingVertical: spacing.m,
-                marginBottom: spacing.s,
-                rowGap: 2,
-            }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                <Text style={{ color: color.text._300, fontSize: fontSize.m, fontWeight: '500' }}>
-                    {item.chatName}
+        <Animated.View entering={drawerItemEntrance(index)}>
+            <TouchableOpacity
+                onPress={() => onLoad(item.chatId, { type: 'entryId', value: item.chatEntryId })}
+                style={{
+                    paddingHorizontal: spacing.m,
+                    paddingVertical: spacing.m,
+                    marginBottom: spacing.s,
+                    rowGap: 2,
+                }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <Text style={{ color: color.text._300, fontSize: fontSize.m, fontWeight: '500' }}>
+                        {item.chatName}
+                    </Text>
+                    <Text style={{ color: color.text._600, fontSize: fontSize.s }}>
+                        {getFriendlyTimeStamp(item.sendDate.getTime())}
+                    </Text>
+                </View>
+                <Text>
+                    {segmented.showHeadEllipsis && <Text style={{ color: color.text._500 }}>...</Text>}
+                    <Text style={{ color: color.text._500 }}>{segmented.head.trimStart()}</Text>
+                    <Text style={{ color: color.text._300, fontWeight: '700' }}>{segmented.query}</Text>
+                    <Text style={{ color: color.text._500 }}>{segmented.tail.trimEnd()}</Text>
+                    {segmented.showTailEllipsis && <Text style={{ color: color.text._500 }}>...</Text>}
                 </Text>
-                <Text style={{ color: color.text._600, fontSize: fontSize.s }}>
-                    {getFriendlyTimeStamp(item.sendDate.getTime())}
-                </Text>
-            </View>
-            <Text>
-                {segmented.showHeadEllipsis && <Text style={{ color: color.text._500 }}>...</Text>}
-                <Text style={{ color: color.text._500 }}>{segmented.head.trimStart()}</Text>
-                <Text style={{ color: color.text._300, fontWeight: '700' }}>{segmented.query}</Text>
-                <Text style={{ color: color.text._500 }}>{segmented.tail.trimEnd()}</Text>
-                {segmented.showTailEllipsis && <Text style={{ color: color.text._500 }}>...</Text>}
-            </Text>
-        </TouchableOpacity>
+            </TouchableOpacity>
+        </Animated.View>
     )
 }
 

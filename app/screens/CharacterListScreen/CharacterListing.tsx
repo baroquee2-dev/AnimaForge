@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native'
 import { useMMKVBoolean } from 'react-native-mmkv'
+import Animated, { SlideInLeft, Easing } from 'react-native-reanimated'
 import { useShallow } from 'zustand/react/shallow'
 
 import Avatar from '@components/views/Avatar'
@@ -16,12 +17,17 @@ type CharacterListingProps = {
     character: CharInfo
     nowLoading: boolean
     setNowLoading: (b: boolean) => void
+    index: number
 }
+
+const STAGGER_CAP = 14
+const STAGGER_STEP_MS = 30
 
 const CharacterListing: React.FC<CharacterListingProps> = ({
     character,
     nowLoading,
     setNowLoading,
+    index,
 }) => {
     const [showTags] = useMMKVBoolean(AppSettings.ShowTags)
     const { setShowSearch, setTagFilter, tagFilter } = CharacterSorter.useSorterStore(
@@ -39,7 +45,10 @@ const CharacterListing: React.FC<CharacterListingProps> = ({
     }
 
     return (
-        <View>
+        <Animated.View
+            entering={SlideInLeft.duration(320 + Math.min(index, STAGGER_CAP) * STAGGER_STEP_MS)
+                .delay(Math.min(index, STAGGER_CAP) * STAGGER_STEP_MS)
+                .easing(Easing.out(Easing.cubic))}>
             <CharacterEditPopup
                 character={character}
                 setNowLoading={setNowLoading}
@@ -74,7 +83,7 @@ const CharacterListing: React.FC<CharacterListingProps> = ({
                     setTagFilter([...tagFilter, tag])
                 }}
             />
-        </View>
+        </Animated.View>
     )
 }
 

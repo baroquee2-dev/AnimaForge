@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { View } from 'react-native'
 import { useReanimatedKeyboardAnimation } from 'react-native-keyboard-controller'
-import Animated, { useAnimatedStyle } from 'react-native-reanimated'
+import Animated, { FadeIn, useAnimatedStyle } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useShallow } from 'zustand/react/shallow'
 
@@ -152,13 +152,19 @@ const ChatScreen = () => {
             ]}>
             <View style={{ flex: 1, paddingBottom: insets.bottom + 4 }}>
                 <Animated.View style={animatedStyle}>
-                    <HeaderTitle />
+                    <HeaderTitle animation="slide_from_right" />
                     <HeaderButton
                         headerLeft={renderHeaderButtonLeft}
                         headerRight={renderHeaderButtonRight}
                     />
                     <View style={{ flex: 1 }}>
-                        {chat && <ChatWindow />}
+                        {chat && (
+                            <Animated.View
+                                entering={FadeIn.duration(280).delay(80)}
+                                style={{ flex: 1 }}>
+                                <ChatWindow />
+                            </Animated.View>
+                        )}
                         <ChatInput />
                         <AvatarViewer />
                         <ChatEditor />

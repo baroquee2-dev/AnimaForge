@@ -2,7 +2,7 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { usePathname } from 'expo-router'
 import { useMemo, useState } from 'react'
 import { View } from 'react-native'
-import Animated, { LinearTransition } from 'react-native-reanimated'
+import Animated, { FadeIn, LinearTransition } from 'react-native-reanimated'
 import { useShallow } from 'zustand/react/shallow'
 
 import Drawer from '@components/views/Drawer'
@@ -63,7 +63,9 @@ const CharacterList: React.FC = () => {
     if (path !== '/') return
 
     return (
-        <View style={{ paddingTop: 16, paddingHorizontal: 8, flex: 1 }}>
+        <Animated.View
+            entering={FadeIn.duration(220)}
+            style={{ paddingTop: 16, paddingHorizontal: 8, flex: 1 }}>
             <HeaderTitle />
             <HeaderButton
                 headerLeft={() => <Drawer.Button drawerID={Drawer.ID.SETTINGS} />}
@@ -81,11 +83,12 @@ const CharacterList: React.FC = () => {
                     contentContainerStyle={{ rowGap: 16 }}
                     data={characterList}
                     keyExtractor={(item) => item.id.toString()}
-                    renderItem={({ item }) => (
+                    renderItem={({ item, index }) => (
                         <CharacterListing
                             character={item}
                             nowLoading={nowLoading}
                             setNowLoading={setNowLoading}
+                            index={index}
                         />
                     )}
                     onEndReachedThreshold={1}
@@ -108,7 +111,7 @@ const CharacterList: React.FC = () => {
             {characterList.length === 0 && data.length !== 0 && updatedAt && (
                 <CharactersSearchEmpty />
             )}
-        </View>
+        </Animated.View>
     )
 }
 

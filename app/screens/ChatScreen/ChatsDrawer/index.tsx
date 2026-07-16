@@ -23,6 +23,7 @@ const ChatsDrawer = () => {
     const { charId } = Characters.useCharacterStore(useShallow((state) => ({ charId: state.id })))
     const { data } = useLiveQuery(Chats.db.query.chatListQuery(charId ?? 0), [charId])
     const setShow = Drawer.useDrawerStore((state) => state.setShow)
+    const showChats = Drawer.useDrawerStore((state) => state.values?.[Drawer.ID.CHATLIST])
     const setShowDrawer = (b: boolean) => {
         setShow(Drawer.ID.CHATLIST, b)
     }
@@ -100,11 +101,16 @@ const ChatsDrawer = () => {
                         entering={FadeIn.duration(200)}
                         style={styles.listContainer}>
                         <FlashList
+                            key={showChats ? 'chats-open' : 'chats-closed'}
                             keyboardShouldPersistTaps="always"
                             data={data}
                             keyExtractor={(item) => item.id.toString()}
                             renderItem={({ item, index }) => (
-                                <ChatDrawerItem item={item} onLoad={handleLoadChat} />
+                                <ChatDrawerItem
+                                    item={item}
+                                    onLoad={handleLoadChat}
+                                    index={index}
+                                />
                             )}
                             showsVerticalScrollIndicator={false}
                             removeClippedSubviews={false}
@@ -123,11 +129,12 @@ const ChatsDrawer = () => {
                     <FlashList
                         data={searchResults}
                         keyExtractor={(item) => item.swipeId.toString()}
-                        renderItem={({ item }) => (
+                        renderItem={({ item, index }) => (
                             <ChatDrawerSearchItem
                                 item={item}
                                 onLoad={handleLoadChat}
                                 query={searchQuery}
+                                index={index}
                             />
                         )}
                         showsVerticalScrollIndicator={false}
