@@ -121,6 +121,12 @@ const ChatBubble: React.FC<ChatTextProps> = ({
                     nowGenerating={nowGenerating}
                     index={index}
                     immersive={isImmersiveDialogue}
+                    onBubblePress={
+                        isImmersiveDialogue
+                            ? () => setShowOptions(nowGenerating ? undefined : index)
+                            : undefined
+                    }
+                    onBubbleLongPress={isImmersiveDialogue ? handleEnableEdit : undefined}
                 />
             ) : (
                 <ChatText nowGenerating={nowGenerating} index={index} />
@@ -128,6 +134,7 @@ const ChatBubble: React.FC<ChatTextProps> = ({
             {!historyCompact && <ChatAttachments index={index} />}
             {!historyCompact && (
                 <View
+                    pointerEvents="box-none"
                     style={{
                         flexDirection: 'row',
                     }}>
@@ -148,6 +155,7 @@ const ChatBubble: React.FC<ChatTextProps> = ({
                         nowGenerating={nowGenerating}
                         isLastMessage={isLastMessage}
                         index={index}
+                        immersive={isImmersiveDialogue}
                     />
                 </View>
             )}
@@ -165,14 +173,7 @@ const ChatBubble: React.FC<ChatTextProps> = ({
                 />
             )}
             {isImmersiveDialogue ? (
-                <Pressable
-                    onPress={() => {
-                        setShowOptions(nowGenerating ? undefined : index)
-                    }}
-                    style={bubbleStyle}
-                    onLongPress={handleEnableEdit}>
-                    {bubbleContent}
-                </Pressable>
+                <View style={bubbleStyle}>{bubbleContent}</View>
             ) : (
                 <Pressable
                     onPress={() => {

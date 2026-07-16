@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { ScrollView, View, Animated, Easing, useAnimatedValue } from 'react-native'
+import { Pressable, View, Animated, Easing, useAnimatedValue } from 'react-native'
+import { ScrollView } from 'react-native-gesture-handler'
 import Markdown from 'react-native-markdown-display'
 import { useShallow } from 'zustand/react/shallow'
 
@@ -16,9 +17,17 @@ type ChatTextProps = {
     nowGenerating: boolean
     index: number
     immersive?: boolean
+    onBubblePress?: () => void
+    onBubbleLongPress?: () => void
 }
 
-const ChatTextLast: React.FC<ChatTextProps> = ({ nowGenerating, index, immersive = false }) => {
+const ChatTextLast: React.FC<ChatTextProps> = ({
+    nowGenerating,
+    index,
+    immersive = false,
+    onBubblePress,
+    onBubbleLongPress,
+}) => {
     const { markdown, rules, style } = MarkdownStyle.useCustomFormatting()
 
     const { swipeText, swipeId } = Chats.useSwipeData(index)
@@ -103,7 +112,12 @@ const ChatTextLast: React.FC<ChatTextProps> = ({ nowGenerating, index, immersive
                 scrollEnabled
                 showsVerticalScrollIndicator
                 keyboardShouldPersistTaps="handled">
-                {markdownContent}
+                <Pressable
+                    delayPressIn={120}
+                    onPress={onBubblePress}
+                    onLongPress={onBubbleLongPress}>
+                    {markdownContent}
+                </Pressable>
             </ScrollView>
         )
     }

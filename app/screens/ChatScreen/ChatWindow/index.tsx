@@ -21,6 +21,7 @@ import ChatFooter from './ChatFooter'
 import ChatHeaderGradient from './ChatHeaderGradient'
 import ChatItem from './ChatItem'
 import ChatModelName from './ChatModelName'
+import { useChatActionsState } from './ChatQuickActions'
 import ImmersiveChatLayout from './ImmersiveChatLayout'
 import ImmersiveHistoryBar from './ImmersiveHistoryBar'
 
@@ -168,6 +169,9 @@ const ChatWindow = () => {
                     data={visibleList}
                     keyExtractor={(item) => item.key}
                     renderItem={renderItems}
+                    onScrollBeginDrag={() => {
+                        useChatActionsState.getState().setActiveIndex(undefined)
+                    }}
                     scrollEventThrottle={16}
                     onViewableItemsChanged={(item) => {
                         if (immersive) return
