@@ -4,7 +4,6 @@ import Animated from 'react-native-reanimated'
 
 import Avatar from '@components/views/Avatar'
 import { Characters } from '@lib/state/Characters'
-import { Chats } from '@lib/state/Chat'
 import { useAvatarViewerStore } from '@lib/state/components/AvatarViewer'
 import { Theme } from '@lib/theme/ThemeManager'
 
@@ -13,13 +12,11 @@ import { getImmersivePortraitSize } from './ChatFrame'
 import PortraitBreathing from './PortraitBreathing'
 
 type ImmersivePortraitHeaderProps = {
-    index: number
     nowGenerating: boolean
 }
 
-const ImmersivePortraitHeader: React.FC<ImmersivePortraitHeaderProps> = ({ index, nowGenerating }) => {
+const ImmersivePortraitHeader: React.FC<ImmersivePortraitHeaderProps> = ({ nowGenerating }) => {
     const { color, spacing, borderRadius } = Theme.useTheme()
-    const message = Chats.useEntryData(index)
     const setShowViewer = useAvatarViewerStore((state) => state.setShow)
     const charImageId = Characters.useCharacterStore((state) => state.card?.image_id) ?? 0
     const immersivePortraitSize = useMemo(getImmersivePortraitSize, [])

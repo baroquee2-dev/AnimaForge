@@ -72,11 +72,8 @@ const ChatWindow = () => {
         .reverse()
 
     const historyCount = Math.max(0, (chat?.messages?.length ?? 0) - 1)
-    const lastMessage = chat?.messages?.at(-1)
     const lastMessageIndex = Math.max(0, (chat?.messages?.length ?? 1) - 1)
     const immersiveCollapsed = immersive && !historyExpanded
-    const showImmersivePortrait =
-        immersiveCollapsed && !!lastMessage && !lastMessage.is_user
     const visibleList = immersiveCollapsed ? list.filter((item) => item.isLastMessage) : list
     const collapsedLastItem = visibleList[0]
 
@@ -140,7 +137,6 @@ const ChatWindow = () => {
                 <ImmersiveChatLayout
                     lastItem={collapsedLastItem}
                     lastMessageIndex={lastMessageIndex}
-                    showPortrait={showImmersivePortrait}
                 />
             ) : (
                 <FlatList

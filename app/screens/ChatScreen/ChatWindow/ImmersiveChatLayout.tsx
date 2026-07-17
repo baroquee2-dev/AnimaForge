@@ -17,31 +17,23 @@ type ImmersiveChatLayoutProps = {
         isGreeting: boolean
     }
     lastMessageIndex: number
-    showPortrait: boolean
 }
 
 const ImmersiveChatLayout: React.FC<ImmersiveChatLayoutProps> = ({
     lastItem,
     lastMessageIndex,
-    showPortrait,
 }) => {
     const nowGenerating = useInference((state) => state.nowGenerating)
     const chatInputHeight = useInputHeightStore(useShallow((state) => state.height))
     const { color, borderRadius } = Theme.useTheme()
     const lastMessage = Chats.useChat().chat?.messages?.[lastMessageIndex]
-    const immersivePortraitExternal = !!lastMessage && !lastMessage.is_user
     const showSwipeToolbar =
         !!lastItem && !!lastMessage && !lastMessage.is_user && lastItem.isLastMessage
 
     return (
         <View style={{ flex: 1, paddingBottom: chatInputHeight + 8 }}>
             <View style={{ flex: 1, minHeight: 0 }}>
-                {showPortrait && (
-                    <ImmersivePortraitHeader
-                        index={lastMessageIndex}
-                        nowGenerating={nowGenerating}
-                    />
-                )}
+                <ImmersivePortraitHeader nowGenerating={nowGenerating} />
                 <View style={{ flex: 1 }} />
             </View>
 
@@ -52,7 +44,7 @@ const ImmersiveChatLayout: React.FC<ImmersiveChatLayoutProps> = ({
                         isLastMessage={lastItem.isLastMessage}
                         isGreeting={lastItem.isGreeting}
                         immersive
-                        immersivePortraitExternal={immersivePortraitExternal}
+                        immersivePortraitExternal
                         immersiveToolbarExternal
                     />
                     {showSwipeToolbar && (
