@@ -44,14 +44,16 @@ const ImmersiveChatLayout: React.FC<ImmersiveChatLayoutProps> = ({
             </View>
 
             {lastItem ? (
-                <View style={{ flexShrink: 0, paddingHorizontal: 8 }}>
+                <View style={{ flexShrink: 0 }}>
                     {showSwipeToolbar && (
-                        <ChatSwipes
+                        <View style={{ paddingHorizontal: 8, marginBottom: 4 }}>
+                            <ChatSwipes
                             index={lastItem.index}
                             nowGenerating={nowGenerating}
                             isGreeting={lastItem.isGreeting}
                             immersive
                         />
+                        </View>
                     )}
                     <ChatItem
                         index={lastItem.index}

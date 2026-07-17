@@ -71,17 +71,7 @@ const ChatBubble: React.FC<ChatTextProps> = ({
               borderRadius: borderRadius.s,
           }
         : isImmersiveDialogue
-          ? {
-                backgroundColor: color.neutral._100 + 'dd',
-                borderColor: color.neutral._300 + 'aa',
-                borderWidth: 1,
-                marginBottom: spacing.sm,
-                paddingVertical: spacing.l,
-                paddingHorizontal: spacing.l,
-                minHeight: 48,
-                borderRadius: borderRadius.s,
-                overflow: 'visible',
-            }
+          ? null
           : isImmersiveUser
             ? {
                   backgroundColor: color.primary._500 + '33',
@@ -173,7 +163,49 @@ const ChatBubble: React.FC<ChatTextProps> = ({
                 />
             )}
             {isImmersiveDialogue ? (
-                <View style={bubbleStyle}>{bubbleContent}</View>
+                <View style={{ width: '100%', position: 'relative' }}>
+                    <View
+                        style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: spacing.l,
+                            zIndex: 2,
+                            backgroundColor: color.neutral._300 + 'f2',
+                            borderColor: color.neutral._500,
+                            borderWidth: 1,
+                            paddingHorizontal: spacing.xl,
+                            paddingVertical: spacing.sm,
+                            borderRadius: borderRadius.m,
+                        }}>
+                        <Text
+                            style={{
+                                color: color.text._100,
+                                fontSize: fontSize.l,
+                                fontWeight: '700',
+                            }}>
+                            {message.name}
+                        </Text>
+                    </View>
+                    <View
+                        style={{
+                            width: '100%',
+                            marginTop: spacing.l,
+                            backgroundColor: color.neutral._100 + 'dd',
+                            borderColor: color.neutral._400,
+                            borderWidth: 1,
+                            borderTopLeftRadius: borderRadius.l,
+                            borderTopRightRadius: borderRadius.l,
+                            borderBottomLeftRadius: 0,
+                            borderBottomRightRadius: 0,
+                            paddingTop: spacing.xl3,
+                            paddingHorizontal: spacing.l,
+                            paddingBottom: spacing.l,
+                            minHeight: 48,
+                            overflow: 'visible',
+                        }}>
+                        {bubbleContent}
+                    </View>
+                </View>
             ) : (
                 <Pressable
                     onPress={() => {

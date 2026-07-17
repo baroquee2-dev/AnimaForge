@@ -26,7 +26,7 @@ type ChatFrameProps = {
 const COMPACT_AVATAR_SIZE = 28
 const IMMERSIVE_PORTRAIT_MAX_HEIGHT_RATIO = 0.52
 const IMMERSIVE_PORTRAIT_WIDTH_PADDING = 32
-const IMMERSIVE_DIALOGUE_CHROME_HEIGHT = 140
+const IMMERSIVE_DIALOGUE_CHROME_HEIGHT = 156
 
 export const getImmersivePortraitSize = () => {
     const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
@@ -85,7 +85,7 @@ const ChatFrame: React.FC<ChatFrameProps> = ({
 
     if (immersive && isLast && !message.is_user) {
         if (immersivePortraitExternal) {
-            return <View style={{ width: '100%', paddingHorizontal: spacing.sm }}>{children}</View>
+            return <View style={{ width: '100%' }}>{children}</View>
         }
 
         return (
@@ -107,16 +107,6 @@ const ChatFrame: React.FC<ChatFrameProps> = ({
                         </TouchableOpacity>
                     </PortraitBreathing>
                 </Animated.View>
-                <Text
-                    style={{
-                        fontSize: fontSize.xl2,
-                        color: color.text._100,
-                        fontWeight: '600',
-                        marginTop: spacing.sm,
-                        marginBottom: spacing.sm,
-                    }}>
-                    {message.name}
-                </Text>
                 <View style={{ width: '100%' }}>{children}</View>
             </View>
         )

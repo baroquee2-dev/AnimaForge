@@ -18,7 +18,7 @@ type ImmersivePortraitHeaderProps = {
 }
 
 const ImmersivePortraitHeader: React.FC<ImmersivePortraitHeaderProps> = ({ index, nowGenerating }) => {
-    const { color, spacing, borderRadius, fontSize } = Theme.useTheme()
+    const { color, spacing, borderRadius } = Theme.useTheme()
     const message = Chats.useEntryData(index)
     const setShowViewer = useAvatarViewerStore((state) => state.setShow)
     const charImageId = Characters.useCharacterStore((state) => state.card?.image_id) ?? 0
@@ -43,16 +43,6 @@ const ImmersivePortraitHeader: React.FC<ImmersivePortraitHeaderProps> = ({ index
                     </TouchableOpacity>
                 </PortraitBreathing>
             </Animated.View>
-            <Text
-                style={{
-                    fontSize: fontSize.xl2,
-                    color: color.text._100,
-                    fontWeight: '600',
-                    marginTop: spacing.sm,
-                    marginBottom: spacing.sm,
-                }}>
-                {message.name}
-            </Text>
         </View>
     )
 }

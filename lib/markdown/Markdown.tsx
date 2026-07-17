@@ -15,6 +15,11 @@ import doubleQuotePlugin from './MarkdownQuotePlugin'
 import thinkPlugin from './MarkdownThinkPlugin'
 
 export namespace MarkdownStyle {
+    const DEFAULT_BODY_BASE_SIZE = 14
+    const IMMERSIVE_BODY_BASE_SIZE = 16
+    const IMMERSIVE_LINE_HEIGHT_RATIO = 1.62
+    const IMMERSIVE_LETTER_SPACING = 0.35
+
     export const Rules = MarkdownIt({ typographer: true })
         .use(thinkPlugin)
         .use(doubleQuotePlugin)
@@ -101,8 +106,8 @@ export namespace MarkdownStyle {
         },
     }
 
-    export const useCustomFormatting = () => {
-        const mdStyle = useMarkdownStyle()
+    export const useCustomFormatting = (immersive = false) => {
+        const mdStyle = useMarkdownStyle(immersive)
 
         const { markdown, rules, style } = useMemo(
             () => ({
@@ -115,7 +120,7 @@ export namespace MarkdownStyle {
         return { markdown, rules, style }
     }
 
-    export const useMarkdownStyle = () => {
+    export const useMarkdownStyle = (immersive = false) => {
         const { color, spacing, borderRadius } = Theme.useTheme()
         const { fontSize, textWeight } = ChatStyle.useChatStyle()
 
@@ -136,10 +141,25 @@ export namespace MarkdownStyle {
             [textWeight]
         )
 
+        const bodyBaseSize = immersive ? IMMERSIVE_BODY_BASE_SIZE : DEFAULT_BODY_BASE_SIZE
+        const bodyFontSize = getModifiedFontSize(bodyBaseSize)
+        const bodyLineHeight = immersive
+            ? Math.round(bodyFontSize * IMMERSIVE_LINE_HEIGHT_RATIO)
+            : undefined
+
         return useMemo(
             () =>
                 StyleSheet.create({
-                    double_quote: { color: color.quote },
+                    double_quote: {
+                        color: color.quote,
+                        ...(immersive
+                            ? {
+                                  fontSize: bodyFontSize,
+                                  lineHeight: bodyLineHeight,
+                                  letterSpacing: IMMERSIVE_LETTER_SPACING,
+                              }
+                            : {}),
+                    },
                     // The main container
                     body: {},
 
@@ -355,11 +375,26 @@ export namespace MarkdownStyle {
                     },
 
                     // Text Output
-                    text: {},
+                    text: {
+                        ...(immersive
+                            ? {
+                                  fontSize: bodyFontSize,
+                                  lineHeight: bodyLineHeight,
+                                  letterSpacing: IMMERSIVE_LETTER_SPACING,
+                              }
+                            : {}),
+                    },
 
                     textgroup: {
                         fontWeight: getModifiedFontWeight(400),
                         color: color.text._100,
+                        ...(immersive
+                            ? {
+                                  fontSize: bodyFontSize,
+                                  lineHeight: bodyLineHeight,
+                                  letterSpacing: IMMERSIVE_LETTER_SPACING,
+                              }
+                            : {}),
                     },
                     latex_inline: {
                         color: color.text._300,
@@ -376,8 +411,14 @@ export namespace MarkdownStyle {
                         justifyContent: 'flex-start',
                         width: '100%',
                         color: color.text._100,
-                        marginVertical: spacing.sm,
-                        fontSize: getModifiedFontSize(14),
+                        marginVertical: immersive ? spacing.xs : spacing.sm,
+                        fontSize: bodyFontSize,
+                        ...(immersive
+                            ? {
+                                  lineHeight: bodyLineHeight,
+                                  letterSpacing: IMMERSIVE_LETTER_SPACING,
+                              }
+                            : {}),
                     },
 
                     hardbreak: {
@@ -392,7 +433,7 @@ export namespace MarkdownStyle {
                     inline: {},
                     span: {},
                 }),
-            [color, spacing, borderRadius, getModifiedFontSize, getModifiedFontWeight]
+            [color, spacing, borderRadius, getModifiedFontSize, getModifiedFontWeight, immersive, bodyFontSize, bodyLineHeight]
         )
     }
 }
