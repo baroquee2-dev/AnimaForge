@@ -112,7 +112,7 @@ const useStyles = (immersive: boolean) => {
             alignSelf: 'stretch',
             minHeight: 40,
             marginTop: immersive ? 0 : spacing.sm,
-            marginBottom: immersive ? spacing.xs : 0,
+            marginBottom: 0,
             zIndex: 32,
         },
 

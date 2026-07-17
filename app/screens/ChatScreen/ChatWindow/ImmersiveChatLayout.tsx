@@ -2,6 +2,7 @@ import { View } from 'react-native'
 import { useShallow } from 'zustand/react/shallow'
 
 import { Chats, useInference } from '@lib/state/Chat'
+import { Theme } from '@lib/theme/ThemeManager'
 
 import { useInputHeightStore } from '../ChatInput'
 import ChatFooter from './ChatFooter'
@@ -26,6 +27,7 @@ const ImmersiveChatLayout: React.FC<ImmersiveChatLayoutProps> = ({
 }) => {
     const nowGenerating = useInference((state) => state.nowGenerating)
     const chatInputHeight = useInputHeightStore(useShallow((state) => state.height))
+    const { color, borderRadius } = Theme.useTheme()
     const lastMessage = Chats.useChat().chat?.messages?.[lastMessageIndex]
     const immersivePortraitExternal = !!lastMessage && !lastMessage.is_user
     const showSwipeToolbar =
@@ -45,16 +47,6 @@ const ImmersiveChatLayout: React.FC<ImmersiveChatLayoutProps> = ({
 
             {lastItem ? (
                 <View style={{ flexShrink: 0 }}>
-                    {showSwipeToolbar && (
-                        <View style={{ paddingHorizontal: 8, marginBottom: 4 }}>
-                            <ChatSwipes
-                            index={lastItem.index}
-                            nowGenerating={nowGenerating}
-                            isGreeting={lastItem.isGreeting}
-                            immersive
-                        />
-                        </View>
-                    )}
                     <ChatItem
                         index={lastItem.index}
                         isLastMessage={lastItem.isLastMessage}
@@ -63,6 +55,24 @@ const ImmersiveChatLayout: React.FC<ImmersiveChatLayoutProps> = ({
                         immersivePortraitExternal={immersivePortraitExternal}
                         immersiveToolbarExternal
                     />
+                    {showSwipeToolbar && (
+                        <View
+                            style={{
+                                backgroundColor: color.neutral._100 + 'dd',
+                                borderColor: color.neutral._400,
+                                borderWidth: 1,
+                                borderTopWidth: 0,
+                                borderBottomLeftRadius: borderRadius.l,
+                                borderBottomRightRadius: borderRadius.l,
+                            }}>
+                            <ChatSwipes
+                                index={lastItem.index}
+                                nowGenerating={nowGenerating}
+                                isGreeting={lastItem.isGreeting}
+                                immersive
+                            />
+                        </View>
+                    )}
                 </View>
             ) : (
                 <ChatFooter />
