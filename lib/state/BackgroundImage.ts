@@ -1,12 +1,16 @@
+import { Asset } from 'expo-asset'
 import { getDocumentAsync } from 'expo-document-picker'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 import { Storage } from '@lib/enums/Storage'
 import { createMMKVStorage } from '@lib/storage/MMKV'
-import { AppDirectory, copyFile, deleteFile } from '@lib/utils/File'
+import { AppDirectory, copyFile, deleteFile, fileExists } from '@lib/utils/File'
 
 import { Logger } from './Logger'
+
+export const DEFAULT_CHAT_BACKGROUND_FILENAME = 'default-chat-background.png'
+const LEGACY_DEFAULT_CHAT_BACKGROUND_FILENAME = 'default-chat-background.webp'
 
 type BackgroundImageStateProps = {
     image?: string
@@ -51,3 +55,27 @@ export const useBackgroundStore = create<BackgroundImageStateProps>()(
         }
     )
 )
+
+export const installDefaultChatBackground = async () => {
+    const current = useBackgroundStore.getState().image
+    const isLegacyDefault = current === LEGACY_DEFAULT_CHAT_BACKGROUND_FILENAME
+    const isCurrentDefault = current === DEFAULT_CHAT_BACKGROUND_FILENAME
+    if (current && !isLegacyDefault && !isCurrentDefault) return
+
+    if (isLegacyDefault) deleteFile(AppDirectory.Assets + LEGACY_DEFAULT_CHAT_BACKGROUND_FILENAME)
+
+    const dest = AppDirectory.Assets + DEFAULT_CHAT_BACKGROUND_FILENAME
+    if (!fileExists(dest)) {
+        try {
+            const [asset] = await Asset.loadAsync(
+                require('@assets/images/default-chat-background.png')
+            )
+            if (asset.localUri) await copyFile({ from: asset.localUri, to: dest })
+        } catch (e) {
+            Logger.error('Failed to install default chat background: ' + e)
+            return
+        }
+    }
+
+    useBackgroundStore.setState({ image: DEFAULT_CHAT_BACKGROUND_FILENAME })
+}

@@ -46,7 +46,11 @@ module.exports = {
             [
                 'expo-asset',
                 {
-                    assets: ['./assets/models/aibot.raw', './assets/models/llama3tokenizer.gguf'],
+                    assets: [
+                        './assets/models/aibot.raw',
+                        './assets/models/llama3tokenizer.gguf',
+                        './assets/images/default-chat-background.png',
+                    ],
                 },
             ],
             [
