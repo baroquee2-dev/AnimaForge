@@ -1,4 +1,4 @@
-import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-audio'
+import { createAudioPlayer, setAudioModeAsync, type AudioPlayer, type AudioStatus } from 'expo-audio'
 
 const sounds = {
     focus: require('@assets/sounds/chat-input-focus.wav'),
@@ -13,17 +13,33 @@ const volumes: Record<SoundKey, number> = {
 }
 
 const players: Partial<Record<SoundKey, AudioPlayer>> = {}
-let audioModeReady = false
+
+const bindAutoPause = (player: AudioPlayer) => {
+    player.addListener('playbackStatusUpdate', (status: AudioStatus) => {
+        if (status.didJustFinish) {
+            player.pause()
+        }
+    })
+}
+
+const ensureUiSoundMode = async () => {
+    await setAudioModeAsync({
+        playsInSilentMode: true,
+        interruptionMode: 'mixWithOthers',
+        shouldPlayInBackground: false,
+        allowsRecording: false,
+    })
+}
 
 const playChatUiSound = (key: SoundKey) => {
     void (async () => {
         try {
-            if (!audioModeReady) {
-                await setAudioModeAsync({ playsInSilentMode: true })
-                audioModeReady = true
-            }
+            await ensureUiSoundMode()
             if (!players[key]) {
-                players[key] = createAudioPlayer(sounds[key])
+                players[key] = createAudioPlayer(sounds[key], {
+                    keepAudioSessionActive: false,
+                })
+                bindAutoPause(players[key])
             }
             const player = players[key]
             if (!player) return
