@@ -7,9 +7,15 @@ type CharacterListingTagsProps = {
     tags: string[]
     onPress: (tag: string) => void
     showTags: boolean
+    contentInsetLeft?: number
 }
 
-const CharacterListingTags: React.FC<CharacterListingTagsProps> = ({ tags, onPress, showTags }) => {
+const CharacterListingTags: React.FC<CharacterListingTagsProps> = ({
+    tags,
+    onPress,
+    showTags,
+    contentInsetLeft = 72,
+}) => {
     const { color, spacing, borderRadius, fontSize } = Theme.useTheme()
 
     if (!showTags || tags.length === 0) return
@@ -19,7 +25,7 @@ const CharacterListingTags: React.FC<CharacterListingTagsProps> = ({ tags, onPre
             style={{
                 flexDirection: 'row',
 
-                paddingLeft: 72,
+                paddingLeft: contentInsetLeft,
                 paddingRight: 16,
                 alignItems: 'center',
             }}>

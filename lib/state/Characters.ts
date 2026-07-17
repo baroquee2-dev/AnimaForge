@@ -40,6 +40,7 @@ export type CharInfo = {
     image_id: number
     last_modified: number
     tags: string[]
+    description: string
     latestSwipe?: string
     latestName?: string
     latestChat?: number
@@ -380,6 +381,7 @@ export namespace Characters {
                         name: true,
                         image_id: true,
                         last_modified: true,
+                        description: true,
                     },
                     where: (characters) => {
                         const base = eq(characters.type, type)

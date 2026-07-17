@@ -54,6 +54,7 @@ const CharacterList: React.FC = () => {
             latestSwipe: item.chats[0]?.messages[0]?.swipes[0]?.swipe,
             latestName: item.chats[0]?.messages[0]?.name,
             last_modified: item.last_modified ?? 0,
+            description: item.description ?? '',
             tags: item.tags.map((item) => item.tag.tag),
         }))
     }, [data])
@@ -80,7 +81,7 @@ const CharacterList: React.FC = () => {
                     layout={LinearTransition}
                     itemLayoutAnimation={LinearTransition}
                     showsVerticalScrollIndicator={false}
-                    contentContainerStyle={{ rowGap: 16 }}
+                    contentContainerStyle={{ rowGap: 18 }}
                     data={characterList}
                     keyExtractor={(item) => item.id.toString()}
                     renderItem={({ item, index }) => (
