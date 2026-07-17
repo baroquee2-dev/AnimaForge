@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@babel/traverse": "^7.24.1",
+    "@expo-google-fonts/noto-sans-sc": "^0.4.3",
     "@expo/vector-icons": "^15.0.3",
     "@react-native-community/slider": "5.1.2",
     "@shopify/flash-list": "2.0.2",

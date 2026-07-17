@@ -11,7 +11,7 @@ import { useAvatarViewerStore } from '@lib/state/components/AvatarViewer'
 import { Theme } from '@lib/theme/ThemeManager'
 
 import PortraitBreathing from './PortraitBreathing'
-import { portraitEntrance } from './chatAnimations'
+import { portraitEntrance } from '@lib/animations/chatAnimations'
 
 type ChatFrameProps = {
     children?: ReactNode

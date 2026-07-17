@@ -5,7 +5,7 @@ import { Chats } from '@lib/state/Chat'
 import { Theme } from '@lib/theme/ThemeManager'
 import { getFriendlyTimeStamp } from '@lib/utils/Time'
 
-import { drawerItemEntrance } from '../ChatWindow/chatAnimations'
+import { drawerItemEntrance } from '@lib/animations/chatAnimations'
 
 type ChatDrawerSearchItemProps = {
     query: string

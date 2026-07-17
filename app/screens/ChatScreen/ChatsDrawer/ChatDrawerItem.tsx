@@ -5,7 +5,7 @@ import Animated from 'react-native-reanimated'
 import { Chats } from '@lib/state/Chat'
 import { Theme } from '@lib/theme/ThemeManager'
 
-import { drawerItemEntrance } from '../ChatWindow/chatAnimations'
+import { drawerItemEntrance } from '@lib/animations/chatAnimations'
 import ChatEditPopup from './ChatDrawerOptions'
 
 type ListItem = Awaited<ReturnType<typeof Chats.db.query.chatListQuery>>[0]

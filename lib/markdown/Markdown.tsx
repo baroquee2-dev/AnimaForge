@@ -6,7 +6,9 @@ import MathJax from 'react-native-mathjax-svg'
 
 import ThemedButton from '@components/buttons/ThemedButton'
 import Accordion from '@components/views/Accordion'
+import { getNotoFontFamilyForWeight } from '@lib/fonts/dialogueFonts'
 import { ChatStyle } from '@lib/state/ChatStyle'
+import { useDialogueFontsStore } from '@lib/state/DialogueFonts'
 import { Logger } from '@lib/state/Logger'
 import { Theme } from '@lib/theme/ThemeManager'
 
@@ -122,7 +124,9 @@ export namespace MarkdownStyle {
 
     export const useMarkdownStyle = (immersive = false) => {
         const { color, spacing, borderRadius } = Theme.useTheme()
-        const { fontSize, textWeight } = ChatStyle.useChatStyle()
+        const { fontSize, textWeight, dialogueFont } = ChatStyle.useChatStyle()
+        const fontsReady = useDialogueFontsStore((state) => state.ready)
+        const useNoto = immersive && dialogueFont === 'noto'
 
         const getModifiedFontSize = useCallback(
             (size: number) =>
@@ -141,6 +145,17 @@ export namespace MarkdownStyle {
             [textWeight]
         )
 
+        const getImmersiveFont = useCallback(
+            (baseWeight: number) => {
+                const modifiedWeight = Number(getModifiedFontWeight(baseWeight))
+                if (useNoto && fontsReady) {
+                    return { fontFamily: getNotoFontFamilyForWeight(modifiedWeight) }
+                }
+                return { fontWeight: getModifiedFontWeight(baseWeight) }
+            },
+            [fontsReady, useNoto, getModifiedFontWeight]
+        )
+
         const bodyBaseSize = immersive ? IMMERSIVE_BODY_BASE_SIZE : DEFAULT_BODY_BASE_SIZE
         const bodyFontSize = getModifiedFontSize(bodyBaseSize)
         const bodyLineHeight = immersive
@@ -157,6 +172,7 @@ export namespace MarkdownStyle {
                                   fontSize: bodyFontSize,
                                   lineHeight: bodyLineHeight,
                                   letterSpacing: IMMERSIVE_LETTER_SPACING,
+                                  ...getImmersiveFont(400),
                               }
                             : {}),
                     },
@@ -210,7 +226,9 @@ export namespace MarkdownStyle {
 
                     // Emphasis
                     strong: {
-                        fontWeight: getModifiedFontWeight(700),
+                        ...(immersive
+                            ? getImmersiveFont(700)
+                            : { fontWeight: getModifiedFontWeight(700) }),
                         color: color.text._100,
                     },
                     em: {
@@ -381,20 +399,21 @@ export namespace MarkdownStyle {
                                   fontSize: bodyFontSize,
                                   lineHeight: bodyLineHeight,
                                   letterSpacing: IMMERSIVE_LETTER_SPACING,
+                                  ...getImmersiveFont(400),
                               }
                             : {}),
                     },
 
                     textgroup: {
-                        fontWeight: getModifiedFontWeight(400),
                         color: color.text._100,
                         ...(immersive
                             ? {
                                   fontSize: bodyFontSize,
                                   lineHeight: bodyLineHeight,
                                   letterSpacing: IMMERSIVE_LETTER_SPACING,
+                                  ...getImmersiveFont(400),
                               }
-                            : {}),
+                            : { fontWeight: getModifiedFontWeight(400) }),
                     },
                     latex_inline: {
                         color: color.text._300,
@@ -417,6 +436,7 @@ export namespace MarkdownStyle {
                             ? {
                                   lineHeight: bodyLineHeight,
                                   letterSpacing: IMMERSIVE_LETTER_SPACING,
+                                  ...getImmersiveFont(400),
                               }
                             : {}),
                     },
@@ -433,7 +453,7 @@ export namespace MarkdownStyle {
                     inline: {},
                     span: {},
                 }),
-            [color, spacing, borderRadius, getModifiedFontSize, getModifiedFontWeight, immersive, bodyFontSize, bodyLineHeight]
+            [color, spacing, borderRadius, getModifiedFontSize, getModifiedFontWeight, getImmersiveFont, immersive, bodyFontSize, bodyLineHeight, fontsReady, useNoto]
         )
     }
 }

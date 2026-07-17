@@ -8,7 +8,7 @@ import { Chats } from '@lib/state/Chat'
 import { useAvatarViewerStore } from '@lib/state/components/AvatarViewer'
 import { Theme } from '@lib/theme/ThemeManager'
 
-import { portraitEntrance } from './chatAnimations'
+import { portraitEntrance } from '@lib/animations/chatAnimations'
 import { getImmersivePortraitSize } from './ChatFrame'
 import PortraitBreathing from './PortraitBreathing'
 

@@ -7,9 +7,11 @@ import { createMMKVStorage } from '@lib/storage/MMKV'
 export namespace ChatStyle {
     export const WEIGHTS = ['thin', 'normal', 'bold', 'bolder'] as const
     export const SIZES = ['s', 'm', 'l', 'xl', '2xl'] as const
+    export const DIALOGUE_FONTS = ['system', 'noto'] as const
     export const MIN_FONT_SIZE = 8
     export type TextWeight = (typeof WEIGHTS)[number]
     export type FontSize = (typeof SIZES)[number]
+    export type DialogueFont = (typeof DIALOGUE_FONTS)[number]
 
     export const sizeModifierMap: Record<FontSize, number> = {
         s: -2,
@@ -29,8 +31,10 @@ export namespace ChatStyle {
     type ChatTextStyleStateProps = {
         textWeight: TextWeight
         fontSize: FontSize
+        dialogueFont: DialogueFont
         setTextWeight: (mode: TextWeight) => void
         setFontSize: (size: FontSize) => void
+        setDialogueFont: (font: DialogueFont) => void
         getModifiedFontSize: (size: number) => number
     }
 
@@ -39,8 +43,10 @@ export namespace ChatStyle {
             (set, get) => ({
                 textWeight: 'normal',
                 fontSize: 'm',
+                dialogueFont: 'noto',
                 setTextWeight: (textWeight) => set({ textWeight }),
                 setFontSize: (fontSize) => set({ fontSize }),
+                setDialogueFont: (dialogueFont) => set({ dialogueFont }),
                 getModifiedFontSize: (size) => {
                     return Math.max(MIN_FONT_SIZE, sizeModifierMap?.[get().fontSize] ?? 0 + size)
                 },
@@ -48,7 +54,13 @@ export namespace ChatStyle {
             {
                 name: Storage.ChatStyle,
                 storage: createMMKVStorage(),
-                version: 1,
+                version: 2,
+                migrate: (persistedState: any, version) => {
+                    if (version < 2) {
+                        persistedState.dialogueFont = 'system'
+                    }
+                    return persistedState
+                },
             }
         )
     )
