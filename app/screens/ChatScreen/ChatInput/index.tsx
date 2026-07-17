@@ -23,6 +23,7 @@ import { AppSettings } from '@lib/constants/GlobalValues'
 import { generateResponse } from '@lib/engine/Inference'
 import { useSpeechInput } from '@lib/hooks/useSpeechInput'
 import { useUnfocusTextInput } from '@lib/hooks/UnfocusTextInput'
+import { playInputFocusSound, playInputSendSound } from '@lib/audio/playInputFocusSound'
 import { Characters } from '@lib/state/Characters'
 import { Chats, useInference } from '@lib/state/Chat'
 import { useChatInputTextStore } from '@lib/state/components/ChatInput'
@@ -94,6 +95,7 @@ const ChatInput = () => {
     }
 
     const handleSend = async () => {
+        playInputSendSound()
         // Hide the keyboard after send so the chat view stays unobstructed.
         Keyboard.dismiss()
         // Close the mic icon after send; recording may already have stopped in the background.
@@ -302,6 +304,9 @@ const ChatInput = () => {
                     }}
                     onPress={() => {
                         setHideOptions(!!newMessage)
+                    }}
+                    onFocus={() => {
+                        playInputFocusSound()
                     }}
                     numberOfLines={8}
                     placeholder="Message..."
