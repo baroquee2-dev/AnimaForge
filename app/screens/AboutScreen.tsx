@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { Image, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { useMMKVBoolean } from 'react-native-mmkv'
 
-import SupportButton from '@components/buttons/SupportButton'
 import ThemedButton from '@components/buttons/ThemedButton'
 import HeaderTitle from '@components/views/HeaderTitle'
 import { AppSettings } from '@lib/constants/GlobalValues'
@@ -52,17 +51,9 @@ const AboutScreen = () => {
                 />
             )}
 
-            <Text style={styles.body}>
+            <Text style={{ marginBottom: spacing.xl3, ...styles.body }}>
                 ChatterUI is a free and open-source application developed by Vali-98
             </Text>
-            <Text style={{ marginBottom: spacing.xl3, ...styles.body }}>
-                {`This app is a passion project I develop in my free time. If you're enjoying the app, consider supporting its development!`}
-            </Text>
-            <Text style={{ ...styles.body, marginBottom: spacing.m }}>
-                Donate to ChatterUI here:
-            </Text>
-
-            <SupportButton />
 
             <Text style={styles.body}>Got an issue? Report it here:</Text>
             <Text style={styles.subtitleText}>({`Don't forget to add your Logs!`})</Text>

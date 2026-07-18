@@ -1,7 +1,6 @@
-import { Text, View } from 'react-native'
+import { Text } from 'react-native'
 import { useMMKVBoolean } from 'react-native-mmkv'
 
-import SupportButton from '@components/buttons/SupportButton'
 import Drawer from '@components/views/Drawer'
 import { AppSettings } from '@lib/constants/GlobalValues'
 import { Theme } from '@lib/theme/ThemeManager'
@@ -36,9 +35,6 @@ const SettingsDrawer = () => {
                 {devMode && 'DEV MODE\t'}
                 {'v' + appConfig.expo.version}
             </Text>
-            <View style={{ marginHorizontal: spacing.xl2 }}>
-                <SupportButton />
-            </View>
         </Drawer.Body>
     )
 }
