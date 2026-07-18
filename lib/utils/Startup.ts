@@ -21,7 +21,6 @@ import { AppDirectory, deleteFile, listFiles, makeDirectory, readStringAsync } f
 import { lockScreenOrientation } from './Screen'
 import { AppSettings, AppSettingsDefault, Global } from '../constants/GlobalValues'
 import { Llama } from '../engine/Local/LlamaLocal'
-import { installDefaultChatBackground } from '../state/BackgroundImage'
 import { Characters } from '../state/Characters'
 import { Chats } from '../state/Chat'
 import { Logger } from '../state/Logger'
@@ -247,7 +246,6 @@ export const startupApp = () => {
     // Sets default preferences
     setAppDefaultSettings()
     generateDefaultDirectories()
-    installDefaultChatBackground()
     setDefaultUser()
     setDefaultInstruct()
 

@@ -10,10 +10,9 @@ import HeaderTitle from '@components/views/HeaderTitle'
 import { AppSettings } from '@lib/constants/GlobalValues'
 import { useDebounce } from '@lib/hooks/Debounce'
 import { useAppMode } from '@lib/state/AppMode'
-import { useBackgroundStore } from '@lib/state/BackgroundImage'
+import { useBackgroundStore, resolveChatBackgroundUri } from '@lib/state/BackgroundImage'
 import { Characters } from '@lib/state/Characters'
 import { Chats } from '@lib/state/Chat'
-import { AppDirectory } from '@lib/utils/File'
 
 import { useInputHeightStore } from '../ChatInput'
 import AnimatedChatBackground from './AnimatedChatBackground'
@@ -111,11 +110,7 @@ const ChatWindow = () => {
     }
 
     const backgroundSource = {
-        uri: backgroundImage
-            ? Characters.getImageDir(backgroundImage)
-            : image
-              ? AppDirectory.Assets + image
-              : '',
+        uri: resolveChatBackgroundUri(backgroundImage, image),
     }
 
     return (
