@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
-import { usePathname } from 'expo-router'
-import { useMemo, useState } from 'react'
+import { useFocusEffect, usePathname } from 'expo-router'
+import { useCallback, useMemo, useState } from 'react'
 import { View } from 'react-native'
 import Animated, { FadeIn, LinearTransition } from 'react-native-reanimated'
 import { useShallow } from 'zustand/react/shallow'
@@ -8,6 +8,7 @@ import { useShallow } from 'zustand/react/shallow'
 import Drawer from '@components/views/Drawer'
 import HeaderButton from '@components/views/HeaderButton'
 import HeaderTitle from '@components/views/HeaderTitle'
+import { playCharacterListSound } from '@lib/audio/playInputFocusSound'
 import { Characters, CharInfo } from '@lib/state/Characters'
 import { CharacterSorter } from '@lib/state/CharacterSorter'
 import { TagHider } from '@lib/state/TagHider'
@@ -61,6 +62,14 @@ const CharacterList: React.FC = () => {
 
     // do not render when not shown, optimizes some rerenders
     const path = usePathname()
+
+    useFocusEffect(
+        useCallback(() => {
+            if (path !== '/') return
+            playCharacterListSound()
+        }, [path])
+    )
+
     if (path !== '/') return
 
     return (

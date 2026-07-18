@@ -3,6 +3,8 @@ import { createAudioPlayer, setAudioModeAsync, type AudioPlayer, type AudioStatu
 const sounds = {
     focus: require('@assets/sounds/chat-input-focus.wav'),
     send: require('@assets/sounds/chat-input-send.wav'),
+    characterList: require('@assets/sounds/ui-character-list.wav'),
+    chatEnter: require('@assets/sounds/ui-chat-enter.wav'),
 } as const
 
 type SoundKey = keyof typeof sounds
@@ -10,6 +12,8 @@ type SoundKey = keyof typeof sounds
 const volumes: Record<SoundKey, number> = {
     focus: 1,
     send: 1,
+    characterList: 0.9,
+    chatEnter: 0.9,
 }
 
 const players: Partial<Record<SoundKey, AudioPlayer>> = {}
@@ -54,3 +58,5 @@ const playChatUiSound = (key: SoundKey) => {
 
 export const playInputFocusSound = () => playChatUiSound('focus')
 export const playInputSendSound = () => playChatUiSound('send')
+export const playCharacterListSound = () => playChatUiSound('characterList')
+export const playChatEnterSound = () => playChatUiSound('chatEnter')

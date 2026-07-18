@@ -1,4 +1,5 @@
-import { useEffect } from 'react'
+import { useFocusEffect } from 'expo-router'
+import { useCallback, useEffect } from 'react'
 import { View } from 'react-native'
 import { useReanimatedKeyboardAnimation } from 'react-native-keyboard-controller'
 import Animated, { FadeIn, useAnimatedStyle } from 'react-native-reanimated'
@@ -11,6 +12,7 @@ import Drawer from '@components/views/Drawer'
 import HeaderButton from '@components/views/HeaderButton'
 import HeaderTitle from '@components/views/HeaderTitle'
 import SettingsDrawer from '@components/views/SettingsDrawer'
+import { playChatEnterSound } from '@lib/audio/playInputFocusSound'
 import { Characters } from '@lib/state/Characters'
 import { Chats } from '@lib/state/Chat'
 import { Logger } from '@lib/state/Logger'
@@ -47,6 +49,12 @@ const ChatScreen = () => {
             showSettings: state.values?.[Drawer.ID.SETTINGS],
             showChats: state.values?.[Drawer.ID.CHATLIST],
         }))
+    )
+
+    useFocusEffect(
+        useCallback(() => {
+            playChatEnterSound()
+        }, [])
     )
 
     useEffect(() => {
