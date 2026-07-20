@@ -1,5 +1,4 @@
 import { getCpuFeatures, getThreads } from '@vali98/react-native-cpu-info'
-import { DeviceType, getDeviceTypeAsync } from 'expo-device'
 import { Paths } from 'expo-file-system'
 import * as KeepAwake from 'expo-keep-awake'
 import { router } from 'expo-router'
@@ -16,7 +15,6 @@ import { useTTSStore } from '@lib/state/TTS'
 
 import { AppDirectory, deleteFile, listFiles, makeDirectory, readStringAsync } from './File'
 // import { patchAndroidText } from './PatchText'
-import { lockScreenOrientation } from './Screen'
 import { AppSettings, AppSettingsDefault, Global } from '../constants/GlobalValues'
 import { migrateChatLayoutSetting } from '../constants/ChatLayout'
 import { Llama } from '../engine/Local/LlamaLocal'
@@ -45,11 +43,7 @@ const setAppDefaultSettings = () => {
     Object.keys(AppSettingsDefault).map((item) => {
         const data = mmkv.getBoolean(item)
         if (data !== undefined) return
-        if (item === AppSettings.UnlockOrientation) {
-            getDeviceTypeAsync().then((result) => {
-                mmkv.set(item, result === DeviceType.TABLET)
-            })
-        } else mmkv.set(item, AppSettingsDefault[item as AppSettings])
+        mmkv.set(item, AppSettingsDefault[item as AppSettings])
     })
 }
 
@@ -264,7 +258,6 @@ export const startupApp = () => {
     migratePresets_0_8_3_to_0_8_4()
     migrateTTSData_0_8_5_to_0_8_6()
     migrateAppMode_0_8_5_to_0_8_6()
-    lockScreenOrientation()
 
     const backgroundColor = Theme.useColorState.getState().color.neutral._100
     setUIBackgroundColor(backgroundColor)

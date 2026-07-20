@@ -8,17 +8,10 @@ import SectionTitle from '@components/text/SectionTitle'
 import { AppSettings } from '@lib/constants/GlobalValues'
 
 const ScreenSettings = () => {
-    const [unlockOrientation, setUnlockOrientation] = useMMKVBoolean(AppSettings.UnlockOrientation)
     const [keepAwake, setKeepAwake] = useMMKVBoolean(AppSettings.KeepAwake)
     return (
         <View style={{ rowGap: 8 }}>
             <SectionTitle>Screen</SectionTitle>
-            <ThemedSwitch
-                label="Unlock Orientation"
-                description="Allows landscape on phones (App restart required)"
-                value={unlockOrientation}
-                onChangeValue={setUnlockOrientation}
-            />
 
             <ThemedSwitch
                 label="Keep Awake"
