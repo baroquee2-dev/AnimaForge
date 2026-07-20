@@ -6,6 +6,7 @@ import HeaderTitle from '@components/views/HeaderTitle'
 import { Theme } from '@lib/theme/ThemeManager'
 
 import CharacterSettings from './CharacterSettings'
+import ChatLayoutSettings from './ChatLayoutSettings'
 import ChatSettings from './ChatSettings'
 import ChatWindowSettings from './ChatWindowSettings'
 import DatabaseSettings from './DatabaseSettings'
@@ -28,6 +29,7 @@ const AppSettingsMenu = () => {
             contentContainerStyle={{ rowGap: spacing.sm }}>
             <HeaderTitle title="Settings" />
 
+            <ChatLayoutSettings />
             <StyleSettings />
             <ChatSettings />
             <ChatWindowSettings />
