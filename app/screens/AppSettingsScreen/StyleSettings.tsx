@@ -6,7 +6,7 @@ import { useShallow } from 'zustand/react/shallow'
 import ThemedButton from '@components/buttons/ThemedButton'
 import SectionTitle from '@components/text/SectionTitle'
 import Alert from '@components/views/Alert'
-import { useBackgroundStore } from '@lib/state/BackgroundImage'
+import { hasCustomGlobalBackground, useBackgroundStore } from '@lib/state/BackgroundImage'
 
 const StyleSettings = () => {
     const router = useRouter()
@@ -29,23 +29,23 @@ const StyleSettings = () => {
                 onPress={() => router.push('/screens/AppSettingsScreen/ColorSelector')}
             />
             <ThemedButton
-                label={chatBackground ? 'Replace Chat Background' : 'Import Chat Background'}
+                label="Change Default Background"
                 variant="secondary"
                 onPress={importBackground}
             />
-            {chatBackground && (
+            {hasCustomGlobalBackground(chatBackground) && (
                 <ThemedButton
-                    label="Delete Chat Background"
+                    label="Remove Default Background"
                     variant="critical"
                     onPress={() =>
                         Alert.alert({
-                            title: 'Delete Background',
+                            title: 'Remove Default Background?',
                             description:
-                                'Are you sure you want to delete this background? This cannot be undone!',
+                                'This removes your custom background and restores the built-in default.',
                             buttons: [
                                 { label: 'Cancel' },
                                 {
-                                    label: 'Delete Background',
+                                    label: 'Remove Default Background',
                                     type: 'warning',
                                     onPress: deleteBackground,
                                 },

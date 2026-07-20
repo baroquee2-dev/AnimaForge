@@ -24,6 +24,9 @@ const isDefaultBackgroundFilename = (filename?: string) =>
     filename === DEFAULT_CHAT_BACKGROUND_FILENAME ||
     filename === LEGACY_DEFAULT_CHAT_BACKGROUND_FILENAME
 
+export const hasCustomGlobalBackground = (filename?: string) =>
+    !!filename && !isDefaultBackgroundFilename(filename)
+
 export const resolveGlobalBackgroundUri = (imageName?: string) => {
     if (imageName) {
         const path = AppDirectory.Assets + imageName
@@ -67,7 +70,7 @@ export const useBackgroundStore = create<BackgroundImageStateProps>()(
                     copyFile({ from: uri, to: AppDirectory.Assets + name })
 
                     set({ image: name })
-                    Logger.infoToast('Successfully Imported!')
+                    Logger.infoToast('Default background updated')
                 } catch (e) {
                     Logger.error('Something went wrong with importing: ' + e)
                 }
@@ -78,7 +81,7 @@ export const useBackgroundStore = create<BackgroundImageStateProps>()(
                     deleteFile(AppDirectory.Assets + imageName)
                 }
                 set({ image: undefined })
-                Logger.warnToast('Background Deleted!')
+                Logger.warnToast('Default background restored')
             },
         }),
         {
