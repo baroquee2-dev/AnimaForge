@@ -28,7 +28,7 @@ const ChatTextLast: React.FC<ChatTextProps> = ({
     onBubblePress,
     onBubbleLongPress,
 }) => {
-    const { markdown, rules, style } = MarkdownStyle.useCustomFormatting(immersive)
+    const { markdown, rules, style } = MarkdownStyle.useCustomFormatting()
 
     const { swipeText, swipeId } = Chats.useSwipeData(index)
     const { buffer } = Chats.useBuffer()

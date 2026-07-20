@@ -10,41 +10,18 @@ import { MarkdownStyle } from '@lib/markdown/Markdown'
 import { ChatStyle } from '@lib/state/ChatStyle'
 import { Theme } from '@lib/theme/ThemeManager'
 
-const renderedText = `
-This is some test text
-| Row One  | Row Two | Row Three   |
-|----------|--------:|-------------:|
-| Item 1   |  row    | row         |
-| Item 2   |  row    | row         |
-
-$s = ut + \\frac{1}{2}at^2$ 
-
-Distance from initial velocity, time and acceleration
-
-A **strong** (bold) text example.
-
-A *emphasized* (italic) text example.
-
-A ~~strikethrough~~ text example.
-
-"A quote text example."
-`
-
-const dialoguePreviewText = `
-「這是一段沉浸式對話預覽，切換字體時應能看出差異。」
+const previewText = `
+「這是一段對話預覽，切換字體時應能看出差異。」
 
 She paused for a moment. **This line is bold.**
 
-"This is how immersive dialogue will look."
+A *emphasized* (italic) text example.
+
+"Quoted dialogue looks like this."
 `
 
 const ChatStyling = () => {
     const { markdown, rules, style } = MarkdownStyle.useCustomFormatting()
-    const {
-        markdown: immersiveMarkdown,
-        rules: immersiveRules,
-        style: immersiveStyle,
-    } = MarkdownStyle.useCustomFormatting(true)
     const { weight, size, dialogueFont, setWeight, setSize, setDialogueFont } = ChatStyle.useChatStyle(
         useShallow((state) => ({
             weight: state.textWeight,
@@ -97,32 +74,18 @@ const ChatStyling = () => {
                         value: item,
                         label: item === 'system' ? 'System' : 'Noto Sans',
                     }))}
-                    label={'Dialogue Font'}
-                    description={'Immersive dialogue only'}
+                    label={'Font'}
                     selected={dialogueFont}
                     onPress={(item) => setDialogueFont(item)}
                     style={{ flex: 0 }}
                 />
 
-                <Text style={{ color: color.text._300, fontSize: 12, marginTop: 8 }}>
-                    Immersive Dialogue Preview
-                </Text>
-                <View style={previewBoxStyle}>
-                    <Markdown
-                        mergeStyle={false}
-                        markdownit={immersiveMarkdown}
-                        rules={immersiveRules}
-                        style={immersiveStyle}>
-                        {dialoguePreviewText}
-                    </Markdown>
-                </View>
-
                 <Text style={{ color: color.text._300, fontSize: 12, marginTop: 16 }}>
-                    Chat Preview
+                    Preview
                 </Text>
                 <View style={previewBoxStyle}>
                     <Markdown mergeStyle={false} markdownit={markdown} rules={rules} style={style}>
-                        {renderedText}
+                        {previewText}
                     </Markdown>
                 </View>
             </ScrollView>

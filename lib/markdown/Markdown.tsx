@@ -17,10 +17,9 @@ import doubleQuotePlugin from './MarkdownQuotePlugin'
 import thinkPlugin from './MarkdownThinkPlugin'
 
 export namespace MarkdownStyle {
-    const DEFAULT_BODY_BASE_SIZE = 14
-    const IMMERSIVE_BODY_BASE_SIZE = 16
-    const IMMERSIVE_LINE_HEIGHT_RATIO = 1.62
-    const IMMERSIVE_LETTER_SPACING = 0.35
+    const DEFAULT_BODY_BASE_SIZE = 16
+    const BODY_LINE_HEIGHT_RATIO = 1.62
+    const BODY_LETTER_SPACING = 0.35
 
     export const Rules = MarkdownIt({ typographer: true })
         .use(thinkPlugin)
@@ -108,8 +107,8 @@ export namespace MarkdownStyle {
         },
     }
 
-    export const useCustomFormatting = (immersive = false) => {
-        const mdStyle = useMarkdownStyle(immersive)
+    export const useCustomFormatting = () => {
+        const mdStyle = useMarkdownStyle()
 
         const { markdown, rules, style } = useMemo(
             () => ({
@@ -122,11 +121,11 @@ export namespace MarkdownStyle {
         return { markdown, rules, style }
     }
 
-    export const useMarkdownStyle = (immersive = false) => {
+    export const useMarkdownStyle = () => {
         const { color, spacing, borderRadius } = Theme.useTheme()
         const { fontSize, textWeight, dialogueFont } = ChatStyle.useChatStyle()
         const fontsReady = useDialogueFontsStore((state) => state.ready)
-        const useNoto = immersive && dialogueFont === 'noto'
+        const useNoto = dialogueFont === 'noto'
 
         const getModifiedFontSize = useCallback(
             (size: number) =>
@@ -145,7 +144,7 @@ export namespace MarkdownStyle {
             [textWeight]
         )
 
-        const getImmersiveFont = useCallback(
+        const getDialogueFont = useCallback(
             (baseWeight: number) => {
                 const modifiedWeight = Number(getModifiedFontWeight(baseWeight))
                 if (useNoto && fontsReady) {
@@ -156,25 +155,21 @@ export namespace MarkdownStyle {
             [fontsReady, useNoto, getModifiedFontWeight]
         )
 
-        const bodyBaseSize = immersive ? IMMERSIVE_BODY_BASE_SIZE : DEFAULT_BODY_BASE_SIZE
-        const bodyFontSize = getModifiedFontSize(bodyBaseSize)
-        const bodyLineHeight = immersive
-            ? Math.round(bodyFontSize * IMMERSIVE_LINE_HEIGHT_RATIO)
-            : undefined
+        const bodyFontSize = getModifiedFontSize(DEFAULT_BODY_BASE_SIZE)
+        const bodyLineHeight = Math.round(bodyFontSize * BODY_LINE_HEIGHT_RATIO)
 
-        return useMemo(
-            () =>
-                StyleSheet.create({
+        return useMemo(() => {
+            const bodyTypography = {
+                fontSize: bodyFontSize,
+                lineHeight: bodyLineHeight,
+                letterSpacing: BODY_LETTER_SPACING,
+                ...getDialogueFont(400),
+            }
+
+            return StyleSheet.create({
                     double_quote: {
                         color: color.quote,
-                        ...(immersive
-                            ? {
-                                  fontSize: bodyFontSize,
-                                  lineHeight: bodyLineHeight,
-                                  letterSpacing: IMMERSIVE_LETTER_SPACING,
-                                  ...getImmersiveFont(400),
-                              }
-                            : {}),
+                        ...bodyTypography,
                     },
                     // The main container
                     body: {},
@@ -226,9 +221,7 @@ export namespace MarkdownStyle {
 
                     // Emphasis
                     strong: {
-                        ...(immersive
-                            ? getImmersiveFont(700)
-                            : { fontWeight: getModifiedFontWeight(700) }),
+                        ...getDialogueFont(700),
                         color: color.text._100,
                     },
                     em: {
@@ -394,26 +387,12 @@ export namespace MarkdownStyle {
 
                     // Text Output
                     text: {
-                        ...(immersive
-                            ? {
-                                  fontSize: bodyFontSize,
-                                  lineHeight: bodyLineHeight,
-                                  letterSpacing: IMMERSIVE_LETTER_SPACING,
-                                  ...getImmersiveFont(400),
-                              }
-                            : {}),
+                        ...bodyTypography,
                     },
 
                     textgroup: {
                         color: color.text._100,
-                        ...(immersive
-                            ? {
-                                  fontSize: bodyFontSize,
-                                  lineHeight: bodyLineHeight,
-                                  letterSpacing: IMMERSIVE_LETTER_SPACING,
-                                  ...getImmersiveFont(400),
-                              }
-                            : { fontWeight: getModifiedFontWeight(400) }),
+                        ...bodyTypography,
                     },
                     latex_inline: {
                         color: color.text._300,
@@ -430,15 +409,8 @@ export namespace MarkdownStyle {
                         justifyContent: 'flex-start',
                         width: '100%',
                         color: color.text._100,
-                        marginVertical: immersive ? spacing.xs : spacing.sm,
-                        fontSize: bodyFontSize,
-                        ...(immersive
-                            ? {
-                                  lineHeight: bodyLineHeight,
-                                  letterSpacing: IMMERSIVE_LETTER_SPACING,
-                                  ...getImmersiveFont(400),
-                              }
-                            : {}),
+                        marginVertical: spacing.sm,
+                        ...bodyTypography,
                     },
 
                     hardbreak: {
@@ -452,8 +424,16 @@ export namespace MarkdownStyle {
                     pre: {},
                     inline: {},
                     span: {},
-                }),
-            [color, spacing, borderRadius, getModifiedFontSize, getModifiedFontWeight, getImmersiveFont, immersive, bodyFontSize, bodyLineHeight, fontsReady, useNoto]
-        )
+                })
+        }, [
+            bodyFontSize,
+            bodyLineHeight,
+            color,
+            spacing,
+            borderRadius,
+            getModifiedFontSize,
+            getModifiedFontWeight,
+            getDialogueFont,
+        ])
     }
 }
