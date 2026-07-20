@@ -7,6 +7,7 @@ import { useAppMode } from '@lib/state/AppMode'
 import { Chats } from '@lib/state/Chat'
 import { Theme } from '@lib/theme/ThemeManager'
 
+import { useIsVisualNovelPresentation } from './ChatLayoutContext'
 import ChatAttachments from './ChatAttachments'
 import { useChatEditorStore } from './ChatEditor'
 import ChatQuickActions, { useChatActionsState } from './ChatQuickActions'
@@ -19,9 +20,8 @@ type ChatTextProps = {
     nowGenerating: boolean
     isLastMessage: boolean
     isGreeting: boolean
-    immersive?: boolean
     historyCompact?: boolean
-    immersiveToolbarExternal?: boolean
+    toolbarExternal?: boolean
 }
 
 const ChatBubble: React.FC<ChatTextProps> = ({
@@ -29,12 +29,12 @@ const ChatBubble: React.FC<ChatTextProps> = ({
     nowGenerating,
     isLastMessage,
     isGreeting,
-    immersive = false,
     historyCompact = false,
-    immersiveToolbarExternal = false,
+    toolbarExternal = false,
 }) => {
     const message = Chats.useEntryData(index)
     const { appMode } = useAppMode()
+    const isVisualNovel = useIsVisualNovelPresentation()
     const [showTPS] = useMMKVBoolean(AppSettings.ShowTokenPerSecond)
     const { color, spacing, borderRadius, fontSize } = Theme.useTheme()
 
@@ -53,11 +53,11 @@ const ChatBubble: React.FC<ChatTextProps> = ({
     const showSwipe =
         !message.is_user &&
         isLastMessage &&
-        (immersive || hasSwipes || !isGreeting)
+        (isVisualNovel || hasSwipes || !isGreeting)
     const timings = message.swipes[message.swipe_id].timings
 
-    const isImmersiveDialogue = immersive && isLastMessage && !message.is_user
-    const isImmersiveUser = immersive && isLastMessage && message.is_user
+    const isVisualNovelDialogue = isVisualNovel && isLastMessage && !message.is_user
+    const isVisualNovelUser = isVisualNovel && isLastMessage && message.is_user
 
     const bubbleStyle = historyCompact
         ? {
@@ -70,9 +70,9 @@ const ChatBubble: React.FC<ChatTextProps> = ({
               minHeight: 28,
               borderRadius: borderRadius.s,
           }
-        : isImmersiveDialogue
+        : isVisualNovelDialogue
           ? null
-          : isImmersiveUser
+          : isVisualNovelUser
             ? {
                   backgroundColor: color.primary._500 + '33',
                   borderColor: color.primary._500 + '55',
@@ -110,13 +110,13 @@ const ChatBubble: React.FC<ChatTextProps> = ({
                 <ChatTextLast
                     nowGenerating={nowGenerating}
                     index={index}
-                    immersive={isImmersiveDialogue}
+                    visualNovelDialogue={isVisualNovelDialogue}
                     onBubblePress={
-                        isImmersiveDialogue
+                        isVisualNovelDialogue
                             ? () => setShowOptions(nowGenerating ? undefined : index)
                             : undefined
                     }
-                    onBubbleLongPress={isImmersiveDialogue ? handleEnableEdit : undefined}
+                    onBubbleLongPress={isVisualNovelDialogue ? handleEnableEdit : undefined}
                 />
             ) : (
                 <ChatText nowGenerating={nowGenerating} index={index} />
@@ -128,7 +128,7 @@ const ChatBubble: React.FC<ChatTextProps> = ({
                     style={{
                         flexDirection: 'row',
                     }}>
-                    {showTPS && appMode === 'local' && timings && !immersive && (
+                    {showTPS && appMode === 'local' && timings && !isVisualNovel && (
                         <Text
                             style={{
                                 color: color.text._500,
@@ -145,7 +145,7 @@ const ChatBubble: React.FC<ChatTextProps> = ({
                         nowGenerating={nowGenerating}
                         isLastMessage={isLastMessage}
                         index={index}
-                        immersive={isImmersiveDialogue}
+                        visualNovelDialogue={isVisualNovelDialogue}
                     />
                 </View>
             )}
@@ -154,15 +154,15 @@ const ChatBubble: React.FC<ChatTextProps> = ({
 
     return (
         <View>
-            {showSwipe && isImmersiveDialogue && !immersiveToolbarExternal && (
+            {showSwipe && isVisualNovelDialogue && !toolbarExternal && (
                 <ChatSwipes
                     index={index}
                     nowGenerating={nowGenerating}
                     isGreeting={isGreeting}
-                    immersive
+                    visualNovelDialogue
                 />
             )}
-            {isImmersiveDialogue ? (
+            {isVisualNovelDialogue ? (
                 <View style={{ width: '100%', position: 'relative' }}>
                     <View
                         style={{
@@ -216,7 +216,7 @@ const ChatBubble: React.FC<ChatTextProps> = ({
                     {bubbleContent}
                 </Pressable>
             )}
-            {showSwipe && !isImmersiveDialogue && (
+            {showSwipe && !isVisualNovelDialogue && (
                 <ChatSwipes index={index} nowGenerating={nowGenerating} isGreeting={isGreeting} />
             )}
         </View>

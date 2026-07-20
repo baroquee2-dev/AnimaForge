@@ -16,7 +16,7 @@ import { getImmersiveDialogueMaxHeight } from './ChatFrame'
 type ChatTextProps = {
     nowGenerating: boolean
     index: number
-    immersive?: boolean
+    visualNovelDialogue?: boolean
     onBubblePress?: () => void
     onBubbleLongPress?: () => void
 }
@@ -24,7 +24,7 @@ type ChatTextProps = {
 const ChatTextLast: React.FC<ChatTextProps> = ({
     nowGenerating,
     index,
-    immersive = false,
+    visualNovelDialogue = false,
     onBubblePress,
     onBubbleLongPress,
 }) => {
@@ -103,7 +103,7 @@ const ChatTextLast: React.FC<ChatTextProps> = ({
         </>
     )
 
-    if (immersive) {
+    if (visualNovelDialogue) {
         return (
             <ScrollView
                 ref={scrollRef}

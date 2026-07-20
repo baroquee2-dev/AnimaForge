@@ -20,7 +20,7 @@ const ChatWindowSettings = () => {
     const [saveScroll, setSaveScroll] = useMMKVBoolean(AppSettings.SaveScrollPosition)
     const [alternate, setAlternate] = useMMKVBoolean(AppSettings.AlternatingChatMode)
     const [wide, setWide] = useMMKVBoolean(AppSettings.WideChatMode)
-    const { layout, setLayout } = useChatLayout()
+    const { layout, setLayout, capabilities } = useChatLayout()
 
     const [showTokensPerSecond, setShowTokensPerSecond] = useMMKVBoolean(
         AppSettings.ShowTokenPerSecond
@@ -63,18 +63,19 @@ const ChatWindowSettings = () => {
                 description="Toggle delete button in chat options bar"
             />
 
-            <ThemedSwitch
-                label="Save Scroll Position"
-                value={saveScroll}
-                onChangeValue={setSaveScroll}
-                description="Automatically move to last scrolled position in chat"
-            />
+            {capabilities.supportsScrollPersistence && (
+                <ThemedSwitch
+                    label="Save Scroll Position"
+                    value={saveScroll}
+                    onChangeValue={setSaveScroll}
+                    description="Automatically move to last scrolled position in chat"
+                />
+            )}
 
             <View style={{ rowGap: spacing.s }}>
                 <Text style={{ color: color.text._100, fontSize: fontSize.l }}>Layout</Text>
                 <Text style={{ color: color.text._400, fontSize: fontSize.s }}>
-                    Visual Novel shows a large portrait and dialogue box. Messenger uses a
-                    standard chat list.
+                    {selectedLayout.description}
                 </Text>
                 <DropdownSheet
                     selected={selectedLayout}
@@ -85,19 +86,23 @@ const ChatWindowSettings = () => {
                 />
             </View>
 
-            <ThemedSwitch
-                label="Wide Chat"
-                value={wide}
-                onChangeValue={setWide}
-                description="Removes whitespace for wider chat"
-            />
+            {capabilities.supportsWideChat && (
+                <ThemedSwitch
+                    label="Wide Chat"
+                    value={wide}
+                    onChangeValue={setWide}
+                    description="Removes whitespace for wider chat"
+                />
+            )}
 
-            <ThemedSwitch
-                label="Alternate User and Character Positions"
-                value={alternate}
-                onChangeValue={setAlternate}
-                description="Left align character chats and right aligns user chats"
-            />
+            {capabilities.supportsAlternateAlignment && (
+                <ThemedSwitch
+                    label="Alternate User and Character Positions"
+                    value={alternate}
+                    onChangeValue={setAlternate}
+                    description="Left align character chats and right aligns user chats"
+                />
+            )}
         </View>
     )
 }

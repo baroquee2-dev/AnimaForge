@@ -10,16 +10,16 @@ type SwipesProps = {
     nowGenerating: boolean
     isGreeting: boolean
     index: number
-    immersive?: boolean
+    visualNovelDialogue?: boolean
 }
 
 const ChatSwipes: React.FC<SwipesProps> = ({
     nowGenerating,
     isGreeting,
     index,
-    immersive = false,
+    visualNovelDialogue = false,
 }) => {
-    const styles = useStyles(immersive)
+    const styles = useStyles(visualNovelDialogue)
     const { color } = Theme.useTheme()
 
     const { swipeChat, addSwipe } = Chats.useSwipes()
@@ -102,7 +102,7 @@ const ChatSwipes: React.FC<SwipesProps> = ({
 
 export default ChatSwipes
 
-const useStyles = (immersive: boolean) => {
+const useStyles = (visualNovelDialogue: boolean) => {
     const { color, spacing } = Theme.useTheme()
     return StyleSheet.create({
         swipesItem: {
@@ -111,7 +111,7 @@ const useStyles = (immersive: boolean) => {
             alignItems: 'center',
             alignSelf: 'stretch',
             minHeight: 40,
-            marginTop: immersive ? 0 : spacing.sm,
+            marginTop: visualNovelDialogue ? 0 : spacing.sm,
             marginBottom: 0,
             zIndex: 32,
         },

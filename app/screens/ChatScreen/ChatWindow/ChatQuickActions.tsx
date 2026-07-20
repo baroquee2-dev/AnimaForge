@@ -36,14 +36,14 @@ interface ChatActionProps {
     index: number
     nowGenerating: boolean
     isLastMessage: boolean
-    immersive?: boolean
+    visualNovelDialogue?: boolean
 }
 
 const ChatQuickActions: React.FC<ChatActionProps> = ({
     index,
     nowGenerating,
     isLastMessage,
-    immersive = false,
+    visualNovelDialogue = false,
 }) => {
     const { activeIndex, setShowOptions } = useChatActionsState(
         useShallow((state) => ({
@@ -205,7 +205,7 @@ const ChatQuickActions: React.FC<ChatActionProps> = ({
         </Animated.View>
     )
 
-    if (immersive) {
+    if (visualNovelDialogue) {
         return (
             <View
                 pointerEvents="box-none"

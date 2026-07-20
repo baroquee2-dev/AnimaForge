@@ -4,22 +4,19 @@ import { useShallow } from 'zustand/react/shallow'
 import { Chats, useInference } from '@lib/state/Chat'
 import { Theme } from '@lib/theme/ThemeManager'
 
-import { useInputHeightStore } from '../ChatInput'
-import ChatFooter from './ChatFooter'
-import ChatItem from './ChatItem'
-import ChatSwipes from './ChatSwipes'
-import ImmersivePortraitHeader from './ImmersivePortraitHeader'
+import { useInputHeightStore } from '../../ChatInput'
+import ChatFooter from '../ChatFooter'
+import ChatItem from '../ChatItem'
+import ChatSwipes from '../ChatSwipes'
+import ImmersivePortraitHeader from '../ImmersivePortraitHeader'
+import type { ChatListItem } from './useChatListItems'
 
-type ImmersiveChatLayoutProps = {
-    lastItem?: {
-        index: number
-        isLastMessage: boolean
-        isGreeting: boolean
-    }
+type VisualNovelCollapsedViewProps = {
+    lastItem?: ChatListItem
     lastMessageIndex: number
 }
 
-const ImmersiveChatLayout: React.FC<ImmersiveChatLayoutProps> = ({
+const VisualNovelCollapsedView: React.FC<VisualNovelCollapsedViewProps> = ({
     lastItem,
     lastMessageIndex,
 }) => {
@@ -43,9 +40,8 @@ const ImmersiveChatLayout: React.FC<ImmersiveChatLayoutProps> = ({
                         index={lastItem.index}
                         isLastMessage={lastItem.isLastMessage}
                         isGreeting={lastItem.isGreeting}
-                        immersive
-                        immersivePortraitExternal
-                        immersiveToolbarExternal
+                        portraitExternal
+                        toolbarExternal
                     />
                     {showSwipeToolbar && (
                         <View
@@ -61,7 +57,7 @@ const ImmersiveChatLayout: React.FC<ImmersiveChatLayoutProps> = ({
                                 index={lastItem.index}
                                 nowGenerating={nowGenerating}
                                 isGreeting={lastItem.isGreeting}
-                                immersive
+                                visualNovelDialogue
                             />
                         </View>
                     )}
@@ -73,4 +69,4 @@ const ImmersiveChatLayout: React.FC<ImmersiveChatLayoutProps> = ({
     )
 }
 
-export default ImmersiveChatLayout
+export default VisualNovelCollapsedView

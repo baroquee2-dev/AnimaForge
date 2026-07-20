@@ -2,6 +2,7 @@ import { StyleSheet, View } from 'react-native'
 
 import { useInference } from '@lib/state/Chat'
 
+import { useIsVisualNovelPresentation } from './ChatLayoutContext'
 import ChatBubble from './ChatBubble'
 import ChatFrame from './ChatFrame'
 
@@ -9,45 +10,43 @@ type ChatItemProps = {
     index: number
     isLastMessage: boolean
     isGreeting: boolean
-    immersive?: boolean
     historyCompact?: boolean
-    immersivePortraitExternal?: boolean
-    immersiveToolbarExternal?: boolean
+    portraitExternal?: boolean
+    toolbarExternal?: boolean
 }
 
 const ChatItem: React.FC<ChatItemProps> = ({
     index,
     isLastMessage,
     isGreeting,
-    immersive = false,
     historyCompact = false,
-    immersivePortraitExternal = false,
-    immersiveToolbarExternal = false,
+    portraitExternal = false,
+    toolbarExternal = false,
 }) => {
     const nowGenerating = useInference((state) => state.nowGenerating)
+    const isVisualNovel = useIsVisualNovelPresentation()
+
     return (
         <View
             style={[
                 styles.chatItem,
                 { zIndex: index },
-                immersive && isLastMessage && styles.immersiveLastItem,
+                isVisualNovel && isLastMessage && styles.visualNovelLastItem,
                 historyCompact && styles.historyCompactItem,
             ]}>
             <ChatFrame
                 index={index}
                 nowGenerating={nowGenerating}
                 isLast={isLastMessage}
-                immersive={immersive}
                 historyCompact={historyCompact}
-                immersivePortraitExternal={immersivePortraitExternal}>
+                portraitExternal={portraitExternal}>
                 <ChatBubble
                     nowGenerating={nowGenerating}
                     index={index}
                     isLastMessage={isLastMessage}
                     isGreeting={isGreeting}
-                    immersive={immersive}
                     historyCompact={historyCompact}
-                    immersiveToolbarExternal={immersiveToolbarExternal}
+                    toolbarExternal={toolbarExternal}
                 />
             </ChatFrame>
         </View>
@@ -61,7 +60,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 4,
         marginBottom: 4,
     },
-    immersiveLastItem: {
+    visualNovelLastItem: {
         paddingHorizontal: 0,
         marginBottom: 0,
     },

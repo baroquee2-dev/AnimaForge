@@ -10,6 +10,7 @@ import { Chats } from '@lib/state/Chat'
 import { useAvatarViewerStore } from '@lib/state/components/AvatarViewer'
 import { Theme } from '@lib/theme/ThemeManager'
 
+import { useChatLayoutCapabilities, useIsVisualNovelPresentation } from './ChatLayoutContext'
 import PortraitBreathing from './PortraitBreathing'
 import { portraitEntrance } from '@lib/animations/chatAnimations'
 
@@ -18,9 +19,8 @@ type ChatFrameProps = {
     index: number
     nowGenerating: boolean
     isLast?: boolean
-    immersive?: boolean
     historyCompact?: boolean
-    immersivePortraitExternal?: boolean
+    portraitExternal?: boolean
 }
 
 const COMPACT_AVATAR_SIZE = 28
@@ -52,13 +52,16 @@ const ChatFrame: React.FC<ChatFrameProps> = ({
     index,
     nowGenerating,
     isLast,
-    immersive = false,
     historyCompact = false,
-    immersivePortraitExternal = false,
+    portraitExternal = false,
 }) => {
     const { color, spacing, borderRadius, fontSize } = Theme.useTheme()
+    const isVisualNovel = useIsVisualNovelPresentation()
+    const capabilities = useChatLayoutCapabilities()
     const [wide] = useMMKVBoolean(AppSettings.WideChatMode)
     const [alternate] = useMMKVBoolean(AppSettings.AlternatingChatMode)
+    const effectiveWide = wide && capabilities.supportsWideChat
+    const effectiveAlternate = alternate && capabilities.supportsAlternateAlignment
     const message = Chats.useEntryData(index)
     const setShowViewer = useAvatarViewerStore((state) => state.setShow)
     const charImageId = Characters.useCharacterStore((state) => state.card?.image_id) ?? 0
@@ -66,7 +69,7 @@ const ChatFrame: React.FC<ChatFrameProps> = ({
 
     const swipe = message.swipes[message.swipe_id]
     const imageId = message.is_user ? userImageId : charImageId
-    const showMetadata = !immersive || historyCompact
+    const showMetadata = !isVisualNovel || historyCompact
 
     const getDeltaTime = () =>
         Math.round(
@@ -79,12 +82,12 @@ const ChatFrame: React.FC<ChatFrameProps> = ({
         )
     const deltaTime = getDeltaTime()
 
-    const rowDir = message.is_user && alternate && !immersive ? 'row-reverse' : 'row'
-    const align = message.is_user && alternate && !immersive ? 'flex-end' : 'flex-start'
+    const rowDir = message.is_user && effectiveAlternate && !isVisualNovel ? 'row-reverse' : 'row'
+    const align = message.is_user && effectiveAlternate && !isVisualNovel ? 'flex-end' : 'flex-start'
     const immersivePortraitSize = useMemo(getImmersivePortraitSize, [])
 
-    if (immersive && isLast && !message.is_user) {
-        if (immersivePortraitExternal) {
+    if (isVisualNovel && isLast && !message.is_user) {
+        if (portraitExternal) {
             return <View style={{ width: '100%' }}>{children}</View>
         }
 
@@ -112,7 +115,7 @@ const ChatFrame: React.FC<ChatFrameProps> = ({
         )
     }
 
-    if (immersive && isLast && message.is_user) {
+    if (isVisualNovel && isLast && message.is_user) {
         return (
             <View style={{ alignItems: 'flex-end', paddingHorizontal: spacing.sm }}>
                 <View
@@ -170,7 +173,7 @@ const ChatFrame: React.FC<ChatFrameProps> = ({
         )
     }
 
-    if (wide && !immersive)
+    if (effectiveWide && !isVisualNovel)
         return (
             <View
                 style={{
@@ -192,8 +195,8 @@ const ChatFrame: React.FC<ChatFrameProps> = ({
                                 width: 48,
                                 height: 48,
                                 borderRadius: borderRadius.xl,
-                                marginRight: message.is_user && alternate ? 0 : spacing.l,
-                                marginLeft: message.is_user && alternate ? spacing.l : 0,
+                                marginRight: message.is_user && effectiveAlternate ? 0 : spacing.l,
+                                marginLeft: message.is_user && effectiveAlternate ? spacing.l : 0,
                             }}
                             targetImage={Characters.getImageDir(imageId)}
                         />
