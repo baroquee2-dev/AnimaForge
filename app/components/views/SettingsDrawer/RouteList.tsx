@@ -1,10 +1,8 @@
 import { AntDesign } from '@expo/vector-icons'
 import { Href, useRouter } from 'expo-router'
 import { FlatList, StyleSheet, Text, TouchableOpacity } from 'react-native'
-import { useMMKVBoolean } from 'react-native-mmkv'
 import Animated, { Easing, SlideInLeft } from 'react-native-reanimated'
 
-import { AppSettings } from '@lib/constants/GlobalValues'
 import { useAppMode } from '@lib/state/AppMode'
 import { Theme } from '@lib/theme/ThemeManager'
 
@@ -42,13 +40,12 @@ const DrawerButton = ({ item, index }: DrawerButtonProps) => {
 }
 
 const RouteList = () => {
-    const [devMode] = useMMKVBoolean(AppSettings.DevMode)
     const { appMode } = useAppMode()
     const paths = getPaths(appMode === 'remote')
     return (
         <FlatList
             showsVerticalScrollIndicator={false}
-            data={__DEV__ || devMode ? [...paths, ...paths_dev] : paths}
+            data={paths}
             renderItem={({ item, index }) => <DrawerButton item={item} index={index} />}
             keyExtractor={(item) => item.path.toString()}
         />
@@ -116,24 +113,5 @@ const getPaths = (remote: boolean): ButtonData[] => [
         name: 'Settings',
         path: '/screens/AppSettingsScreen',
         icon: 'setting',
-    },
-]
-
-const paths_dev: ButtonData[] = [
-    /*{
-        name: '[DEV] HF',
-        path: '/HFTest',
-    },*/
-    {
-        name: '[DEV] Components',
-        path: '/screens/ComponentTestScreen',
-    },
-    {
-        name: '[DEV] ColorTest',
-        path: '/screens/ColorTestScreen',
-    },
-    {
-        name: '[DEV] Markdown',
-        path: '/screens/MarkdownTestScreen',
     },
 ]
