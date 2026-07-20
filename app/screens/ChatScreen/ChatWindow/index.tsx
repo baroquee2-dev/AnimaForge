@@ -8,6 +8,7 @@ import { useShallow } from 'zustand/react/shallow'
 import Drawer from '@components/views/Drawer'
 import HeaderTitle from '@components/views/HeaderTitle'
 import { AppSettings } from '@lib/constants/GlobalValues'
+import { isVisualNovelLayout, useChatLayout } from '@lib/constants/ChatLayout'
 import { useDebounce } from '@lib/hooks/Debounce'
 import { useAppMode } from '@lib/state/AppMode'
 import { useBackgroundStore, resolveChatBackgroundUri } from '@lib/state/BackgroundImage'
@@ -38,7 +39,8 @@ const ChatWindow = () => {
     const [saveScroll] = useMMKVBoolean(AppSettings.SaveScrollPosition)
     const [showModelname] = useMMKVBoolean(AppSettings.ShowModelInChat)
     const [autoScroll] = useMMKVBoolean(AppSettings.AutoScroll)
-    const [immersive] = useMMKVBoolean(AppSettings.ImmersiveChatMode)
+    const { layout } = useChatLayout()
+    const immersive = isVisualNovelLayout(layout)
     const [historyExpanded, setHistoryExpanded] = useState(false)
     const chatInputHeight = useInputHeightStore(useShallow((state) => state.height))
     const { data: { background_image: backgroundImage } = {} } = useLiveQuery(

@@ -20,6 +20,7 @@ import { AppDirectory, deleteFile, listFiles, makeDirectory, readStringAsync } f
 // import { patchAndroidText } from './PatchText'
 import { lockScreenOrientation } from './Screen'
 import { AppSettings, AppSettingsDefault, Global } from '../constants/GlobalValues'
+import { migrateChatLayoutSetting } from '../constants/ChatLayout'
 import { Llama } from '../engine/Local/LlamaLocal'
 import { Characters } from '../state/Characters'
 import { Chats } from '../state/Chat'
@@ -52,6 +53,7 @@ export const useTextIntentFocus = () => {
 }
 
 const setAppDefaultSettings = () => {
+    migrateChatLayoutSetting()
     Object.keys(AppSettingsDefault).map((item) => {
         const data = mmkv.getBoolean(item)
         if (data !== undefined) return
