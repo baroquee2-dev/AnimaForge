@@ -172,7 +172,7 @@ const FormattingManager = () => {
                     marginVertical: spacing.xl,
                     flex: 1,
                 }}>
-                <HeaderTitle title="Formatting" />
+                <HeaderTitle title="AI Instructions" />
                 <HeaderButton headerRight={headerRight} />
                 <View>
                     <InputSheet
@@ -235,7 +235,7 @@ const FormattingManager = () => {
                         rowGap: spacing.xl,
                         paddingHorizontal: spacing.xl,
                     }}>
-                    <SectionTitle>Instruct Formatting</SectionTitle>
+                    <SectionTitle>Instruction Fields</SectionTitle>
                     <ThemedTextInput
                         label="System Prompt"
                         value={currentInstruct.system_prompt}

@@ -79,7 +79,7 @@ const getPaths = (remote: boolean): ButtonData[] => [
         icon: 'control',
     },
     {
-        name: 'Formatting',
+        name: 'AI Instructions',
         path: '/screens/FormattingManagerScreen',
         icon: 'profile',
     },

@@ -470,6 +470,6 @@ export const getSystemPrompt = ({
 const warnNoMessages = () => {
     Logger.warnToast('No messages added. Check Logs.')
     Logger.warn(
-        'No messages were added to the context. This can be caused by:\n- Generated Length is too high, lower it in Formatting\n- Your context length is too low\n- Your first message is too long'
+        'No messages were added to the context. This can be caused by:\n- Generated Length is too high, lower it in AI Instructions\n- Your context length is too low\n- Your first message is too long'
     )
 }
