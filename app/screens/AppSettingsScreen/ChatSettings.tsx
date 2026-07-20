@@ -1,4 +1,3 @@
-import { useTextIntentStatus } from '@vali98/react-native-process-text'
 import { useRouter } from 'expo-router'
 import React from 'react'
 import { View } from 'react-native'
@@ -14,7 +13,6 @@ const ChatSettings = () => {
     const [chatOnStartup, setChatOnStartup] = useMMKVBoolean(AppSettings.ChatOnStartup)
     const [autoLoadUser, setAutoLoadUser] = useMMKVBoolean(AppSettings.AutoLoadUser)
     const [autoTitle, setAutoTitle] = useMMKVBoolean(AppSettings.AutoGenerateTitle)
-    const { enabled: textIntent, setEnabled: setTextIntent } = useTextIntentStatus()
     const router = useRouter()
     return (
         <View style={{ rowGap: 8 }}>
@@ -46,13 +44,6 @@ const ChatSettings = () => {
                 value={autoTitle}
                 onChangeValue={setAutoTitle}
                 description="Automatically generates titles for chats (only in Remote mode)"
-            />
-
-            <ThemedSwitch
-                label="Ask In ChatterUI"
-                value={textIntent}
-                onChangeValue={setTextIntent}
-                description="Adds ChatterUI as a search option when highlighting text"
             />
 
             <ThemedButton

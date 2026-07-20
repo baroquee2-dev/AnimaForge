@@ -86,7 +86,6 @@ module.exports = {
                     'android:largeHeap': true,
                 },
             ],
-            ['@vali98/react-native-process-text', { label: 'Ask In ChatterUi' }],
             [
                 'expo-camera',
                 {

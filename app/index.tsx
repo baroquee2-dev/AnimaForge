@@ -9,7 +9,7 @@ import HeaderTitle from '@components/views/HeaderTitle'
 import { db } from '@db'
 import useLocalAuth from '@lib/hooks/LocalAuth'
 import { Theme } from '@lib/theme/ThemeManager'
-import { loadChatOnInit, startupApp, useTextIntentFocus } from '@lib/utils/Startup'
+import { loadChatOnInit, startupApp } from '@lib/utils/Startup'
 import CharacterList from '@screens/CharacterListScreen'
 
 import migrations from '../db/migrations/migrations'
@@ -21,8 +21,6 @@ const Home = () => {
     const { authorized, retry } = useLocalAuth()
 
     const [firstRender, setFirstRender] = useState<boolean>(true)
-
-    useTextIntentFocus()
 
     useEffect(() => {
         if (authorized && success) {
