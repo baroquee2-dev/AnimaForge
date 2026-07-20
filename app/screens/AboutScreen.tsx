@@ -51,15 +51,8 @@ const AboutScreen = () => {
                 />
             )}
 
-            <Text style={{ marginBottom: spacing.xl3, ...styles.body }}>
-                ChatterUI is a free and open-source application developed by Vali-98
-            </Text>
-
-            <Text style={styles.body}>Got an issue? Report it here:</Text>
-            <Text style={styles.subtitleText}>({`Don't forget to add your Logs!`})</Text>
-
             <ThemedButton
-                buttonStyle={{ marginTop: spacing.m }}
+                buttonStyle={{ marginTop: spacing.xl3 }}
                 variant="secondary"
                 label="Github Repository"
                 iconName="github"
@@ -87,7 +80,6 @@ const useStyles = () => {
         },
         titleText: { color: color.text._100, fontSize: 32, marginTop: 16 },
         subtitleText: { color: color.text._400 },
-        body: { color: color.text._100, marginTop: spacing.l, textAlign: 'center' },
         icon: {
             width: 120,
             height: 120,
