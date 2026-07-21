@@ -11,12 +11,14 @@ import { MarkdownStyle } from '@lib/markdown/Markdown'
 import { Chats, useInference } from '@lib/state/Chat'
 
 import { useInputHeightStore } from '../ChatInput'
-import { getImmersiveDialogueMaxHeight } from './ChatFrame'
+import { getImmersiveDialogueMaxHeight as getVisualNovelDialogueMaxHeight } from './ChatFrame'
+import { getImmersiveDialogueMaxHeight } from './layouts/immersiveLayout'
 
 type ChatTextProps = {
     nowGenerating: boolean
     index: number
     visualNovelDialogue?: boolean
+    immersiveDialogue?: boolean
     onBubblePress?: () => void
     onBubbleLongPress?: () => void
 }
@@ -25,6 +27,7 @@ const ChatTextLast: React.FC<ChatTextProps> = ({
     nowGenerating,
     index,
     visualNovelDialogue = false,
+    immersiveDialogue = false,
     onBubblePress,
     onBubbleLongPress,
 }) => {
@@ -42,8 +45,11 @@ const ChatTextLast: React.FC<ChatTextProps> = ({
     const firstRender = useRef(true)
     const inputHeight = useInputHeightStore(useShallow((state) => state.height))
     const immersiveMaxHeight = useMemo(
-        () => getImmersiveDialogueMaxHeight(inputHeight),
-        [inputHeight]
+        () =>
+            immersiveDialogue
+                ? getImmersiveDialogueMaxHeight(inputHeight)
+                : getVisualNovelDialogueMaxHeight(inputHeight),
+        [immersiveDialogue, inputHeight]
     )
 
     const updateHeight = useCallback(() => {
@@ -103,11 +109,15 @@ const ChatTextLast: React.FC<ChatTextProps> = ({
         </>
     )
 
-    if (visualNovelDialogue) {
+    if (visualNovelDialogue || immersiveDialogue) {
         return (
             <ScrollView
                 ref={scrollRef}
-                style={{ height: immersiveMaxHeight }}
+                style={
+                    immersiveDialogue
+                        ? { maxHeight: immersiveMaxHeight, flexGrow: 0 }
+                        : { height: immersiveMaxHeight }
+                }
                 nestedScrollEnabled
                 scrollEnabled
                 showsVerticalScrollIndicator

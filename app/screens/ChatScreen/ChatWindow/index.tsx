@@ -1,11 +1,12 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { useMMKVBoolean } from 'react-native-mmkv'
+import { View } from 'react-native'
 import { useShallow } from 'zustand/react/shallow'
 
 import Drawer from '@components/views/Drawer'
 import HeaderTitle from '@components/views/HeaderTitle'
 import { AppSettings } from '@lib/constants/GlobalValues'
-import { useChatLayout } from '@lib/constants/ChatLayout'
+import { getChatLayoutCapabilities, useChatLayout } from '@lib/constants/ChatLayout'
 import { useAppMode } from '@lib/state/AppMode'
 import { useBackgroundStore, resolveChatBackgroundUri } from '@lib/state/BackgroundImage'
 import { Characters } from '@lib/state/Characters'
@@ -21,6 +22,7 @@ const ChatWindow = () => {
     const { appMode } = useAppMode()
     const [showModelname] = useMMKVBoolean(AppSettings.ShowModelInChat)
     const { layout } = useChatLayout()
+    const capabilities = getChatLayoutCapabilities(layout)
     const { data: { background_image: backgroundImage } = {} } = useLiveQuery(
         Characters.db.query.backgroundImageQuery(charId ?? -1)
     )
@@ -36,21 +38,27 @@ const ChatWindow = () => {
         uri: resolveChatBackgroundUri(backgroundImage, image),
     }
 
-    return (
-        <AnimatedChatBackground uri={backgroundSource.uri}>
-            <ChatLayoutProvider layout={layout}>
-                {showModelname && appMode === 'local' && (
-                    <HeaderTitle
-                        headerTitle={() => !showSettings && !showChat && <ChatModelName />}
-                    />
-                )}
+    const chatContent = (
+        <ChatLayoutProvider layout={layout}>
+            {showModelname && appMode === 'local' && (
+                <HeaderTitle headerTitle={() => !showSettings && !showChat && <ChatModelName />} />
+            )}
 
-                <ChatLayoutRouter />
+            <ChatLayoutRouter />
 
-                <ChatHeaderGradient />
-            </ChatLayoutProvider>
-        </AnimatedChatBackground>
+            {capabilities.showChatBackground && <ChatHeaderGradient />}
+        </ChatLayoutProvider>
     )
+
+    if (!capabilities.showChatBackground) {
+        return (
+            <View style={{ flex: 1, backgroundColor: '#000', overflow: 'hidden' }}>
+                <View style={{ flex: 1 }}>{chatContent}</View>
+            </View>
+        )
+    }
+
+    return <AnimatedChatBackground uri={backgroundSource.uri}>{chatContent}</AnimatedChatBackground>
 }
 
 export default ChatWindow

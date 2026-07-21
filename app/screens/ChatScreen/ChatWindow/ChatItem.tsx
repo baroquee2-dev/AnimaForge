@@ -2,7 +2,7 @@ import { StyleSheet, View } from 'react-native'
 
 import { useInference } from '@lib/state/Chat'
 
-import { useIsVisualNovelPresentation } from './ChatLayoutContext'
+import { useIsImmersivePresentation, useIsVisualNovelPresentation } from './ChatLayoutContext'
 import ChatBubble from './ChatBubble'
 import ChatFrame from './ChatFrame'
 
@@ -25,13 +25,14 @@ const ChatItem: React.FC<ChatItemProps> = ({
 }) => {
     const nowGenerating = useInference((state) => state.nowGenerating)
     const isVisualNovel = useIsVisualNovelPresentation()
+    const isImmersive = useIsImmersivePresentation()
 
     return (
         <View
             style={[
                 styles.chatItem,
                 { zIndex: index },
-                isVisualNovel && isLastMessage && styles.visualNovelLastItem,
+                (isVisualNovel || isImmersive) && isLastMessage && styles.presentationLastItem,
                 historyCompact && styles.historyCompactItem,
             ]}>
             <ChatFrame
@@ -60,7 +61,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 4,
         marginBottom: 4,
     },
-    visualNovelLastItem: {
+    presentationLastItem: {
         paddingHorizontal: 0,
         marginBottom: 0,
     },

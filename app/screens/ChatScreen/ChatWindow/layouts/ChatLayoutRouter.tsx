@@ -1,18 +1,19 @@
 import type { ChatLayout } from '@lib/constants/ChatLayout'
 
 import { useChatLayoutContext } from '../ChatLayoutContext'
+import ImmersiveChatLayout from './ImmersiveChatLayout'
 import MessengerChatLayout from './MessengerChatLayout'
 import VisualNovelChatLayout from './VisualNovelChatLayout'
 
-/** Add the third layout component here when introducing a new ChatLayout value. */
 const CHAT_LAYOUT_VIEWS: Record<ChatLayout, React.ComponentType> = {
     visualNovel: VisualNovelChatLayout,
     messenger: MessengerChatLayout,
+    immersive: ImmersiveChatLayout,
 }
 
 const ChatLayoutRouter = () => {
     const { layout } = useChatLayoutContext()
-    const LayoutView = CHAT_LAYOUT_VIEWS[layout] ?? MessengerChatLayout
+    const LayoutView = CHAT_LAYOUT_VIEWS[layout] ?? VisualNovelChatLayout
 
     return <LayoutView />
 }

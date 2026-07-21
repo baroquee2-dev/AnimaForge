@@ -44,4 +44,6 @@ export const useMessagePresentation = () =>
 
 export const useIsVisualNovelPresentation = () => useMessagePresentation() === 'visualNovel'
 
+export const useIsImmersivePresentation = () => useMessagePresentation() === 'immersive'
+
 export const useChatLayoutCapabilities = () => useChatLayoutContext().capabilities

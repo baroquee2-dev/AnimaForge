@@ -1,4 +1,5 @@
 import { ReactNode, useEffect } from 'react'
+import { StyleProp, ViewStyle } from 'react-native'
 import Animated, {
     Easing,
     useAnimatedStyle,
@@ -11,9 +12,10 @@ import Animated, {
 type PortraitBreathingProps = {
     active: boolean
     children: ReactNode
+    style?: StyleProp<ViewStyle>
 }
 
-const PortraitBreathing: React.FC<PortraitBreathingProps> = ({ active, children }) => {
+const PortraitBreathing: React.FC<PortraitBreathingProps> = ({ active, children, style }) => {
     const scale = useSharedValue(1)
 
     useEffect(() => {
@@ -34,7 +36,7 @@ const PortraitBreathing: React.FC<PortraitBreathingProps> = ({ active, children 
         transform: [{ scale: scale.value }],
     }))
 
-    return <Animated.View style={animatedStyle}>{children}</Animated.View>
+    return <Animated.View style={[animatedStyle, style]}>{children}</Animated.View>
 }
 
 export default PortraitBreathing

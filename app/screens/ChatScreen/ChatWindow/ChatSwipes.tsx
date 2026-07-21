@@ -11,6 +11,7 @@ type SwipesProps = {
     isGreeting: boolean
     index: number
     visualNovelDialogue?: boolean
+    immersiveDialogue?: boolean
 }
 
 const ChatSwipes: React.FC<SwipesProps> = ({
@@ -18,8 +19,9 @@ const ChatSwipes: React.FC<SwipesProps> = ({
     isGreeting,
     index,
     visualNovelDialogue = false,
+    immersiveDialogue = false,
 }) => {
-    const styles = useStyles(visualNovelDialogue)
+    const styles = useStyles(visualNovelDialogue || immersiveDialogue)
     const { color } = Theme.useTheme()
 
     const { swipeChat, addSwipe } = Chats.useSwipes()

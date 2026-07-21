@@ -20,6 +20,7 @@ import CameraSheet from '@components/views/CameraSheet'
 import ContextMenu from '@components/views/ContextMenu'
 import { XAxisOnlyTransition } from '@lib/animations/transitions'
 import { AppSettings } from '@lib/constants/GlobalValues'
+import { useChatLayout } from '@lib/constants/ChatLayout'
 import { generateResponse } from '@lib/engine/Inference'
 import { useSpeechInput } from '@lib/hooks/useSpeechInput'
 import { useUnfocusTextInput } from '@lib/hooks/UnfocusTextInput'
@@ -54,6 +55,13 @@ const ChatInput = () => {
     const inputRef = useUnfocusTextInput()
 
     const { color, borderRadius, spacing } = Theme.useTheme()
+    const { capabilities } = useChatLayout()
+    const transparentChrome = capabilities.transparentChrome
+    const chromeSurface = transparentChrome ? color.neutral._100 + '55' : color.neutral._100 + 'cc'
+    const chromeBorder = transparentChrome ? color.neutral._100 + '66' : color.neutral._200
+    const fieldSurface = transparentChrome ? color.neutral._100 + '44' : color.neutral._100
+    const optionSurface = transparentChrome ? color.neutral._100 + '55' : color.neutral._200
+    const attachmentSurface = transparentChrome ? color.neutral._100 + '44' : color.neutral._200
     const [sendOnEnter] = useMMKVBoolean(AppSettings.SendOnEnter)
     const [attachments, setAttachments] = useState<Attachment[]>([])
     const [hideOptions, setHideOptions] = useState(false)
@@ -143,9 +151,9 @@ const ChatInput = () => {
                 bottom: 4,
                 paddingVertical: spacing.sm,
                 paddingHorizontal: spacing.sm,
-                backgroundColor: color.neutral._100 + 'cc',
+                backgroundColor: chromeSurface,
                 borderWidth: 1,
-                borderColor: color.neutral._200,
+                borderColor: chromeBorder,
                 boxShadow: [
                     {
                         offsetX: 1,
@@ -163,7 +171,7 @@ const ChatInput = () => {
                 style={{
                     display: attachments.length > 0 ? 'flex' : 'none',
                     padding: spacing.l,
-                    backgroundColor: color.neutral._200,
+                    backgroundColor: attachmentSurface,
                     borderRadius: borderRadius.m,
                 }}
                 horizontal
@@ -263,7 +271,7 @@ const ChatInput = () => {
                                 triggerStyle={{
                                     color: color.text._400,
                                     padding: 6,
-                                    backgroundColor: color.neutral._200,
+                                    backgroundColor: optionSurface,
                                     borderRadius: 16,
                                 }}
                                 placement="top"
@@ -279,7 +287,7 @@ const ChatInput = () => {
                                 }}
                                 buttonStyle={{
                                     padding: 5,
-                                    backgroundColor: color.neutral._200,
+                                    backgroundColor: optionSurface,
                                     borderRadius: 32,
                                 }}
                                 variant="tertiary"
@@ -294,7 +302,7 @@ const ChatInput = () => {
                     ref={inputRef}
                     style={{
                         color: color.text._100,
-                        backgroundColor: color.neutral._100,
+                        backgroundColor: fieldSurface,
                         flex: 1,
                         borderWidth: 2,
                         borderColor: color.primary._300,
@@ -327,7 +335,7 @@ const ChatInput = () => {
                             borderRadius: borderRadius.m,
                             backgroundColor: isListening
                                 ? color.error._500
-                                : color.neutral._200,
+                                : optionSurface,
                             padding: spacing.m,
                             opacity: nowGenerating ? 0.4 : 1,
                         }}
