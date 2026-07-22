@@ -6,12 +6,14 @@ type HeaderTitleProps = {
     title?: string
     headerTitle?: ((props: { children: string; tintColor?: string }) => ReactNode) | undefined
     animation?: NativeStackNavigationOptions['animation']
+    screenOptions?: NativeStackNavigationOptions
 }
 
 const HeaderTitle: React.FC<HeaderTitleProps> = ({
     title = '',
     headerTitle = undefined,
     animation = 'simple_push',
+    screenOptions,
 }) => {
     return (
         <Stack.Screen
@@ -19,6 +21,7 @@ const HeaderTitle: React.FC<HeaderTitleProps> = ({
                 title: title,
                 headerTitle: headerTitle,
                 animation: animation,
+                ...screenOptions,
             }}
         />
     )

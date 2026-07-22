@@ -1,6 +1,7 @@
 import { useFocusEffect } from 'expo-router'
-import { useCallback, useEffect } from 'react'
-import { View } from 'react-native'
+import { useCallback, useEffect, useMemo } from 'react'
+import { StyleSheet, View } from 'react-native'
+import type { NativeStackNavigationOptions } from '@react-navigation/native-stack'
 import { useReanimatedKeyboardAnimation } from 'react-native-keyboard-controller'
 import Animated, { FadeIn, useAnimatedStyle } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -13,9 +14,11 @@ import HeaderButton from '@components/views/HeaderButton'
 import HeaderTitle from '@components/views/HeaderTitle'
 import SettingsDrawer from '@components/views/SettingsDrawer'
 import { playChatEnterSound } from '@lib/audio/playInputFocusSound'
+import { useChatLayout } from '@lib/constants/ChatLayout'
 import { Characters } from '@lib/state/Characters'
-import { Chats } from '@lib/state/Chat'
+import { Chats, useInference } from '@lib/state/Chat'
 import { Logger } from '@lib/state/Logger'
+import { Theme } from '@lib/theme/ThemeManager'
 import { ChatImportSchema } from '@lib/utils/ChatSchema'
 import { pickStringDocument } from '@lib/utils/File'
 import ChatInput from '@screens/ChatScreen/ChatInput'
@@ -23,9 +26,14 @@ import ChatsDrawer from '@screens/ChatScreen/ChatsDrawer'
 import ChatWindow from '@screens/ChatScreen/ChatWindow'
 
 import ChatEditor from './ChatWindow/ChatEditor'
+import ImmersiveFullscreenPortrait from './ChatWindow/layouts/ImmersiveFullscreenPortrait'
 
 const ChatScreen = () => {
     const insets = useSafeAreaInsets()
+    const { color } = Theme.useTheme()
+    const { capabilities } = useChatLayout()
+    const edgeToEdgePortrait = capabilities.fullScreenPortrait
+    const nowGenerating = useInference((state) => state.nowGenerating)
     const { unloadCharacter, charId } = Characters.useCharacterStore(
         useShallow((state) => ({
             unloadCharacter: state.unloadCard,
@@ -50,6 +58,30 @@ const ChatScreen = () => {
             showChats: state.values?.[Drawer.ID.CHATLIST],
         }))
     )
+
+    const immersiveScreenOptions = useMemo((): NativeStackNavigationOptions => {
+        if (edgeToEdgePortrait) {
+            return {
+                headerTransparent: true,
+                headerStyle: { backgroundColor: 'transparent' },
+                headerShadowVisible: false,
+                headerTintColor: '#f5f5f5',
+                statusBarStyle: 'light',
+                statusBarTranslucent: true,
+                contentStyle: { backgroundColor: 'transparent' },
+            }
+        }
+
+        return {
+            headerTransparent: false,
+            headerStyle: { backgroundColor: color.neutral._100 },
+            headerShadowVisible: false,
+            headerTintColor: color.text._100,
+            statusBarStyle: 'auto',
+            statusBarTranslucent: false,
+            contentStyle: { backgroundColor: color.neutral._100 },
+        }
+    }, [color.neutral._100, color.text._100, edgeToEdgePortrait])
 
     useFocusEffect(
         useCallback(() => {
@@ -158,33 +190,49 @@ const ChatScreen = () => {
                     closeDirection: 'left',
                 },
             ]}>
-            <View style={{ flex: 1, paddingBottom: insets.bottom + 4 }}>
-                <Animated.View style={animatedStyle}>
-                    <HeaderTitle animation="slide_from_right" />
-                    <HeaderButton
-                        headerLeft={renderHeaderButtonLeft}
-                        headerRight={renderHeaderButtonRight}
-                    />
-                    <View style={{ flex: 1 }}>
-                        {chat && (
-                            <Animated.View
-                                entering={FadeIn.duration(280).delay(80)}
-                                style={{ flex: 1 }}>
-                                <ChatWindow />
-                            </Animated.View>
-                        )}
-                        <ChatInput />
-                        <AvatarViewer />
-                        <ChatEditor />
+            <View style={{ flex: 1, overflow: 'hidden' }}>
+                {edgeToEdgePortrait && chat && (
+                    <View style={styles.edgeToEdgePortrait} pointerEvents="box-none">
+                        <ImmersiveFullscreenPortrait nowGenerating={nowGenerating} />
                     </View>
-                </Animated.View>
+                )}
 
-                {/**Drawer has to be outside of the KeyboardAvoidingView */}
-                <SettingsDrawer />
-                <ChatsDrawer />
+                <View style={{ flex: 1, paddingBottom: insets.bottom + 4, zIndex: 1 }}>
+                    <Animated.View style={animatedStyle}>
+                        <HeaderTitle animation="slide_from_right" screenOptions={immersiveScreenOptions} />
+                        <HeaderButton
+                            headerLeft={renderHeaderButtonLeft}
+                            headerRight={renderHeaderButtonRight}
+                            screenOptions={immersiveScreenOptions}
+                        />
+                        <View style={{ flex: 1 }}>
+                            {chat && (
+                                <Animated.View
+                                    entering={FadeIn.duration(280).delay(80)}
+                                    style={{ flex: 1 }}>
+                                    <ChatWindow />
+                                </Animated.View>
+                            )}
+                            <ChatInput />
+                            <AvatarViewer />
+                            <ChatEditor />
+                        </View>
+                    </Animated.View>
+
+                    {/**Drawer has to be outside of the KeyboardAvoidingView */}
+                    <SettingsDrawer />
+                    <ChatsDrawer />
+                </View>
             </View>
         </Drawer.Gesture>
     )
 }
 
 export default ChatScreen
+
+const styles = StyleSheet.create({
+    edgeToEdgePortrait: {
+        ...StyleSheet.absoluteFillObject,
+        zIndex: 0,
+    },
+})

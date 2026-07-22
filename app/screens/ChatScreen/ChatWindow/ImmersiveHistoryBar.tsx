@@ -1,13 +1,18 @@
 import { MaterialIcons } from '@expo/vector-icons'
 import { Pressable, Text, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Theme } from '@lib/theme/ThemeManager'
+
+import { IMMERSIVE_HEADER_BODY_HEIGHT } from './layouts/immersiveLayout'
 
 type ImmersiveHistoryBarProps = {
     count: number
     expanded: boolean
     onToggle: () => void
     variant?: 'inline' | 'floating'
+    /** Offset below transparent stack header (Immersive edge-to-edge). */
+    clearHeaderOverlay?: boolean
 }
 
 const ImmersiveHistoryBar: React.FC<ImmersiveHistoryBarProps> = ({
@@ -15,10 +20,15 @@ const ImmersiveHistoryBar: React.FC<ImmersiveHistoryBarProps> = ({
     expanded,
     onToggle,
     variant = 'inline',
+    clearHeaderOverlay = false,
 }) => {
     const { color, spacing, borderRadius, fontSize } = Theme.useTheme()
+    const insets = useSafeAreaInsets()
 
     if (count <= 0) return null
+
+    const floatingTop =
+        spacing.sm + (clearHeaderOverlay ? insets.top + IMMERSIVE_HEADER_BODY_HEIGHT : 0)
 
     if (variant === 'floating') {
         return (
@@ -27,7 +37,7 @@ const ImmersiveHistoryBar: React.FC<ImmersiveHistoryBarProps> = ({
                 hitSlop={8}
                 style={{
                     position: 'absolute',
-                    top: spacing.sm,
+                    top: floatingTop,
                     right: spacing.m,
                     zIndex: 100,
                     flexDirection: 'row',

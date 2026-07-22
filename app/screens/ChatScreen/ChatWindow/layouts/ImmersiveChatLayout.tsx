@@ -3,7 +3,7 @@ import { FlatList, StyleSheet, View } from 'react-native'
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated'
 import { useShallow } from 'zustand/react/shallow'
 
-import { Chats, useInference } from '@lib/state/Chat'
+import { Chats } from '@lib/state/Chat'
 
 import { useChatLayoutContext } from '../ChatLayoutContext'
 import ChatFooter from '../ChatFooter'
@@ -11,13 +11,11 @@ import ChatItem from '../ChatItem'
 import ImmersiveHistoryBar from '../ImmersiveHistoryBar'
 import { useInputHeightStore } from '../../ChatInput'
 import ImmersiveCollapsedView from './ImmersiveCollapsedView'
-import ImmersiveFullscreenPortrait from './ImmersiveFullscreenPortrait'
 import { useChatHistoryMeta, useChatListItems } from './useChatListItems'
 
 const ImmersiveChatLayout = () => {
     const { layout } = useChatLayoutContext()
     const { chat } = Chats.useChat()
-    const nowGenerating = useInference((state) => state.nowGenerating)
     const [historyExpanded, setHistoryExpanded] = useState(false)
     const chatInputHeight = useInputHeightStore(useShallow((state) => state.height))
     const list = useChatListItems()
@@ -42,12 +40,11 @@ const ImmersiveChatLayout = () => {
 
     return (
         <View style={{ flex: 1, overflow: 'hidden' }}>
-            <ImmersiveFullscreenPortrait nowGenerating={nowGenerating} />
-
             <View style={StyleSheet.absoluteFillObject} pointerEvents="box-none">
                 {historyCount > 0 && (
                     <ImmersiveHistoryBar
                         variant="floating"
+                        clearHeaderOverlay
                         count={historyCount}
                         expanded={historyExpanded}
                         onToggle={() => setHistoryExpanded((value) => !value)}

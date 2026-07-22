@@ -52,7 +52,7 @@ const ChatWindow = () => {
 
     if (!capabilities.showChatBackground) {
         return (
-            <View style={{ flex: 1, backgroundColor: '#000', overflow: 'hidden' }}>
+            <View style={{ flex: 1, overflow: 'hidden' }}>
                 <View style={{ flex: 1 }}>{chatContent}</View>
             </View>
         )
