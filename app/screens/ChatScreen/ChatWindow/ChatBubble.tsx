@@ -158,8 +158,8 @@ const ChatBubble: React.FC<ChatTextProps> = ({
                                 textAlign: 'right',
                                 fontSize: fontSize.s,
                             }}>
-                            {`Prompt: ${getFiniteValue(timings.prompt_per_second)} t/s`}
-                            {`   Text Gen: ${getFiniteValue(timings.predicted_per_second)} t/s`}
+                            {`Prompt: ${getFiniteValue(timings.prompt_per_second)} t/s | ${getFiniteValue(timings.prompt_ms / 1000)}s`}
+                            {`   Text Gen: ${getFiniteValue(timings.predicted_per_second)} t/s | ${getFiniteValue(timings.predicted_ms / 1000)}s`}
                         </Text>
                     )}
 

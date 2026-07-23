@@ -63,6 +63,7 @@ const ChatInput = () => {
     const optionSurface = transparentChrome ? color.neutral._100 + '55' : color.neutral._200
     const attachmentSurface = transparentChrome ? color.neutral._100 + '44' : color.neutral._200
     const [sendOnEnter] = useMMKVBoolean(AppSettings.SendOnEnter)
+    const [disableSend, setDisableSend] = useState(false)
     const [attachments, setAttachments] = useState<Attachment[]>([])
     const [hideOptions, setHideOptions] = useState(false)
     const [showCamera, setShowCamera] = useState(false)
@@ -104,21 +105,27 @@ const ChatInput = () => {
 
     const handleSend = async () => {
         playInputSendSound()
-        // Hide the keyboard after send so the chat view stays unobstructed.
         Keyboard.dismiss()
-        // Close the mic icon after send; recording may already have stopped in the background.
         turnOffListening()
-        if (newMessage.trim() !== '' || attachments.length > 0)
-            await addEntry(
-                userName ?? '',
-                true,
-                newMessage,
-                attachments.map((item) => item.uri)
-            )
-        const swipeId = await addEntry(charName ?? '', false, '')
-        setNewMessage('')
-        setAttachments([])
-        if (swipeId) generateResponse(swipeId)
+        setDisableSend(true)
+        try {
+            if (newMessage.trim() !== '' || attachments.length > 0)
+                await addEntry(
+                    userName ?? '',
+                    true,
+                    newMessage,
+                    attachments.map((item) => item.uri)
+                )
+            const swipeId = await addEntry(charName ?? '', false, '')
+            setNewMessage('')
+            setAttachments([])
+            if (swipeId) generateResponse(swipeId)
+        } catch (e) {
+            Logger.errorToast('Failed to send message')
+            Logger.error(JSON.stringify(e))
+        } finally {
+            setDisableSend(false)
+        }
     }
 
     const handlePickImage = async () => {
@@ -352,10 +359,12 @@ const ChatInput = () => {
                 </Animated.View>
                 <Animated.View layout={XAxisOnlyTransition}>
                     <TouchableOpacity
+                        disabled={disableSend || nowGenerating}
                         style={{
                             borderRadius: borderRadius.m,
                             backgroundColor: nowGenerating ? color.error._500 : color.primary._500,
                             padding: spacing.m,
+                            opacity: disableSend || nowGenerating ? 0.4 : 1,
                         }}
                         onPress={nowGenerating ? abortResponse : handleSend}>
                         <MaterialIcons

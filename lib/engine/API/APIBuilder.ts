@@ -311,7 +311,7 @@ const readableStreamResponse = async (senderParams: SenderParams) => {
         try {
             const a = JSON.parse(data)
             if (a?.error) {
-                Logger.errorToast('Error Logged')
+                Logger.errorToast('Error During SSE event')
                 Logger.error(data)
             }
         } catch {}

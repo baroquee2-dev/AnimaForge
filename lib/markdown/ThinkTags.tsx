@@ -1,11 +1,7 @@
 export const thinkTags = [
     {
-        open: /^<think\b[^>]*>/,
-        close: '</think>',
-    },
-    {
-        open: /^<thinking\b[^>]*>/,
-        close: '</thinking>',
+        open: /^<think(?:ing)?\b[^>]*>/,
+        close: /^<\/think(?:ing)?>/,
     },
     {
         open: /^<\|channel>thought/,
@@ -30,7 +26,10 @@ export function buildThinkRules() {
         const openSource =
             tag.open instanceof RegExp ? tag.open.source.replace(/^\^/, '') : escapeRegex(tag.open)
 
-        const closeSource = escapeRegex(tag.close)
+        const closeSource =
+            tag.close instanceof RegExp
+                ? tag.close.source.replace(/^\^/, '')
+                : escapeRegex(tag.close)
 
         return {
             macro: new RegExp(`${openSource}[\\s\\S]*?${closeSource}`, 'g'),

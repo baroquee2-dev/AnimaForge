@@ -65,7 +65,7 @@ const VisualNovelChatLayout = () => {
                                 .damping(20)
                                 .stiffness(300)}
                             exiting={FadeOut.duration(150)}
-                            entering={FadeIn.duration(150).delay(100)}
+                            entering={FadeIn.duration(150)}
                         />
                     )}
                     keyboardShouldPersistTaps="handled"

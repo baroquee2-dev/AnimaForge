@@ -53,31 +53,35 @@ const ChatTextLast: React.FC<ChatTextProps> = ({
     )
 
     const updateHeight = useCallback(() => {
-        if (firstRender.current) return (firstRender.current = false)
-        const showPadding = nowGenerating && buffer.data
-        const overflowPadding = showPadding ? 12 : 0
-        if (viewRef.current) {
-            viewRef.current.measure((x, y, width, measuredHeight) => {
-                const newHeight = measuredHeight + overflowPadding
-                if (targetHeight.current === newHeight) return
-                if (targetHeight.current > -1) animHeight.setValue(targetHeight.current)
+        viewRef.current?.measure((_, __, ___, measuredHeight) => {
+            if (firstRender.current) {
+                firstRender.current = false
+                animHeight.setValue(measuredHeight)
+                return
+            }
+            const showPadding = nowGenerating && buffer.data
+            const overflowPadding = showPadding ? 12 : 0
+            const newHeight = measuredHeight + overflowPadding
 
-                animHeight.stopAnimation(() =>
-                    Animated.timing(animHeight, {
-                        toValue: newHeight,
-                        duration:
-                            300 * Math.max(1, Math.abs(newHeight - targetHeight.current) / 1000),
-                        useNativeDriver: false,
-                        easing: Easing.inOut((x) => x * x),
-                    }).start()
-                )
-                targetHeight.current = newHeight
-            })
-        }
+            if (targetHeight.current === newHeight) return
+            if (targetHeight.current > -1) animHeight.setValue(targetHeight.current)
+
+            animHeight.stopAnimation(() =>
+                Animated.timing(animHeight, {
+                    toValue: newHeight,
+                    duration: 300 * Math.max(1, Math.abs(newHeight - targetHeight.current) / 1000),
+                    useNativeDriver: false,
+                    easing: Easing.inOut((x) => x * x),
+                }).start()
+            )
+            targetHeight.current = newHeight
+        })
     }, [animHeight, buffer.data, nowGenerating])
 
     useEffect(() => {
-        if (!nowGenerating && !firstRender.current) setTimeout(() => updateHeight(), 400)
+        if (!nowGenerating && !firstRender.current) {
+            setTimeout(() => updateHeight(), 400)
+        }
     }, [nowGenerating, updateHeight])
 
     const filteredText = useTextFilter(swipeText?.trim() ?? '')

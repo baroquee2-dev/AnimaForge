@@ -129,8 +129,8 @@ export namespace MarkdownStyle {
             const quoteType = (node.sourceMeta?.quoteType ??
                 node.meta?.quoteType ??
                 'english') as keyof typeof quotes
-            const [open, close] = quotes[quoteType] || quotes.english
-
+            let [open, close] = quotes[quoteType] || quotes.english
+            if (node.sourceMeta?.dangling) close = ''
             return (
                 <Text key={node.key} style={styles.double_quote}>
                     {open}
@@ -191,6 +191,13 @@ export namespace MarkdownStyle {
                     allowedImageHandlers={allowedImageHandlers}
                     defaultImageHandler={defaultImageHandler}
                 />
+            )
+        },
+        inline: (node: any, children: any, parent: any, styles: any) => {
+            return (
+                <Text key={node.key} style={[styles.inline, { flexWrap: 'wrap', width: '100%' }]}>
+                    {children}
+                </Text>
             )
         },
     }

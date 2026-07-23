@@ -1,5 +1,6 @@
 import { AppSettings } from '@lib/constants/GlobalValues'
 import { buildThinkRules } from '@lib/markdown/ThinkTags'
+import { useAppModeStore } from '@lib/state/AppMode'
 import { CharacterCardData, CharacterTokenCache } from '@lib/state/Characters'
 import { ChatEntry } from '@lib/state/Chat'
 import { defaultSystemPromptFormat, InstructTokenCache, InstructType } from '@lib/state/Instructs'
@@ -202,7 +203,19 @@ export const buildChatCompletionContext = async ({
     const output = [...payload, ...messageBuffer.reverse()]
     Logger.info(`Approximate Context Size: ${total_length} tokens`)
     Logger.info(`${(performance.now() - delta).toFixed(2)}ms taken to build context`)
-    if (mmkv.getBoolean(AppSettings.PrintContext)) Logger.info(JSON.stringify(output))
+    if (mmkv.getBoolean(AppSettings.PrintContext)) {
+        Logger.info(
+            JSON.stringify(
+                output.map((item) => {
+                    const content = item[completionFeats.contentName]
+                    if (typeof content === 'string') return content
+                    if (Array.isArray(content))
+                        return content.filter((part) => part.type === 'text')
+                    return content
+                })
+            )
+        )
+    }
 
     return output
 }
@@ -252,7 +265,11 @@ export const buildTextCompletionContext = async ({
     let first_message_reached = false
 
     // we require lengths for names if use_names is enabled
+    let hasMedia = false
     for (const message of messages.reverse()) {
+        if (!hasMedia && message.attachments?.length) {
+            hasMedia = true
+        }
         const swipe_len = await chatTokenizer(message, index)
         const swipe_data = message.swipes[message.swipe_id]
 
@@ -335,6 +352,15 @@ export const buildTextCompletionContext = async ({
 
     payload += instruct.system_suffix
     payload = replaceMacrosInternal(payload + message_acc, instruct)
+
+    if (hasMedia) {
+        Logger.errorToast('Text Completions does not support multimodal')
+        if (useAppModeStore.getState().appMode === 'local') {
+            Logger.warn(
+                "[HINT] You probably have built-in templates disabled. Enable it in 'Formatting > Use Built-In Local Model' template"
+            )
+        }
+    }
 
     Logger.info(`Approximate Context Size: ${message_acc_length + payloadLength} tokens`)
     Logger.info(`${(performance.now() - delta).toFixed(2)}ms taken to build context`)

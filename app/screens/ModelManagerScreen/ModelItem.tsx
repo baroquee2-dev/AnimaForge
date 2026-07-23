@@ -258,6 +258,7 @@ const useStyles = () => {
             paddingVertical: spacing.l,
             paddingHorizontal: spacing.xl2,
             backgroundColor: color.neutral._200,
+            minHeight: 64,
             marginBottom: spacing.l,
         },
 

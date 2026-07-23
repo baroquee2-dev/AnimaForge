@@ -8,6 +8,7 @@ import ThemedSwitch from '@components/input/ThemedSwitch'
 import DropdownSheet from '@components/input/DropdownSheet'
 import MultiDropdownSheet from '@components/input/MultiDropdownSheet'
 import ThemedTextInput from '@components/input/ThemedTextInput'
+import Alert from '@components/views/Alert'
 import BottomSheet from '@components/views/BottomSheet'
 import { CLAUDE_VERSION } from '@lib/constants/GlobalValues'
 import { APIValues } from '@lib/engine/API/APIBuilder.types'
@@ -33,11 +34,12 @@ const ConnectionEditor: React.FC<ConnectionEditorProps> = ({
     const { color, fontSize } = Theme.useTheme()
     const styles = useStyles()
 
-    const { editValue, getTemplates, addValue } = APIManager.useConnectionsStore(
+    const { editValue, getTemplates, addValue, removeValue } = APIManager.useConnectionsStore(
         useShallow((state) => ({
             getTemplates: state.getTemplates,
             editValue: state.editValue,
             addValue: state.addValue,
+            removeValue: state.removeValue,
         }))
     )
 
@@ -88,9 +90,27 @@ const ConnectionEditor: React.FC<ConnectionEditorProps> = ({
         debouncedModelList(values)
     }, [debouncedModelList, show, values])
 
+    const handleDelete = () => {
+        Alert.alert({
+            title: 'Delete Connection',
+            description: `Are you sure you want to delete "${originalValues.friendlyName}"?`,
+            buttons: [
+                { label: 'Cancel' },
+                {
+                    label: 'Delete',
+                    type: 'warning',
+                    onPress: () => {
+                        removeValue(index)
+                        close()
+                    },
+                },
+            ],
+        })
+    }
+
     return (
         <BottomSheet
-            sheetStyle={{ flex: 2 }}
+            sheetStyle={{ flex: 2, maxHeight: '80%' }}
             visible={show}
             onClose={close}
             setVisible={(v) => {
@@ -265,6 +285,12 @@ const ConnectionEditor: React.FC<ConnectionEditorProps> = ({
                         justifyContent: 'space-between',
                         columnGap: 8,
                     }}>
+                    <ThemedButton
+                        variant="critical"
+                        iconName="delete"
+                        label="Delete"
+                        onPress={handleDelete}
+                    />
                     <ThemedButton
                         variant="tertiary"
                         iconName="copy"
