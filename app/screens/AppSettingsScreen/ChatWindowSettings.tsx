@@ -11,8 +11,6 @@ const ChatWindowSettings = () => {
     const [autoScroll, setAutoScroll] = useMMKVBoolean(AppSettings.AutoScroll)
     const [sendOnEnter, setSendOnEnter] = useMMKVBoolean(AppSettings.SendOnEnter)
     const [saveScroll, setSaveScroll] = useMMKVBoolean(AppSettings.SaveScrollPosition)
-    const [alternate, setAlternate] = useMMKVBoolean(AppSettings.AlternatingChatMode)
-    const [wide, setWide] = useMMKVBoolean(AppSettings.WideChatMode)
     const { capabilities } = useChatLayout()
 
     const [showTokensPerSecond, setShowTokensPerSecond] = useMMKVBoolean(
@@ -50,24 +48,6 @@ const ChatWindowSettings = () => {
                     value={saveScroll}
                     onChangeValue={setSaveScroll}
                     description="Automatically move to last scrolled position in chat"
-                />
-            )}
-
-            {capabilities.supportsWideChat && (
-                <ThemedSwitch
-                    label="Wide Chat"
-                    value={wide}
-                    onChangeValue={setWide}
-                    description="Removes whitespace for wider chat"
-                />
-            )}
-
-            {capabilities.supportsAlternateAlignment && (
-                <ThemedSwitch
-                    label="Alternate User and Character Positions"
-                    value={alternate}
-                    onChangeValue={setAlternate}
-                    description="Left align character chats and right aligns user chats"
                 />
             )}
         </View>

@@ -21,8 +21,6 @@ export type ChatLayoutCapabilities = {
     /** Floating history toggle for collapsed + expandable transcript. */
     supportsHistoryBar: boolean
     /** Settings toggles that apply to this layout. */
-    supportsWideChat: boolean
-    supportsAlternateAlignment: boolean
     supportsScrollPersistence: boolean
 }
 
@@ -51,8 +49,6 @@ export const CHAT_LAYOUT_DEFINITIONS: Record<ChatLayout, ChatLayoutDefinition> =
             transparentChrome: false,
             collapseToLastMessage: true,
             supportsHistoryBar: true,
-            supportsWideChat: false,
-            supportsAlternateAlignment: false,
             supportsScrollPersistence: false,
         },
     },
@@ -68,8 +64,6 @@ export const CHAT_LAYOUT_DEFINITIONS: Record<ChatLayout, ChatLayoutDefinition> =
             transparentChrome: false,
             collapseToLastMessage: false,
             supportsHistoryBar: false,
-            supportsWideChat: true,
-            supportsAlternateAlignment: true,
             supportsScrollPersistence: true,
         },
     },
@@ -85,8 +79,6 @@ export const CHAT_LAYOUT_DEFINITIONS: Record<ChatLayout, ChatLayoutDefinition> =
             transparentChrome: true,
             collapseToLastMessage: true,
             supportsHistoryBar: true,
-            supportsWideChat: false,
-            supportsAlternateAlignment: false,
             supportsScrollPersistence: false,
         },
     },

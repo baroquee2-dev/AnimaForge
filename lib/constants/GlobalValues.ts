@@ -137,8 +137,6 @@ export enum AppSettings {
     UseTagHider = 'settings-usetaghider',
     SaveScrollPosition = 'settings-savescrollposition',
     AutoGenerateTitle = 'settings-auto-generate-title',
-    WideChatMode = 'settings-wide-chat-mode',
-    AlternatingChatMode = 'settings-alternative-chat-mode',
     KeepAwake = 'settings-keep-awake',
 }
 
@@ -172,8 +170,6 @@ export const AppSettingsDefault: Record<AppSettings, boolean> = {
     [AppSettings.UseTagHider]: true,
     [AppSettings.SaveScrollPosition]: false,
     [AppSettings.AutoGenerateTitle]: true,
-    [AppSettings.WideChatMode]: false,
-    [AppSettings.AlternatingChatMode]: false,
     [AppSettings.KeepAwake]: true,
 }
 
