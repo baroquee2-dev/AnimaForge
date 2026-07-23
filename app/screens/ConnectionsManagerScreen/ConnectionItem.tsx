@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import { useShallow } from 'zustand/react/shallow'
 
@@ -13,9 +13,10 @@ import ConnectionEditor from './ConnectionEditor'
 type ConnectionItemProps = {
     item: APIManagerValue
     index: number
+    pendingOpen?: number
 }
 
-const ConnectionItem: React.FC<ConnectionItemProps> = ({ item, index }) => {
+const ConnectionItem: React.FC<ConnectionItemProps> = ({ item, index, pendingOpen }) => {
     const { spacing } = Theme.useTheme()
     const styles = useStyles()
     const [showEditor, setShowEditor] = useState(false)
@@ -25,6 +26,10 @@ const ConnectionItem: React.FC<ConnectionItemProps> = ({ item, index }) => {
             editValue: state.editValue,
         }))
     )
+
+    useEffect(() => {
+        if (index === pendingOpen) setShowEditor(true)
+    }, [index, pendingOpen])
 
     const handleDelete = () => {
         Alert.alert({

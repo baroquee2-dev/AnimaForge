@@ -68,6 +68,7 @@ const buildLocalPayload = async () => {
     const payloadFields = getSamplerFields()
     const rep_pen = payloadFields?.['penalty_repeat']
     const reasoning = payloadFields?.['enable_thinking'] as boolean
+    let thinkTags = {}
     const localPreset: LlamaConfig = Llama.useLlamaPreferencesStore.getState().config
     let prompt: undefined | string = undefined
     let mediaPaths: string[] = []
@@ -109,6 +110,23 @@ const buildLocalPayload = async () => {
                 else if (typeof result === 'object') {
                     prompt = result.prompt
                     mediaPaths = result.media_paths ?? []
+                    if (reasoning && result.type === 'jinja') {
+                        const jinjaResult = result as {
+                            thinking_end_tag?: string
+                            thinking_start_tag?: string
+                        }
+                        const thinking_end_tag = jinjaResult.thinking_end_tag
+                        const thinking_start_tag = jinjaResult.thinking_start_tag
+                        const thinking_forced_open = true
+
+                        if (thinking_end_tag && thinking_start_tag)
+                            thinkTags = {
+                                thinking_end_tag,
+                                thinking_start_tag,
+                                thinking_forced_open,
+                            }
+                    }
+
                     if (mediaPaths.length > 0 && !hasImage && !hasAudio) {
                         Logger.warnToast('Media was added without multimodal support.')
                     }
@@ -155,6 +173,7 @@ const buildLocalPayload = async () => {
         stop: constructStopSequence(),
         emit_partial_completion: true,
         ...finalMediaPaths,
+        ...thinkTags,
     }
 }
 

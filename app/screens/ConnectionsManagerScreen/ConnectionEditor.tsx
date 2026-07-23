@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 import { useShallow } from 'zustand/react/shallow'
 
@@ -10,8 +10,9 @@ import MultiDropdownSheet from '@components/input/MultiDropdownSheet'
 import ThemedTextInput from '@components/input/ThemedTextInput'
 import BottomSheet from '@components/views/BottomSheet'
 import { CLAUDE_VERSION } from '@lib/constants/GlobalValues'
-import { APIConfiguration } from '@lib/engine/API/APIBuilder.types'
+import { APIValues } from '@lib/engine/API/APIBuilder.types'
 import { APIManager, APIManagerValue } from '@lib/engine/API/APIManagerState'
+import { useDebounce } from '@lib/hooks/Debounce'
 import { Logger } from '@lib/state/Logger'
 import { Theme } from '@lib/theme/ThemeManager'
 import { getNestedValue } from '@lib/utils/Parsing'
@@ -32,52 +33,60 @@ const ConnectionEditor: React.FC<ConnectionEditorProps> = ({
     const { color, fontSize } = Theme.useTheme()
     const styles = useStyles()
 
-    const { editValue, getTemplates } = APIManager.useConnectionsStore(
+    const { editValue, getTemplates, addValue } = APIManager.useConnectionsStore(
         useShallow((state) => ({
             getTemplates: state.getTemplates,
             editValue: state.editValue,
+            addValue: state.addValue,
         }))
     )
-
-    const [template, setTemplate] = useState<APIConfiguration>(getTemplates()[0])
 
     const [values, setValues] = useState<APIManagerValue>(originalValues)
     const [modelList, setModelList] = useState<any[]>([])
 
-    useEffect(() => {
-        const newTemplate = getTemplates().find((item) => item.name === values.configName)
-        if (!newTemplate) {
+    const template = useMemo(() => {
+        const match = getTemplates().find((item) => item.name === values.configName)
+        if (!match) {
             Logger.errorToast('Could not get valid template!')
             close()
-            return
+            return getTemplates()[0]
         }
+        return match
+    }, [close, getTemplates, values.configName])
 
-        setTemplate(newTemplate)
-    }, [close, values, getTemplates])
-
-    const handleGetModelList = useCallback(async () => {
-        if (!template.features.useModel || !show) return
-        const auth: any = {}
-        if (template.features.useKey) {
-            auth[template.request.authHeader] = template.request.authPrefix + values.key
-            if (template.name === 'Claude') {
-                auth['anthropic-version'] = CLAUDE_VERSION
+    const handleGetModelList = useCallback(
+        async (nextValues: APIValues) => {
+            if (!template.features.useModel || !show) return
+            const auth: any = {}
+            if (template.features.useKey) {
+                auth[template.request.authHeader] = template.request.authPrefix + nextValues.key
+                if (template.name === 'Claude') {
+                    auth['anthropic-version'] = CLAUDE_VERSION
+                }
             }
-        }
-        const result = await fetch(values.modelEndpoint, { headers: { ...auth } })
-        const data = await result.json()
-        if (result.status !== 200) {
-            Logger.error(`Could not retrieve models: ${data?.error?.message}`)
-            return
-        }
-        const models = getNestedValue(data, template.model.modelListParser)
-        setModelList(models)
-    }, [show, template, values])
-    // TODO: Replace with react query
+            const result = await fetch(nextValues.modelEndpoint, { headers: { ...auth } })
+            const data = await result.json()
+            if (result.status !== 200) {
+                Logger.error(`Could not retrieve models: ${data?.error?.message}`)
+                return
+            }
+            const models = getNestedValue(data, template.model.modelListParser)
+            setModelList(models)
+        },
+        [show, template]
+    )
+
+    const debouncedModelList = useDebounce(handleGetModelList, 300)
+
     useEffect(() => {
+        if (!show) return
         setValues(originalValues)
-        handleGetModelList()
-    }, [originalValues, handleGetModelList])
+    }, [show, originalValues])
+
+    useEffect(() => {
+        if (!show) return
+        debouncedModelList(values)
+    }, [debouncedModelList, show, values])
 
     return (
         <BottomSheet
@@ -144,7 +153,7 @@ const ConnectionEditor: React.FC<ConnectionEditorProps> = ({
                                           }
                                         : {}
                                 }
-                                callback={handleGetModelList}
+                                callback={() => handleGetModelList(values)}
                             />
                         </View>
                     )}
@@ -201,7 +210,7 @@ const ConnectionEditor: React.FC<ConnectionEditorProps> = ({
                                 )}
                                 <ThemedButton
                                     onPress={() => {
-                                        handleGetModelList()
+                                        handleGetModelList(values)
                                     }}
                                     iconName="reload"
                                     iconSize={18}
@@ -249,13 +258,31 @@ const ConnectionEditor: React.FC<ConnectionEditorProps> = ({
                         />
                     )}
                 </ScrollView>
-                <ThemedButton
-                    label="Save Changes"
-                    onPress={() => {
-                        editValue(values, index)
-                        close()
-                    }}
-                />
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        paddingTop: 8,
+                        justifyContent: 'space-between',
+                        columnGap: 8,
+                    }}>
+                    <ThemedButton
+                        variant="tertiary"
+                        iconName="copy"
+                        label="Clone"
+                        onPress={() => {
+                            const newName = values.friendlyName + ' (Clone)'
+                            addValue({ ...values, friendlyName: newName })
+                            close()
+                        }}
+                    />
+                    <ThemedButton
+                        label="Save Changes"
+                        onPress={() => {
+                            editValue(values, index)
+                            close()
+                        }}
+                    />
+                </View>
             </View>
         </BottomSheet>
     )

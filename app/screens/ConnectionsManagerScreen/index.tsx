@@ -1,5 +1,6 @@
 import { AntDesign, Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
+import { useState } from 'react'
 import { FlatList, Pressable, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useShallow } from 'zustand/react/shallow'
@@ -11,6 +12,7 @@ import { APIManager } from '@lib/engine/API/APIManagerState'
 import { Theme } from '@lib/theme/ThemeManager'
 
 import ConnectionItem from './ConnectionItem'
+import TemplatePicker from './TemplatePicker'
 
 const ConnectionsManagerScreen = () => {
     // eslint-disable-next-line react-compiler/react-compiler
@@ -21,6 +23,8 @@ const ConnectionsManagerScreen = () => {
         }))
     )
     const { color, spacing } = Theme.useTheme()
+    const [pendingOpen, setPendingOpen] = useState<number | undefined>()
+    const [showTemplatePicker, setShowTemplatePicker] = useState(false)
 
     const router = useRouter()
     return (
@@ -50,7 +54,9 @@ const ConnectionsManagerScreen = () => {
                     contentContainerStyle={{ rowGap: 4, paddingBottom: 24 }}
                     data={apiValues}
                     keyExtractor={(item, index) => item.configName + index}
-                    renderItem={({ item, index }) => <ConnectionItem item={item} index={index} />}
+                    renderItem={({ item, index }) => (
+                        <ConnectionItem item={item} index={index} pendingOpen={pendingOpen} />
+                    )}
                     removeClippedSubviews={false}
                     showsVerticalScrollIndicator={false}
                 />
@@ -74,8 +80,13 @@ const ConnectionsManagerScreen = () => {
                 buttonStyle={{
                     marginHorizontal: spacing.xl,
                 }}
-                onPress={() => router.push('/screens/ConnectionsManagerScreen/AddConnection')}
+                onPress={() => setShowTemplatePicker(true)}
                 label="Add Connection"
+            />
+            <TemplatePicker
+                visible={showTemplatePicker}
+                setVisible={setShowTemplatePicker}
+                setPending={setPendingOpen}
             />
         </SafeAreaView>
     )
