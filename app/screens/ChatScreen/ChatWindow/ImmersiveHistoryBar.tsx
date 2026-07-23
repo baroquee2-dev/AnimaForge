@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Theme } from '@lib/theme/ThemeManager'
 
-import { IMMERSIVE_HEADER_BODY_HEIGHT } from './layouts/immersiveLayout'
+import { IMMERSIVE_HEADER_BODY_HEIGHT } from '@lib/chat/immersiveLayout'
 
 type ImmersiveHistoryBarProps = {
     count: number

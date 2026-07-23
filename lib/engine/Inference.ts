@@ -1,6 +1,6 @@
 import BackgroundService from 'react-native-background-actions'
 
-import { AppSettings } from '@lib/constants/GlobalValues'
+import { AppSettings, APP_NAME, APP_SCHEME } from '@lib/constants/GlobalValues'
 import { useAppModeStore } from '@lib/state/AppMode'
 import { Chats, useInference } from '@lib/state/Chat'
 import { Instructs } from '@lib/state/Instructs'
@@ -49,15 +49,15 @@ export async function continueResponse(swipeId: number) {
 }
 
 const completionTaskOptions = {
-    taskName: 'chatterui_completion_task',
+    taskName: 'animaforge_completion_task',
     taskTitle: 'Running completion...',
-    taskDesc: 'ChatterUI is running a completion task',
+    taskDesc: `${APP_NAME} is running a completion task`,
     taskIcon: {
         name: 'ic_launcher',
         type: 'mipmap',
     },
     color: '#403737',
-    linkingURI: 'chatterui://',
+    linkingURI: `${APP_SCHEME}://`,
     progressBar: {
         max: 1,
         value: 0,

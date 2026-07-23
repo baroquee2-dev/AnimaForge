@@ -5,13 +5,13 @@ import { useShallow } from 'zustand/react/shallow'
 
 import { Chats } from '@lib/state/Chat'
 
-import { useChatLayoutContext } from '../ChatLayoutContext'
+import { useChatLayoutContext } from '@lib/chat/ChatLayoutContext'
 import ChatFooter from '../ChatFooter'
 import ChatItem from '../ChatItem'
 import ImmersiveHistoryBar from '../ImmersiveHistoryBar'
 import { useInputHeightStore } from '../../ChatInput'
 import ImmersiveCollapsedView from './ImmersiveCollapsedView'
-import { useChatHistoryMeta, useChatListItems } from './useChatListItems'
+import { useChatHistoryMeta, useChatListItems } from '@lib/chat/useChatListItems'
 
 const ImmersiveChatLayout = () => {
     const { layout } = useChatLayoutContext()

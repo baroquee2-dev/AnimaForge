@@ -1,6 +1,6 @@
 import type { ChatLayout } from '@lib/constants/ChatLayout'
 
-import { useChatLayoutContext } from '../ChatLayoutContext'
+import { useChatLayoutContext } from '@lib/chat/ChatLayoutContext'
 import ImmersiveChatLayout from './ImmersiveChatLayout'
 import MessengerChatLayout from './MessengerChatLayout'
 import VisualNovelChatLayout from './VisualNovelChatLayout'

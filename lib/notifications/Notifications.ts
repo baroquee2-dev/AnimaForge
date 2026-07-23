@@ -5,7 +5,7 @@ import { AppState, Linking, Platform } from 'react-native'
 import { useMMKVBoolean } from 'react-native-mmkv'
 
 import Alert from '@components/views/Alert'
-import { AppSettings } from '@lib/constants/GlobalValues'
+import { AppSettings, APP_NAME } from '@lib/constants/GlobalValues'
 import { Characters } from '@lib/state/Characters'
 import { Chats } from '@lib/state/Chat'
 import { Logger } from '@lib/state/Logger'
@@ -24,8 +24,8 @@ export const setupNotifications = () => {
 
 export async function registerForPushNotificationsAsync() {
     if (Platform.OS === 'android') {
-        await Notifications.setNotificationChannelAsync('chatterUI', {
-            name: 'chatterUI',
+        await Notifications.setNotificationChannelAsync('animaForge', {
+            name: APP_NAME,
             importance: Notifications.AndroidImportance.DEFAULT,
             vibrationPattern: [250, 0, 250, 250],
             lightColor: '#7d6294',
@@ -41,7 +41,7 @@ export async function registerForPushNotificationsAsync() {
     if (finalStatus !== 'granted') {
         Alert.alert({
             title: 'Permission Required',
-            description: 'ChatterUI requires permissions to send you notifications.',
+            description: `${APP_NAME} requires permissions to send you notifications.`,
             buttons: [
                 {
                     label: 'Cancel',

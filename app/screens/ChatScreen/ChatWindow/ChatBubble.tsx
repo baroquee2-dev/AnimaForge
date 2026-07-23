@@ -7,15 +7,15 @@ import { useAppMode } from '@lib/state/AppMode'
 import { Chats } from '@lib/state/Chat'
 import { Theme } from '@lib/theme/ThemeManager'
 
-import { useIsImmersivePresentation, useIsVisualNovelPresentation } from './ChatLayoutContext'
+import { useIsImmersivePresentation, useIsVisualNovelPresentation } from '@lib/chat/ChatLayoutContext'
 import ChatAttachments from './ChatAttachments'
 import { useChatEditorStore } from './ChatEditor'
 import ChatQuickActions, { useChatActionsState } from './ChatQuickActions'
 import ChatSwipes from './ChatSwipes'
 import ChatText from './ChatText'
 import ChatTextLast from './ChatTextLast'
-import { IMMERSIVE_CHROME } from './layouts/immersiveChrome'
-import { IMMERSIVE_DIALOGUE_LEFT_PADDING, getImmersiveDialogueWidth } from './layouts/immersiveLayout'
+import { IMMERSIVE_CHROME } from '@lib/chat/immersiveChrome'
+import { IMMERSIVE_DIALOGUE_LEFT_PADDING, getImmersiveDialogueWidth } from '@lib/chat/immersiveLayout'
 
 type ChatTextProps = {
     index: number

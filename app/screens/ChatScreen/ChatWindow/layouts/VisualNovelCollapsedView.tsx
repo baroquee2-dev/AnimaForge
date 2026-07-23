@@ -9,7 +9,7 @@ import ChatFooter from '../ChatFooter'
 import ChatItem from '../ChatItem'
 import ChatSwipes from '../ChatSwipes'
 import ImmersivePortraitHeader from '../ImmersivePortraitHeader'
-import type { ChatListItem } from './useChatListItems'
+import type { ChatListItem } from '@lib/chat/useChatListItems'
 
 type VisualNovelCollapsedViewProps = {
     lastItem?: ChatListItem

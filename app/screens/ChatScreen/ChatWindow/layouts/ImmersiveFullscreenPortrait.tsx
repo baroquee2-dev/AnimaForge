@@ -7,7 +7,7 @@ import { Characters } from '@lib/state/Characters'
 import { useAvatarViewerStore } from '@lib/state/components/AvatarViewer'
 
 import PortraitBreathing from '../PortraitBreathing'
-import { IMMERSIVE_PORTRAIT_ZOOM } from './immersiveLayout'
+import { IMMERSIVE_PORTRAIT_ZOOM } from '@lib/chat/immersiveLayout'
 
 type ImmersiveFullscreenPortraitProps = {
     nowGenerating: boolean

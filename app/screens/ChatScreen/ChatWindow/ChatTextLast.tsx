@@ -12,7 +12,7 @@ import { Chats, useInference } from '@lib/state/Chat'
 
 import { useInputHeightStore } from '../ChatInput'
 import { getImmersiveDialogueMaxHeight as getVisualNovelDialogueMaxHeight } from './ChatFrame'
-import { getImmersiveDialogueMaxHeight } from './layouts/immersiveLayout'
+import { getImmersiveDialogueMaxHeight } from '@lib/chat/immersiveLayout'
 
 type ChatTextProps = {
     nowGenerating: boolean

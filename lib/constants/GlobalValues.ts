@@ -185,3 +185,8 @@ export const GITHUB_REPOSITORY = 'https://github.com/baroquee2-dev/AnimaForge'
 export const GITHUB_REPOSITORY_ISSUES = `${GITHUB_REPOSITORY}/issues`
 export const GITHUB_DOCS_CUSTOM_TEMPLATES = `${GITHUB_REPOSITORY}/blob/dev/docs/CustomTemplates.md`
 export const GITHUB_DOCS_CUSTOM_THEMES = `${GITHUB_REPOSITORY}/blob/dev/docs/CustomThemes.md`
+
+export const APP_NAME = 'AnimaForge'
+export const APP_SCHEME = 'animaforge'
+export const APP_PACKAGE = 'com.baroquee2.animaforge'
+export const APP_PACKAGE_DEV = 'com.baroquee2.animaforge.dev'

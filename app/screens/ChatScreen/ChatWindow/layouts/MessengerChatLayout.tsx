@@ -12,7 +12,7 @@ import { useInputHeightStore } from '../../ChatInput'
 import ChatFooter from '../ChatFooter'
 import ChatItem from '../ChatItem'
 import { useChatActionsState } from '../ChatQuickActions'
-import { useChatListItems } from './useChatListItems'
+import { useChatListItems } from '@lib/chat/useChatListItems'
 
 const MessengerChatLayout = () => {
     const { chat } = Chats.useChat()

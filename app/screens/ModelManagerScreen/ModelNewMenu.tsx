@@ -33,7 +33,7 @@ const ModelNewMenu: React.FC<ModelNewMenuProps> = ({ modelImporting, setModelImp
                 disabled={modelImporting}
                 buttons={[
                     {
-                        label: 'Copy Model Into ChatterUI',
+                        label: 'Copy Model Into AnimaForge',
                         icon: 'download',
                         onPress: handleImportModel,
                     },

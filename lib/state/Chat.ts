@@ -24,7 +24,7 @@ import {
 
 import { Characters } from './Characters'
 import { Logger } from './Logger'
-import { AppSettings } from '../constants/GlobalValues'
+import { AppSettings, APP_NAME } from '../constants/GlobalValues'
 import { mmkv } from '../storage/MMKV'
 
 export interface ChatSwipeState extends ChatSwipe {
@@ -141,7 +141,7 @@ export const sendGenerateCompleteNotification = async () => {
 
     const notificationText = showMessage
         ? Chats.useChatState.getState().buffer?.data?.trim()
-        : 'ChatterUI has finished a response.'
+        : `${APP_NAME} has finished a response.`
 
     Notifications.scheduleNotificationAsync({
         content: {

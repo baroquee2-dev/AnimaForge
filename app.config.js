@@ -1,35 +1,37 @@
 const IS_DEV = process.env.APP_VARIANT === 'development'
+const APP_ICON = './assets/images/app-icon.png'
+const APP_PACKAGE = IS_DEV ? 'com.baroquee2.animaforge.dev' : 'com.baroquee2.animaforge'
 
 module.exports = {
     expo: {
-        name: IS_DEV ? 'ChatterUI (DEV)' : 'ChatterUI',
+        name: IS_DEV ? 'AnimaForge (DEV)' : 'AnimaForge',
         newArchEnabled: true,
-        slug: 'ChatterUI',
+        slug: 'AnimaForge',
         version: '0.1.0',
         orientation: 'default',
-        icon: './assets/images/icon.png',
-        scheme: 'chatterui',
+        icon: APP_ICON,
+        scheme: 'animaforge',
         userInterfaceStyle: 'automatic',
         assetBundlePatterns: ['**/*'],
         ios: {
             icon: {
-                dark: './assets/images/ios-dark.png',
-                light: './assets/images/ios-light.png',
-                tinted: './assets/images/icon.png',
+                dark: APP_ICON,
+                light: APP_ICON,
+                tinted: APP_ICON,
             },
             supportsTablet: true,
-            package: IS_DEV ? 'com.Vali98.ChatterUIDev' : 'com.Vali98.ChatterUI',
-            bundleIdentifier: IS_DEV ? 'com.Vali98.ChatterUIDev' : 'com.Vali98.ChatterUI',
+            package: APP_PACKAGE,
+            bundleIdentifier: APP_PACKAGE,
         },
         android: {
             adaptiveIcon: {
-                foregroundImage: './assets/images/adaptive-icon-foreground.png',
-                backgroundImage: './assets/images//adaptive-icon-background.png',
-                monochromeImage: './assets/images/adaptive-icon-foreground.png',
+                foregroundImage: APP_ICON,
+                backgroundImage: './assets/images/adaptive-icon-background.png',
+                monochromeImage: APP_ICON,
                 backgroundColor: '#000',
             },
             edgeToEdgeEnabled: true,
-            package: IS_DEV ? 'com.Vali98.ChatterUIDev' : 'com.Vali98.ChatterUI',
+            package: APP_PACKAGE,
             userInterfaceStyle: 'dark',
             permissions: [
                 'android.permission.FOREGROUND_SERVICE',
@@ -40,7 +42,7 @@ module.exports = {
         web: {
             bundler: 'metro',
             output: 'static',
-            favicon: './assets/images/adaptive-icon.png',
+            favicon: APP_ICON,
         },
         plugins: [
             [
@@ -70,14 +72,14 @@ module.exports = {
                 'expo-splash-screen',
                 {
                     backgroundColor: '#000000',
-                    image: './assets/images/adaptive-icon.png',
+                    image: APP_ICON,
                     imageWidth: 200,
                 },
             ],
             [
                 'expo-notifications',
                 {
-                    icon: './assets/images/notification.png',
+                    icon: APP_ICON,
                 },
             ],
             [
@@ -89,7 +91,7 @@ module.exports = {
             [
                 'expo-camera',
                 {
-                    cameraPermission: 'Allow ChatterUI to access your camera',
+                    cameraPermission: 'Allow AnimaForge to access your camera',
                 },
             ],
             ['expo-sqlite', { withSQLiteVecExtension: true }],
@@ -97,7 +99,7 @@ module.exports = {
                 'expo-speech-recognition',
                 {
                     microphonePermission:
-                        'Allow ChatterUI to use the microphone for voice input.',
+                        'Allow AnimaForge to use the microphone for voice input.',
                 },
             ],
             'expo-localization',

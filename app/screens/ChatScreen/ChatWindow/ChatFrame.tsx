@@ -10,7 +10,11 @@ import { Chats } from '@lib/state/Chat'
 import { useAvatarViewerStore } from '@lib/state/components/AvatarViewer'
 import { Theme } from '@lib/theme/ThemeManager'
 
-import { useChatLayoutCapabilities, useIsImmersivePresentation, useIsVisualNovelPresentation } from './ChatLayoutContext'
+import {
+    useChatLayoutCapabilities,
+    useIsImmersivePresentation,
+    useIsVisualNovelPresentation,
+} from '@lib/chat/ChatLayoutContext'
 import PortraitBreathing from './PortraitBreathing'
 import { portraitEntrance } from '@lib/animations/chatAnimations'
 

@@ -2,7 +2,7 @@ import { StyleSheet, View } from 'react-native'
 
 import { useInference } from '@lib/state/Chat'
 
-import { useIsImmersivePresentation, useIsVisualNovelPresentation } from './ChatLayoutContext'
+import { useIsImmersivePresentation, useIsVisualNovelPresentation } from '@lib/chat/ChatLayoutContext'
 import ChatBubble from './ChatBubble'
 import ChatFrame from './ChatFrame'
 

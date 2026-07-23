@@ -13,7 +13,7 @@ import { Characters } from '@lib/state/Characters'
 
 import AnimatedChatBackground from './AnimatedChatBackground'
 import ChatHeaderGradient from './ChatHeaderGradient'
-import { ChatLayoutProvider } from './ChatLayoutContext'
+import { ChatLayoutProvider } from '@lib/chat/ChatLayoutContext'
 import ChatModelName from './ChatModelName'
 import ChatLayoutRouter from './layouts/ChatLayoutRouter'
 

@@ -8,12 +8,12 @@ import { useInputHeightStore } from '../../ChatInput'
 import ChatFooter from '../ChatFooter'
 import ChatItem from '../ChatItem'
 import ChatSwipes from '../ChatSwipes'
-import { IMMERSIVE_CHROME } from './immersiveChrome'
+import { IMMERSIVE_CHROME } from '@lib/chat/immersiveChrome'
 import {
     IMMERSIVE_DIALOGUE_LEFT_PADDING,
     getImmersiveDialogueWidth,
-} from './immersiveLayout'
-import type { ChatListItem } from './useChatListItems'
+} from '@lib/chat/immersiveLayout'
+import type { ChatListItem } from '@lib/chat/useChatListItems'
 
 type ImmersiveCollapsedViewProps = {
     lastItem?: ChatListItem
