@@ -29,10 +29,19 @@ const AboutScreen = () => {
         <View style={styles.container}>
             <HeaderTitle title="About" />
             <TouchableOpacity activeOpacity={0.8} onPress={updateCounter}>
-                <Image source={require('../../assets/images/icon.png')} style={styles.icon} />
+                <View style={styles.iconFrame}>
+                    <Image
+                        source={require('../../assets/images/about-icon.png')}
+                        style={styles.iconImage}
+                        resizeMode="cover"
+                    />
+                </View>
             </TouchableOpacity>
 
-            <Text style={styles.titleText}>ChatterUI</Text>
+            <View style={styles.titleRow}>
+                <Text style={styles.titleAnima}>Anima</Text>
+                <Text style={styles.titleForge}>Forge</Text>
+            </View>
             <Text style={styles.subtitleText}>
                 Version {version} {devMode && '[DEV MODE]'}
             </Text>
@@ -72,20 +81,43 @@ const useStyles = () => {
 
     return StyleSheet.create({
         container: {
+            flex: 1,
             paddingHorizontal: spacing.xl3,
             paddingBottom: spacing.xl2,
             justifyContent: 'center',
             alignItems: 'center',
-            flex: 1,
         },
-        titleText: { color: color.text._100, fontSize: 32, marginTop: 16 },
-        subtitleText: { color: color.text._400 },
-        icon: {
-            width: 120,
-            height: 120,
-            backgroundColor: 'black',
-
-            borderRadius: 60,
+        titleRow: {
+            flexDirection: 'row',
+            alignItems: 'baseline',
+            justifyContent: 'center',
+            marginTop: spacing.m,
+        },
+        titleAnima: {
+            fontSize: 32,
+            fontWeight: '500',
+            color: color.text._100,
+        },
+        titleForge: {
+            fontSize: 32,
+            fontWeight: '700',
+            color: color.primary._500,
+            marginLeft: spacing.sm,
+        },
+        subtitleText: { color: color.text._400, marginTop: spacing.sm },
+        iconFrame: {
+            width: 160,
+            height: 160,
+            borderRadius: 20,
+            backgroundColor: '#000',
+            overflow: 'hidden',
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        iconImage: {
+            width: '100%',
+            height: '100%',
+            transform: [{ scale: 1.4 }],
         },
     })
 }
