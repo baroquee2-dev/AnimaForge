@@ -9,9 +9,9 @@ body:
           value: |
               **Before submitting a feature request:**
 
-              1. Check [existing issues](https://github.com/Vali-98/ChatterUI/issues) to see if your idea is already covered.
-              2. If you need a new API provider added, check out the [Custom Templates](https://github.com/Vali-98/ChatterUI/discussions/126) to add support yourself!
-              3. If you need a new color scheme, check out [Custom Themes](https://github.com/Vali-98/ChatterUI/discussions/218)
+              1. Check [existing issues](https://github.com/baroquee2-dev/AnimaForge/issues) to see if your idea is already covered.
+              2. If you need a new API provider added, see [Custom Templates](https://github.com/baroquee2-dev/AnimaForge/blob/dev/docs/CustomTemplates.md).
+              3. If you need a new color scheme, see [Custom Themes](https://github.com/baroquee2-dev/AnimaForge/blob/dev/docs/CustomThemes.md).
 
               ---
 

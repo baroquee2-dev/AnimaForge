@@ -6,13 +6,13 @@ const MAX_HEIGHT_RATIO = 0.2
 const MIN_HEIGHT = 64
 
 /** Full-screen portrait scale (1 = fit, >1 = zoom in / crop edges). */
-export const IMMERSIVE_PORTRAIT_ZOOM = 1.1
+export const IMMERSIVE_PORTRAIT_ZOOM = 1.05
 
 /** Approximate native header body height below the status bar. */
 export const IMMERSIVE_HEADER_BODY_HEIGHT = 44
 
 /** Dialogue box width as a fraction of the screen (left-aligned). */
-export const IMMERSIVE_DIALOGUE_WIDTH_RATIO = 0.8
+export const IMMERSIVE_DIALOGUE_WIDTH_RATIO = 0.88
 
 export const IMMERSIVE_DIALOGUE_LEFT_PADDING = 12
 

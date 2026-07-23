@@ -1,5 +1,5 @@
 name: Bug Report
-description: Report a bug to help us improve ChatterUI
+description: Report a bug to help us improve Anima Forge
 title: '[Bug]: '
 labels: [bug]
 
@@ -7,7 +7,7 @@ body:
     - type: markdown
       attributes:
           value: |
-              **Before submitting a bug report:**, Check [existing issues](https://github.com/Vali-98/ChatterUI/issues) to see if your issue is already covered.
+              **Before submitting a bug report:**, Check [existing issues](https://github.com/baroquee2-dev/AnimaForge/issues) to see if your issue is already covered.
 
               ---
 
@@ -19,7 +19,7 @@ body:
           required: true
       attributes:
           label: App Version
-          description: What ChatterUI version are you running?
+          description: What Anima Forge version are you running?
           placeholder: e.g., 0.8.7, 0.8.7-beta1...
 
     - type: input

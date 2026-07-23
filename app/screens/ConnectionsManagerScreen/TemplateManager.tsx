@@ -9,6 +9,7 @@ import HeaderButton from '@components/views/HeaderButton'
 import HeaderTitle from '@components/views/HeaderTitle'
 import InputSheet from '@components/views/InputSheet'
 import { APIManager } from '@lib/engine/API/APIManagerState'
+import { GITHUB_DOCS_CUSTOM_TEMPLATES } from '@lib/constants/GlobalValues'
 import { Logger } from '@lib/state/Logger'
 import { Theme } from '@lib/theme/ThemeManager'
 import { pickJSONDocument } from '@lib/utils/File'
@@ -68,9 +69,7 @@ const TemplateManager = () => {
                                 icon: 'github',
                                 onPress: (close) => {
                                     close()
-                                    Linking.openURL(
-                                        'https://github.com/Vali-98/ChatterUI/discussions/126'
-                                    )
+                                    Linking.openURL(GITHUB_DOCS_CUSTOM_TEMPLATES)
                                 },
                             },
                             {
@@ -78,9 +77,7 @@ const TemplateManager = () => {
                                 icon: 'info',
                                 onPress: (close) => {
                                     close()
-                                    Linking.openURL(
-                                        'https://github.com/Vali-98/ChatterUI/blob/dev/docs/CustomTemplates.md'
-                                    )
+                                    Linking.openURL(GITHUB_DOCS_CUSTOM_TEMPLATES)
                                 },
                             },
                         ]}

@@ -4,7 +4,7 @@ import { useMMKVBoolean } from 'react-native-mmkv'
 
 import ThemedButton from '@components/buttons/ThemedButton'
 import HeaderTitle from '@components/views/HeaderTitle'
-import { AppSettings } from '@lib/constants/GlobalValues'
+import { AppSettings, GITHUB_REPOSITORY } from '@lib/constants/GlobalValues'
 import { Logger } from '@lib/state/Logger'
 import { Theme } from '@lib/theme/ThemeManager'
 import appConfig from 'app.config'
@@ -58,7 +58,7 @@ const AboutScreen = () => {
                 iconName="github"
                 iconSize={20}
                 onPress={() => {
-                    Linking.openURL('https://github.com/Vali-98/ChatterUI')
+                    Linking.openURL(GITHUB_REPOSITORY)
                 }}
             />
         </View>

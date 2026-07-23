@@ -6,6 +6,7 @@ import { Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import ThemedButton from '@components/buttons/ThemedButton'
 import HeaderTitle from '@components/views/HeaderTitle'
+import { GITHUB_REPOSITORY } from '@lib/constants/GlobalValues'
 import { db } from '@db'
 import useLocalAuth from '@lib/hooks/LocalAuth'
 import { Theme } from '@lib/theme/ThemeManager'
@@ -59,7 +60,7 @@ const Home = () => {
                     iconName="github"
                     iconSize={20}
                     onPress={() => {
-                        Linking.openURL('https://github.com/Vali-98/ChatterUI')
+                        Linking.openURL(GITHUB_REPOSITORY)
                     }}
                 />
             </View>

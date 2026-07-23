@@ -1,6 +1,6 @@
 import { nativeApplicationVersion } from 'expo-application'
 
-import { AppSettings, CLAUDE_VERSION } from '@lib/constants/GlobalValues'
+import { AppSettings, CLAUDE_VERSION, GITHUB_REPOSITORY } from '@lib/constants/GlobalValues'
 import { SSEFetch } from '@lib/engine/SSEFetch'
 import { Logger } from '@lib/state/Logger'
 import { mmkv } from '@lib/storage/MMKV'
@@ -228,7 +228,7 @@ const hordeResponse = (senderParams: SenderParams) => {
             fetch(`${hordeURL}generate/text/status/${generation_id}`, {
                 method: 'DELETE',
                 headers: {
-                    'Client-Agent': `ChatterUI:${nativeApplicationVersion}:https://github.com/Vali-98/ChatterUI`,
+                    'Client-Agent': `AnimaForge:${nativeApplicationVersion}:${GITHUB_REPOSITORY}`,
                     accept: 'application/json',
                     'Content-Type': 'application/json',
                 },
@@ -245,7 +245,7 @@ const hordeResponse = (senderParams: SenderParams) => {
             body: senderParams.payload,
             headers: {
                 ...senderParams.header,
-                'Client-Agent': `ChatterUI:${nativeApplicationVersion}:https://github.com/Vali-98/ChatterUI`,
+                'Client-Agent': `AnimaForge:${nativeApplicationVersion}:${GITHUB_REPOSITORY}`,
                 accept: 'application/json',
                 'content-type': 'application/json',
             },
@@ -278,7 +278,7 @@ const hordeResponse = (senderParams: SenderParams) => {
             const response = await fetch(`${hordeURL}generate/text/status/${generation_id}`, {
                 method: 'GET',
                 headers: {
-                    'Client-Agent': `ChatterUI:${nativeApplicationVersion}:https://github.com/Vali-98/ChatterUI`,
+                    'Client-Agent': `AnimaForge:${nativeApplicationVersion}:${GITHUB_REPOSITORY}`,
                     accept: 'application/json',
                     'content-type': 'application/json',
                 },
