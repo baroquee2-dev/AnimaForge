@@ -1,6 +1,7 @@
 import { setStringAsync } from 'expo-clipboard'
-import { useCallback, useMemo } from 'react'
-import { Platform, StyleSheet, Text, View } from 'react-native'
+import { Image } from 'expo-image'
+import { useCallback, useMemo, useState } from 'react'
+import { Platform, StyleSheet, Text, useWindowDimensions, View } from 'react-native'
 import { MarkdownIt } from 'react-native-markdown-display'
 import MathJax from 'react-native-mathjax-svg'
 
@@ -15,6 +16,60 @@ import { Theme } from '@lib/theme/ThemeManager'
 import latexPlugin from './MarkdownLatexPlugin'
 import doubleQuotePlugin from './MarkdownQuotePlugin'
 import thinkPlugin from './MarkdownThinkPlugin'
+
+const ImageAdapter = ({
+    node,
+    styles,
+    allowedImageHandlers,
+    defaultImageHandler,
+}: {
+    node: any
+    styles: any
+    allowedImageHandlers: string[]
+    defaultImageHandler: string | null
+}) => {
+    const [imageData, setImageData] = useState({ height: 0, aspectRatio: 1 })
+    const { src, alt } = node.attributes
+
+    const { width } = useWindowDimensions()
+    const show =
+        allowedImageHandlers.filter((value: string) => {
+            return src.toLowerCase().startsWith(value.toLowerCase())
+        }).length > 0
+
+    if (show === false && defaultImageHandler === null) {
+        return null
+    }
+
+    const imageProps: any = {
+        indicator: true,
+        style: styles._VIEW_SAFE_image,
+        source: { uri: src },
+    }
+
+    if (alt) {
+        imageProps.accessible = true
+        imageProps.accessibilityLabel = alt
+    }
+
+    return (
+        <View style={{ height: imageData.height }}>
+            <Image
+                key={node.key}
+                {...imageProps}
+                width={imageData.height}
+                aspectRatio={imageData.aspectRatio}
+                onLoad={(data) => {
+                    setImageData({
+                        height: Math.min(width - 100, data.source.width),
+                        aspectRatio: data.source.width / data.source.height,
+                    })
+                }}
+                contentFit="contain"
+            />
+        </View>
+    )
+}
 
 export namespace MarkdownStyle {
     const DEFAULT_BODY_BASE_SIZE = 16
@@ -63,9 +118,24 @@ export namespace MarkdownStyle {
             )
         },
         double_quote: (node: any, children: any, parent: any, styles: any) => {
+            const quotes = {
+                english: ['\u201C', '\u201D'],
+                low9: ['\u201E', '\u201D'],
+                reversed9: ['\u201F', '\u201D'],
+                ascii: ['"', '"'],
+                guillemet: ['\u00AB', '\u00BB'],
+            }
+
+            const quoteType = (node.sourceMeta?.quoteType ??
+                node.meta?.quoteType ??
+                'english') as keyof typeof quotes
+            const [open, close] = quotes[quoteType] || quotes.english
+
             return (
                 <Text key={node.key} style={styles.double_quote}>
-                    “{children}”
+                    {open}
+                    {children}
+                    {close}
                 </Text>
             )
         },
@@ -103,6 +173,24 @@ export namespace MarkdownStyle {
                     color={styles.latex_inline.color ?? 'white'}>
                     {content}
                 </MathJax>
+            )
+        },
+        image: (
+            node: any,
+            children: any,
+            parent: any,
+            styles: any,
+            allowedImageHandlers: string[],
+            defaultImageHandler: string | null
+        ) => {
+            return (
+                <ImageAdapter
+                    key={node.key}
+                    node={node}
+                    styles={styles}
+                    allowedImageHandlers={allowedImageHandlers}
+                    defaultImageHandler={defaultImageHandler}
+                />
             )
         },
     }
@@ -383,6 +471,8 @@ export namespace MarkdownStyle {
                     // Images
                     image: {
                         flex: 1,
+                        minWidth: 30,
+                        minHeight: 30,
                     },
 
                     // Text Output

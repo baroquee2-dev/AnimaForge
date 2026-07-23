@@ -43,6 +43,8 @@ const ChatSwipes: React.FC<SwipesProps> = ({
 
     const isLastAltGreeting = isGreeting && swipeIndex === swipesLength - 1
 
+    if (isGreeting && swipesLength === 1) return null
+
     return (
         <View style={styles.swipesItem}>
             <TouchableOpacity

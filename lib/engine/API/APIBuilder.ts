@@ -15,10 +15,17 @@ import {
 } from './GeminiGrounding'
 import { buildRequest, RequestBuilderParams } from './RequestBuilder'
 
+export type DataOutputType = 'text' | 'reasoning' | 'tool_call'
+
+type DataOutput = {
+    type: DataOutputType
+    content: string
+}
+
 export interface APIBuilderParams
     extends ContextBuilderParams,
         Omit<RequestBuilderParams, 'prompt'> {
-    onData: (data: string) => void
+    onData: (data: DataOutput) => void
     onEnd: (data: string) => void
     stopSequence: string[]
     stopGenerating: () => void
@@ -133,21 +140,14 @@ export const buildAndSendRequest = async ({
 
         const replaceStrings = constructReplaceStrings(stopSequence)
 
-        const parseOutput = (
-            event: any,
-            pattern: string | string[],
-            prefixThinkTag: boolean = false,
-            prefixExitThink: boolean = false
-        ) => {
+        const parseOutput = (event: any, pattern: string | string[], type: DataOutputType) => {
             try {
                 const data = getNestedValue(
                     typeof event === 'string' ? JSON.parse(event) : event,
                     pattern
                 ) as string | null
                 const text = data?.replaceAll(replaceStrings, '') ?? ''
-                if (text && prefixExitThink) onData('</think>')
-                if (text && prefixThinkTag) onData('<think>')
-                if (text) onData(text)
+                if (text) onData({ content: text, type: type })
                 return !!text?.trim()
             } catch (e) {
                 Logger.error(JSON.stringify(e))
@@ -158,7 +158,7 @@ export const buildAndSendRequest = async ({
         const parseGeminiOutput = (event: any) => {
             try {
                 const text = parseGeminiGroundingText(event).replaceAll(replaceStrings, '')
-                if (text) onData(text)
+                if (text) onData({ content: text, type: 'text' })
                 return !!text?.trim()
             } catch (e) {
                 Logger.error(JSON.stringify(e))
@@ -166,8 +166,15 @@ export const buildAndSendRequest = async ({
             return false
         }
 
-        let inReasoning = false
+        const patternMapping: { pattern: string | string[]; type: DataOutputType }[] = [
+            { type: 'text', pattern: apiConfig.request.responseParsePattern },
+        ]
+        const reasonPattern = apiConfig.request.reasoningParsePattern
+
         const isChatCompletions = apiConfig.request.completionType.type === 'chatCompletions'
+        if (reasonPattern && isChatCompletions) {
+            patternMapping.push({ type: 'reasoning', pattern: reasonPattern })
+        }
 
         return response({
             endpoint: endpoint,
@@ -178,20 +185,8 @@ export const buildAndSendRequest = async ({
                     return
                 }
 
-                if (
-                    parseOutput(event, apiConfig.request.responseParsePattern, false, inReasoning)
-                ) {
-                    inReasoning = false
-                    return
-                }
-                const reasonPattern = apiConfig.request.reasoningParsePattern
-                // do not prefix think tags on text completions
-                if (
-                    reasonPattern &&
-                    isChatCompletions &&
-                    parseOutput(event, reasonPattern, !inReasoning)
-                ) {
-                    inReasoning = true
+                for (const pattern of patternMapping) {
+                    if (parseOutput(event, pattern.pattern, pattern.type)) break
                 }
             },
             onEnd: onEnd,
