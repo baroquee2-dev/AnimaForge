@@ -10,7 +10,6 @@ import { AppSettings } from '@lib/constants/GlobalValues'
 const ChatWindowSettings = () => {
     const [autoScroll, setAutoScroll] = useMMKVBoolean(AppSettings.AutoScroll)
     const [sendOnEnter, setSendOnEnter] = useMMKVBoolean(AppSettings.SendOnEnter)
-    const [quickDelete, setQuickDelete] = useMMKVBoolean(AppSettings.QuickDelete)
     const [saveScroll, setSaveScroll] = useMMKVBoolean(AppSettings.SaveScrollPosition)
     const [alternate, setAlternate] = useMMKVBoolean(AppSettings.AlternatingChatMode)
     const [wide, setWide] = useMMKVBoolean(AppSettings.WideChatMode)
@@ -43,13 +42,6 @@ const ChatWindowSettings = () => {
                 value={showTokensPerSecond}
                 onChangeValue={setShowTokensPerSecond}
                 description="Show tokens per second when using local models"
-            />
-
-            <ThemedSwitch
-                label="Quick Delete"
-                value={quickDelete}
-                onChangeValue={setQuickDelete}
-                description="Toggle delete button in chat options bar"
             />
 
             {capabilities.supportsScrollPersistence && (

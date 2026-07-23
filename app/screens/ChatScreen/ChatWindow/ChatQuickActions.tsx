@@ -1,14 +1,12 @@
 import { setStringAsync } from 'expo-clipboard'
 import React, { useCallback } from 'react'
 import { View } from 'react-native'
-import { useMMKVBoolean } from 'react-native-mmkv'
 import Animated, { StretchInY, StretchOutY, ZoomIn, ZoomOut } from 'react-native-reanimated'
 import { create } from 'zustand'
 import { useShallow } from 'zustand/react/shallow'
 
 import ThemedButton from '@components/buttons/ThemedButton'
 import Alert from '@components/views/Alert'
-import { AppSettings } from '@lib/constants/GlobalValues'
 import { useBackAction } from '@lib/hooks/BackAction'
 import { Chats, useInference } from '@lib/state/Chat'
 import { Logger } from '@lib/state/Logger'
@@ -55,7 +53,6 @@ const ChatQuickActions: React.FC<ChatActionProps> = ({
     )
     const showEditor = useChatEditorStore((state) => state.show)
     const { color } = Theme.useTheme()
-    const [quickDelete] = useMMKVBoolean(AppSettings.QuickDelete)
     const { deleteEntry } = Chats.useEntry()
     const { chatId, loadChat } = Chats.useChat()
     const { swipe } = Chats.useSwipeData(index)
@@ -129,33 +126,31 @@ const ChatQuickActions: React.FC<ChatActionProps> = ({
             }}>
             {!(isLastMessage && nowGenerating) && (
                 <>
-                    {quickDelete && (
-                        <Animated.View
-                            style={{ flexDirection: 'row' }}
-                            entering={ZoomIn.duration(200)}
-                            exiting={ZoomOut.duration(200)}>
-                            <ThemedButton
-                                variant="tertiary"
-                                iconName="delete"
-                                iconSize={24}
-                                iconStyle={{
-                                    color: color.error._400,
-                                }}
-                                onPress={() => {
-                                    if (showOptions) setShowOptions(undefined)
-                                    deleteEntry(index)
-                                }}
-                            />
-                            <View
-                                style={{
-                                    borderColor: color.primary._500,
-                                    borderLeftWidth: 1,
-                                    marginLeft: 12,
-                                    marginRight: 4,
-                                }}
-                            />
-                        </Animated.View>
-                    )}
+                    <Animated.View
+                        style={{ flexDirection: 'row' }}
+                        entering={ZoomIn.duration(200)}
+                        exiting={ZoomOut.duration(200)}>
+                        <ThemedButton
+                            variant="tertiary"
+                            iconName="delete"
+                            iconSize={24}
+                            iconStyle={{
+                                color: color.error._400,
+                            }}
+                            onPress={() => {
+                                if (showOptions) setShowOptions(undefined)
+                                deleteEntry(index)
+                            }}
+                        />
+                        <View
+                            style={{
+                                borderColor: color.primary._500,
+                                borderLeftWidth: 1,
+                                marginLeft: 12,
+                                marginRight: 4,
+                            }}
+                        />
+                    </Animated.View>
 
                     <Animated.View entering={ZoomIn.duration(200)} exiting={ZoomOut.duration(200)}>
                         <ThemedButton
