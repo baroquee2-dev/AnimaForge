@@ -26,7 +26,6 @@ module.exports = {
         android: {
             adaptiveIcon: {
                 foregroundImage: APP_ICON,
-                backgroundImage: './assets/images/adaptive-icon-background.png',
                 monochromeImage: APP_ICON,
                 backgroundColor: '#000',
             },
@@ -82,6 +81,7 @@ module.exports = {
                     icon: APP_ICON,
                 },
             ],
+            './expo-build-plugins/gradlejvm.plugin.js',
             [
                 './expo-build-plugins/androidattributes.plugin.js',
                 {

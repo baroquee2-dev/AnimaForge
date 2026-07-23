@@ -238,8 +238,7 @@ export const startupApp = () => {
     // set cpu thread count
     setCPUThreads()
 
-    // patch Android text for bold Accessibility, still an issue here:
-    // https://github.com/Vali-98/ChatterUI/issues/511
+    // patch Android text for bold Accessibility (disabled)
     // patchAndroidText()
 
     // set keep awake settings
