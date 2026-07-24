@@ -50,6 +50,8 @@ const MessengerChatLayout = () => {
     const renderItems = ({ item }: { item: (typeof list)[number] }) => (
         <ChatItem
             index={item.index}
+            entryId={item.entryId}
+            tokenLength={item.tokenLength}
             isLastMessage={item.isLastMessage}
             isGreeting={item.isGreeting}
         />

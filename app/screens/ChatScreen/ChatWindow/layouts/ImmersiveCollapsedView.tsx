@@ -27,7 +27,11 @@ const ImmersiveCollapsedView: React.FC<ImmersiveCollapsedViewProps> = ({
     const nowGenerating = useInference((state) => state.nowGenerating)
     const chatInputHeight = useInputHeightStore(useShallow((state) => state.height))
     const { color, borderRadius } = Theme.useTheme()
-    const lastMessage = Chats.useChat().chat?.messages?.[lastMessageIndex]
+    const lastMessage = Chats.useChatState((state) =>
+        lastItem
+            ? state.data?.messages?.find((item) => item.id === lastItem.entryId)
+            : undefined
+    )
     const showSwipeToolbar =
         !!lastItem && !!lastMessage && !lastMessage.is_user && lastItem.isLastMessage
 
@@ -44,6 +48,8 @@ const ImmersiveCollapsedView: React.FC<ImmersiveCollapsedViewProps> = ({
                     <View style={{ width: getImmersiveDialogueWidth() }}>
                     <ChatItem
                         index={lastItem.index}
+                        entryId={lastItem.entryId}
+                        tokenLength={lastItem.tokenLength}
                         isLastMessage={lastItem.isLastMessage}
                         isGreeting={lastItem.isGreeting}
                         portraitExternal

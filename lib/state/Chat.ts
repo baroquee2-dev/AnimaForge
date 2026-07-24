@@ -1,4 +1,4 @@
-import { and, count, desc, eq, getTableColumns, like, sql } from 'drizzle-orm'
+import { and, asc, count, desc, eq, getTableColumns, like, sql } from 'drizzle-orm'
 import { randomUUID } from 'expo-crypto'
 import * as Notifications from 'expo-notifications'
 import mime from 'mime/lite'
@@ -196,6 +196,27 @@ export namespace Chats {
             get().setBuffer({ data: '' })
         },
         load: async (chatId, overrideScrollOffset) => {
+            const shallow = await database.query.chats.findFirst({
+                where: eq(chats.id, chatId),
+            })
+
+            if (shallow) {
+                let autoScroll: ChatData['autoScroll']
+                if (overrideScrollOffset !== undefined) {
+                    autoScroll = undefined
+                } else {
+                    autoScroll = { cause: 'saveScroll', index: shallow.scroll_offset }
+                }
+
+                set({
+                    data: {
+                        ...shallow,
+                        messages: [],
+                        autoScroll,
+                    },
+                })
+            }
+
             const data = (await db.query.chat(chatId)) as ChatData | undefined
 
             if (data?.user_id && mmkv.getBoolean(AppSettings.AutoLoadUser)) {
@@ -233,9 +254,10 @@ export namespace Chats {
                             }
                         }
                     }
-                } else {
-                    // we assume this is taken from ChatWindow
+                } else if (!get().data?.autoScroll) {
                     data.autoScroll = { cause: 'saveScroll', index: data.scroll_offset }
+                } else {
+                    data.autoScroll = get().data?.autoScroll
                 }
 
                 if (data.autoScroll?.index && data.autoScroll.index > data.messages.length) {
@@ -870,7 +892,58 @@ export namespace Chats {
                     .where(eq(chats.id, chatId))
             }
         }
+
+        export namespace live {
+            export const entryIdList = (chatId: number) => {
+                return database.query.chatEntries.findMany({
+                    where: eq(chatEntries.chat_id, chatId),
+                    columns: {
+                        id: true,
+                        swipe_id: true,
+                    },
+                    with: {
+                        swipes: {
+                            columns: {
+                                swipe: true,
+                            },
+                            orderBy: asc(chatSwipes.id),
+                        },
+                    },
+                    orderBy: desc(chatEntries.id),
+                })
+            }
+
+            export const entry = (entryId: number) => {
+                return database.query.chatEntries.findFirst({
+                    where: eq(chatEntries.id, entryId),
+                    with: {
+                        attachments: true,
+                        swipes: {
+                            orderBy: asc(chatSwipes.id),
+                        },
+                    },
+                })
+            }
+
+            export const swipeIdList = (entryId: number) => {
+                return database.query.chatSwipes.findMany({
+                    where: eq(chatSwipes.entry_id, entryId),
+                    columns: {
+                        id: true,
+                    },
+                    orderBy: asc(chatSwipes.id),
+                })
+            }
+
+            export type LiveEntry = NonNullable<Awaited<ReturnType<typeof entry>>>
+        }
     }
+
+    export const mapLiveEntryToChatEntry = (row: db.live.LiveEntry): ChatEntry => ({
+        ...row,
+        swipes: row.swipes.map((swipe) => ({ ...swipe, token_count: undefined })),
+        attachments: row.attachments,
+    })
 
     export const useEntryData = (index: number) => {
         // TODO: Investigate if dummyEntry is dangerous

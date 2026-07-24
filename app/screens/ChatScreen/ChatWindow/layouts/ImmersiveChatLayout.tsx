@@ -19,7 +19,7 @@ const ImmersiveChatLayout = () => {
     const [historyExpanded, setHistoryExpanded] = useState(false)
     const chatInputHeight = useInputHeightStore(useShallow((state) => state.height))
     const list = useChatListItems()
-    const { historyCount, lastMessageIndex } = useChatHistoryMeta()
+    const { historyCount, lastMessageIndex } = useChatHistoryMeta(list)
 
     const collapsed = !historyExpanded
     const visibleList = collapsed ? list.filter((item) => item.isLastMessage) : list
@@ -32,6 +32,8 @@ const ImmersiveChatLayout = () => {
     const renderItems = ({ item }: { item: (typeof list)[number] }) => (
         <ChatItem
             index={item.index}
+            entryId={item.entryId}
+            tokenLength={item.tokenLength}
             isLastMessage={item.isLastMessage}
             isGreeting={item.isGreeting}
             historyCompact={historyExpanded && !item.isLastMessage}
