@@ -1,6 +1,11 @@
 import merge from 'lodash.merge'
 
-import { SamplerConfigData, SamplerID, Samplers } from '@lib/constants/SamplerData'
+import {
+    SamplerConfigData,
+    SamplerID,
+    Samplers,
+    shouldOmitSamplerNumberValue,
+} from '@lib/constants/SamplerData'
 import { InstructType } from '@lib/state/Instructs'
 import { SamplersManager } from '@lib/state/SamplerState'
 import { getNestedValue } from '@lib/utils/Parsing'
@@ -274,10 +279,17 @@ const getSamplerFields = (
             const value = samplers[item.samplerID]
             const samplerItem = Samplers[item.samplerID]
             let cleanvalue = value
-            if (typeof value === 'number')
-                if (item.samplerID === 'max_length' && max_length) {
-                    cleanvalue = Math.min(value, max_length)
-                } else if (samplerItem.values.type === 'integer') cleanvalue = Math.floor(value)
+            if (typeof value === 'number') {
+                if (shouldOmitSamplerNumberValue(item.samplerID, value)) {
+                    return {}
+                }
+                const type = samplerItem.values.type
+                if (item.samplerID === 'max_length') {
+                    cleanvalue = Math.min(value, max_length ?? value)
+                } else if (type === 'integer') {
+                    cleanvalue = Math.floor(value)
+                }
+            }
             if (item.samplerID === SamplerID.DRY_SEQUENCE_BREAK) {
                 //@ts-expect-error. This is due to a migration
                 cleanvalue = (value as string).split(',')

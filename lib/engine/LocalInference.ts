@@ -1,6 +1,11 @@
 import Alert from '@components/views/Alert'
 import { AppSettings } from '@lib/constants/GlobalValues'
-import { SamplerConfigData, SamplerID, Samplers } from '@lib/constants/SamplerData'
+import {
+    SamplerConfigData,
+    SamplerID,
+    Samplers,
+    shouldOmitSamplerNumberValue,
+} from '@lib/constants/SamplerData'
 import { Characters } from '@lib/state/Characters'
 import { Chats, useInference } from '@lib/state/Chat'
 import { commonStopStrings, Instructs, outputPrefixes } from '@lib/state/Instructs'
@@ -52,10 +57,17 @@ const getSamplerFields = (max_length?: number) => {
             const value = preset[item.samplerID]
             const samplerItem = Samplers[item.samplerID]
             let cleanvalue = value
-            if (typeof value === 'number')
+            if (typeof value === 'number') {
+                if (shouldOmitSamplerNumberValue(item.samplerID, value)) {
+                    return {}
+                }
+                const type = samplerItem.values.type
                 if (item.samplerID === 'max_length' && max_length) {
                     cleanvalue = Math.min(value, max_length)
-                } else if (samplerItem.values.type === 'integer') cleanvalue = Math.floor(value)
+                } else if (type === 'integer') {
+                    cleanvalue = Math.floor(value)
+                }
+            }
             if (item.samplerID === SamplerID.DRY_SEQUENCE_BREAK) {
                 //@ts-expect-error. This is due to a migration
                 cleanvalue = (value as string).split(',')
