@@ -68,6 +68,14 @@ type CharacterCardState = {
 
 export type CharacterCardData = Awaited<ReturnType<typeof Characters.db.query.cardQuery>>
 
+const CHARACTER_CARD_TEXT_CHUNK_KEYWORDS = [
+    'Description', // AI bot base description
+    'Comment', // incorrect migration, needs to be retained
+    'character_card',
+    'chara',
+    'ccv3',
+]
+
 export namespace Characters {
     export const useUserStore = create<CharacterCardState>()(
         persist(
@@ -811,7 +819,16 @@ export namespace Characters {
                 Logger.errorToast(`Failed to create card - Image could not be retrieved`)
                 return
             }
-            const card = JSON.parse(extractPngTextChunk(file))
+            const [result] = extractPngTextChunk(file, {
+                keywords: CHARACTER_CARD_TEXT_CHUNK_KEYWORDS,
+            })
+
+            if (!result?.data) {
+                Logger.errorToast('No character was found.')
+                return
+            }
+
+            const card = JSON.parse(result.data)
             if (card === undefined) {
                 Logger.errorToast('No character was found.')
                 return
@@ -837,8 +854,9 @@ export namespace Characters {
     }
 
     const createCharacterFromV2JSON = async (data: any, uri: string | undefined = undefined) => {
+        const normalized = normalizeImportedCharacterCard(data)
         // check JSON def
-        const result = characterCardV2Schema.safeParse(data)
+        const result = characterCardV2Schema.safeParse(normalized)
         if (result.error) {
             Logger.warnToast('V2 Parsing failed, falling back to V1')
             return await createCharacterFromV1JSON(data, uri)
@@ -878,17 +896,17 @@ export namespace Characters {
             return
         }
         // name can be empty string, should at least have something
-        const exportedFileName = dbcard.name ?? 'Character'
-        const cardString = JSON.stringify(convertDBDataToCV2(dbcard))
+        const exportedFileName = sanitizeExportFilename(dbcard.name ?? 'Character')
+        const cardV2 = convertDBDataToCV2(dbcard)
 
         const imagePath = getImageDir(dbcard.image_id)
         if (fileExists(imagePath)) {
             const fileData = await readBase64Async(imagePath)
             if (!fileData) return
-            const exportData = replacePngTextChunk(fileData, cardString)
+            const exportData = buildExportedCharacterPng(fileData, cardV2)
             await saveStringToDownload(exportData, exportedFileName + '.png', 'base64')
         } else {
-            await saveStringToDownload(cardString, exportedFileName + '.json', 'utf8')
+            await saveStringToDownload(JSON.stringify(cardV2), exportedFileName + '.json', 'utf8')
         }
     }
 
@@ -967,6 +985,50 @@ const characterCardV2Schema = z.object({
 // type CharacterCardV2Data = z.infer<typeof characterCardV2DataSchema>
 
 type CharacterCardV2 = z.infer<typeof characterCardV2Schema>
+
+const sanitizeExportFilename = (name: string) => name.replace(/[\\/:*?"<>|]/g, '_').trim() || 'Character'
+
+/** SillyTavern decodes every tEXt chunk; remove all before writing chara + ccv3 (ST-compatible). */
+const buildExportedCharacterPng = (fileDataBase64: string, card: CharacterCardV2): string => {
+    const cardString = JSON.stringify(card)
+    const v3String = JSON.stringify({
+        ...card,
+        spec: 'chara_card_v3',
+        spec_version: '3.0',
+    })
+
+    const removeKeywords = new Set<string>(CHARACTER_CARD_TEXT_CHUNK_KEYWORDS)
+    try {
+        for (const chunk of extractPngTextChunk(fileDataBase64, { decodeBase64: false })) {
+            removeKeywords.add(chunk.keyword)
+        }
+    } catch (e) {
+        Logger.warn(`PNG export: could not list existing tEXt chunks: ${e}`)
+    }
+
+    return replacePngTextChunk(
+        fileDataBase64,
+        [
+            { data: cardString, keyword: 'chara', b64encode: true },
+            { data: v3String, keyword: 'ccv3', b64encode: true },
+        ],
+        { removeKeywords: [...removeKeywords] }
+    )
+}
+
+/** Map CharCard v3 PNG/JSON payloads to v2 for DB import (unknown v3 fields are dropped by zod). */
+const normalizeImportedCharacterCard = (raw: unknown): unknown => {
+    if (!raw || typeof raw !== 'object') return raw
+    const card = raw as { spec?: string; spec_version?: string; data?: unknown }
+    if (card.spec === 'chara_card_v3' && card.data && typeof card.data === 'object') {
+        return {
+            spec: 'chara_card_v2',
+            spec_version: '2.0',
+            data: card.data,
+        }
+    }
+    return raw
+}
 
 const createBlankV2Card = (
     name: string,
