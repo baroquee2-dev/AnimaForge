@@ -1,0 +1,127 @@
+{
+    "common": {
+        "cancel": "Cancel",
+        "save": "Save",
+        "delete": "Delete",
+        "import": "Import",
+        "remove": "Remove",
+        "create": "Create"
+    },
+    "nav": {
+        "sampler": "Sampler",
+        "aiInstructions": "AI Instructions",
+        "api": "API",
+        "models": "Models",
+        "tts": "TTS",
+        "logs": "Logs",
+        "about": "About",
+        "settings": "Settings"
+    },
+    "settings": {
+        "title": "Settings",
+        "language": {
+            "title": "Language",
+            "description": "App interface language. Chat content and character cards are not translated.",
+            "modalTitle": "Language",
+            "en": "English",
+            "zhTW": "繁體中文"
+        },
+        "chatLayout": {
+            "title": "Chat Layout",
+            "modalTitle": "Chat Layout",
+            "visualNovel": {
+                "label": "Visual Novel",
+                "description": "Large portrait with a dialogue box for the latest reply."
+            },
+            "messenger": {
+                "label": "Messenger",
+                "description": "Standard scrollable chat list with message bubbles."
+            },
+            "immersive": {
+                "label": "Immersive",
+                "description": "Full-screen character portrait. Dialogue and input use transparent overlays."
+            }
+        },
+        "style": {
+            "title": "Style",
+            "changeTheme": "Change Theme",
+            "changeBackground": "Change Default Background",
+            "removeBackground": "Remove Default Background",
+            "removeBackgroundTitle": "Remove Default Background?",
+            "removeBackgroundDesc": "This removes your custom background and restores the built-in default."
+        },
+        "chat": {
+            "title": "Chat",
+            "useFirstMessage": "Use First Message",
+            "useFirstMessageDesc": "Disabling this will make new chats start blank, needed by specific models",
+            "loadOnStartup": "Load Chat On Startup",
+            "loadOnStartupDesc": "Loads the most recent chat on startup",
+            "autoLoadUser": "Auto Load User",
+            "autoLoadUserDesc": "When opening a chat, automatically loads the User the chat was created with",
+            "autoTitle": "Automatically Generate Titles",
+            "autoTitleDesc": "Automatically generates titles for chats (only in Remote mode)",
+            "chatStyle": "Chat Style"
+        },
+        "chatWindow": {
+            "title": "Chat Window",
+            "autoScroll": "Auto Scroll",
+            "autoScrollDesc": "Autoscrolls text during generations",
+            "sendOnEnter": "Send on Enter",
+            "sendOnEnterDesc": "Submits messages when Enter is pressed",
+            "showTps": "Show Tokens Per Second",
+            "showTpsDesc": "Show tokens per second when using local models",
+            "saveScroll": "Save Scroll Position",
+            "saveScrollDesc": "Automatically move to last scrolled position in chat"
+        },
+        "character": {
+            "title": "Character Management",
+            "regenerateDefault": "Regenerate Default Card",
+            "regenerateDefaultTitle": "Regenerate Default Card",
+            "regenerateDefaultDesc": "This will add the default AI Bot card to your character list.",
+            "createDefault": "Create Default Card",
+            "hiddenTags": "Hidden Tags",
+            "hiddenTagsDesc": "Hide characters with the following tags from the character list."
+        },
+        "generation": {
+            "title": "Generation",
+            "printContext": "Print Context",
+            "printContextDesc": "Prints the generation context to logs for debugging",
+            "bypassContext": "Bypass Context Length",
+            "bypassContextDesc": "Ignores context length limits when building prompts"
+        },
+        "notifications": {
+            "title": "Notifications",
+            "enable": "Enable Notifications",
+            "enableDesc": "Sends notifications when the app is in the background",
+            "sound": "Notification Sound",
+            "vibrate": "Notification Vibration",
+            "showText": "Show Text In Notification",
+            "showTextDesc": "Shows generated messages in notifications"
+        },
+        "screen": {
+            "title": "Screen",
+            "keepAwake": "Keep Awake",
+            "keepAwakeDesc": "Keeps app awake in foreground"
+        },
+        "database": {
+            "title": "Database Management",
+            "warning": "WARNING: ensure imported database is from the same app version!",
+            "export": "Export Database",
+            "exportTitle": "Export Database",
+            "exportDesc": "Are you sure you want to export the database file?\n\nIt will automatically be downloaded to Downloads",
+            "import": "Import Database",
+            "importTitle": "Import Database",
+            "importDesc": "Are you sure you want to import this database? This may will destroy the current database!\n\nA backup will automatically be downloaded.\n\nApp will restart automatically",
+            "versionWarningTitle": "WARNING: Different Version",
+            "versionWarningDesc": "The imported database file has a different app version ({{dbVersion}}) to installed version ({{appVersion}}).\n\nImporting this database may break or corrupt the database. It is recommended to use the same app version.",
+            "importAnyways": "Import Anyways",
+            "downloadSuccess": "Download Successful!",
+            "copyFailed": "Failed to copy database: {{error}}"
+        },
+        "security": {
+            "title": "Security",
+            "lockApp": "Lock App",
+            "lockAppDesc": "Requires user authentication to open the app. This will not work if you have no device locks enabled."
+        }
+    }
+}

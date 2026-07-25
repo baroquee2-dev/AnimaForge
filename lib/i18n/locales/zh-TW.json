@@ -1,0 +1,127 @@
+{
+    "common": {
+        "cancel": "取消",
+        "save": "儲存",
+        "delete": "刪除",
+        "import": "匯入",
+        "remove": "移除",
+        "create": "建立"
+    },
+    "nav": {
+        "sampler": "取樣器",
+        "aiInstructions": "AI 指令",
+        "api": "API",
+        "models": "模型",
+        "tts": "語音",
+        "logs": "日誌",
+        "about": "關於",
+        "settings": "設定"
+    },
+    "settings": {
+        "title": "設定",
+        "language": {
+            "title": "語言",
+            "description": "應用程式介面語言。聊天內容與角色卡不會被翻譯。",
+            "modalTitle": "語言",
+            "en": "English",
+            "zhTW": "繁體中文"
+        },
+        "chatLayout": {
+            "title": "聊天版面",
+            "modalTitle": "聊天版面",
+            "visualNovel": {
+                "label": "視覺小說",
+                "description": "大型立繪搭配對話框，顯示最新回覆。"
+            },
+            "messenger": {
+                "label": "即時通訊",
+                "description": "標準可捲動氣泡式聊天列表。"
+            },
+            "immersive": {
+                "label": "沉浸式",
+                "description": "全螢幕角色立繪，對話與輸入使用透明疊層。"
+            }
+        },
+        "style": {
+            "title": "外觀",
+            "changeTheme": "變更主題",
+            "changeBackground": "變更預設背景",
+            "removeBackground": "移除預設背景",
+            "removeBackgroundTitle": "要移除預設背景嗎？",
+            "removeBackgroundDesc": "這會移除自訂背景並還原內建預設背景。"
+        },
+        "chat": {
+            "title": "聊天",
+            "useFirstMessage": "使用開場白",
+            "useFirstMessageDesc": "關閉後新對話會從空白開始，部分模型需要此設定",
+            "loadOnStartup": "啟動時載入聊天",
+            "loadOnStartupDesc": "啟動時載入最近一次的聊天",
+            "autoLoadUser": "自動載入使用者",
+            "autoLoadUserDesc": "開啟聊天時，自動載入建立該聊天時使用的使用者",
+            "autoTitle": "自動產生標題",
+            "autoTitleDesc": "自動為聊天產生標題（僅遠端模式）",
+            "chatStyle": "聊天樣式"
+        },
+        "chatWindow": {
+            "title": "聊天視窗",
+            "autoScroll": "自動捲動",
+            "autoScrollDesc": "產生回覆時自動捲動文字",
+            "sendOnEnter": "按 Enter 傳送",
+            "sendOnEnterDesc": "按下 Enter 時送出訊息",
+            "showTps": "顯示每秒 Token 數",
+            "showTpsDesc": "使用本機模型時顯示每秒 Token 數",
+            "saveScroll": "記住捲動位置",
+            "saveScrollDesc": "自動回到上次在聊天中的捲動位置"
+        },
+        "character": {
+            "title": "角色管理",
+            "regenerateDefault": "重新產生預設角色卡",
+            "regenerateDefaultTitle": "重新產生預設角色卡",
+            "regenerateDefaultDesc": "這會將預設 AI 角色卡加入你的角色列表。",
+            "createDefault": "建立預設角色卡",
+            "hiddenTags": "隱藏標籤",
+            "hiddenTagsDesc": "在角色列表中隱藏帶有下列標籤的角色。"
+        },
+        "generation": {
+            "title": "生成",
+            "printContext": "輸出 Context",
+            "printContextDesc": "將生成用的 context 印到日誌以便除錯",
+            "bypassContext": "略過 Context 長度限制",
+            "bypassContextDesc": "組裝提示詞時忽略 context 長度上限"
+        },
+        "notifications": {
+            "title": "通知",
+            "enable": "啟用通知",
+            "enableDesc": "應用程式在背景時傳送通知",
+            "sound": "通知音效",
+            "vibrate": "通知震動",
+            "showText": "在通知中顯示文字",
+            "showTextDesc": "在通知中顯示生成的訊息內容"
+        },
+        "screen": {
+            "title": "螢幕",
+            "keepAwake": "保持螢幕喚醒",
+            "keepAwakeDesc": "應用程式在前景時保持螢幕不休眠"
+        },
+        "database": {
+            "title": "資料庫管理",
+            "warning": "警告：請確認匯入的資料庫來自相同的應用程式版本！",
+            "export": "匯出資料庫",
+            "exportTitle": "匯出資料庫",
+            "exportDesc": "確定要匯出資料庫檔案嗎？\n\n檔案會自動下載到「下載」資料夾",
+            "import": "匯入資料庫",
+            "importTitle": "匯入資料庫",
+            "importDesc": "確定要匯入此資料庫嗎？這可能會覆蓋目前的資料庫！\n\n會自動下載一份備份。\n\n應用程式將自動重新啟動",
+            "versionWarningTitle": "警告：版本不同",
+            "versionWarningDesc": "匯入的資料庫檔案應用程式版本（{{dbVersion}}）與目前安裝版本（{{appVersion}}）不同。\n\n匯入可能導致資料庫損毀，建議使用相同版本。",
+            "importAnyways": "仍要匯入",
+            "downloadSuccess": "下載成功！",
+            "copyFailed": "複製資料庫失敗：{{error}}"
+        },
+        "security": {
+            "title": "安全性",
+            "lockApp": "鎖定應用程式",
+            "lockAppDesc": "開啟應用程式時需要使用者驗證。若裝置未設定鎖定方式，此功能將無法運作。"
+        }
+    }
+}

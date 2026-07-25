@@ -4,10 +4,12 @@ import { getDocumentAsync } from 'expo-document-picker'
 import { Paths } from 'expo-file-system'
 import React from 'react'
 import { Text, View } from 'react-native'
+import { useTranslation } from 'react-i18next'
 
 import ThemedButton from '@components/buttons/ThemedButton'
 import SectionTitle from '@components/text/SectionTitle'
 import Alert from '@components/views/Alert'
+import i18n from '@lib/i18n'
 import { Logger } from '@lib/state/Logger'
 import { Theme } from '@lib/theme/ThemeManager'
 import { copyFile, deleteFile } from '@lib/utils/File'
@@ -20,9 +22,11 @@ const dbPath = Paths.document.uri + '/SQLite/db.db'
 const exportDB = async (notify: boolean = true) => {
     await localDownload(dbPath.replace('file://', ''))
         .then(() => {
-            if (notify) Logger.infoToast('Download Successful!')
+            if (notify) Logger.infoToast(i18n.t('settings.database.downloadSuccess'))
         })
-        .catch((e: string) => Logger.errorToast('Failed to copy database: ' + e))
+        .catch((e: string) =>
+            Logger.errorToast(i18n.t('settings.database.copyFailed', { error: e }))
+        )
 }
 
 const importDB = async (uri: string, name: string) => {
@@ -41,21 +45,29 @@ const importDB = async (uri: string, name: string) => {
     const dbAppVersion = name.split('-')?.[0]
     if (dbAppVersion !== appVersion) {
         Alert.alert({
-            title: `WARNING: Different Version`,
-            description: `The imported database file has a different app version (${dbAppVersion}) to installed version (${appVersion}).\n\nImporting this database may break or corrupt the database. It is recommended to use the same app version.`,
+            title: i18n.t('settings.database.versionWarningTitle'),
+            description: i18n.t('settings.database.versionWarningDesc', {
+                dbVersion: dbAppVersion,
+                appVersion,
+            }),
             buttons: [
-                { label: 'Cancel' },
-                { label: 'Import Anyways', onPress: copyDB, type: 'warning' },
+                { label: i18n.t('common.cancel') },
+                {
+                    label: i18n.t('settings.database.importAnyways'),
+                    onPress: copyDB,
+                    type: 'warning',
+                },
             ],
         })
     } else copyDB()
 }
 
 const DatabaseSettings = () => {
+    const { t } = useTranslation()
     const { color, spacing } = Theme.useTheme()
     return (
         <View style={{ rowGap: 8 }}>
-            <SectionTitle>Database Management</SectionTitle>
+            <SectionTitle>{t('settings.database.title')}</SectionTitle>
 
             <Text
                 style={{
@@ -63,36 +75,36 @@ const DatabaseSettings = () => {
                     paddingBottom: spacing.xs,
                     marginBottom: spacing.m,
                 }}>
-                WARNING: ensure imported database is from the same app version!
+                {t('settings.database.warning')}
             </Text>
             <ThemedButton
-                label="Export Database"
+                label={t('settings.database.export')}
                 variant="secondary"
                 onPress={() => {
                     Alert.alert({
-                        title: `Export Database`,
-                        description: `Are you sure you want to export the database file?\n\nIt will automatically be downloaded to Downloads`,
+                        title: t('settings.database.exportTitle'),
+                        description: t('settings.database.exportDesc'),
                         buttons: [
-                            { label: 'Cancel' },
-                            { label: 'Export Database', onPress: exportDB },
+                            { label: t('common.cancel') },
+                            { label: t('settings.database.export'), onPress: exportDB },
                         ],
                     })
                 }}
             />
 
             <ThemedButton
-                label="Import Database"
+                label={t('settings.database.import')}
                 variant="secondary"
                 onPress={async () => {
                     getDocumentAsync({ type: ['application/*'] }).then(async (result) => {
                         if (result.canceled) return
                         Alert.alert({
-                            title: `Import Database`,
-                            description: `Are you sure you want to import this database? This may will destroy the current database!\n\nA backup will automatically be downloaded.\n\nApp will restart automatically`,
+                            title: t('settings.database.importTitle'),
+                            description: t('settings.database.importDesc'),
                             buttons: [
-                                { label: 'Cancel' },
+                                { label: t('common.cancel') },
                                 {
-                                    label: 'Import',
+                                    label: t('common.import'),
                                     onPress: () =>
                                         importDB(result.assets[0].uri, result.assets[0].name),
                                     type: 'warning',

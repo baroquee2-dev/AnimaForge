@@ -1,6 +1,7 @@
 import React from 'react'
 import { View } from 'react-native'
 import { useMMKVBoolean } from 'react-native-mmkv'
+import { useTranslation } from 'react-i18next'
 
 import ThemedSwitch from '@components/input/ThemedSwitch'
 import SectionTitle from '@components/text/SectionTitle'
@@ -8,6 +9,7 @@ import { useChatLayout } from '@lib/constants/ChatLayout'
 import { AppSettings } from '@lib/constants/GlobalValues'
 
 const ChatWindowSettings = () => {
+    const { t } = useTranslation()
     const [autoScroll, setAutoScroll] = useMMKVBoolean(AppSettings.AutoScroll)
     const [sendOnEnter, setSendOnEnter] = useMMKVBoolean(AppSettings.SendOnEnter)
     const [saveScroll, setSaveScroll] = useMMKVBoolean(AppSettings.SaveScrollPosition)
@@ -19,35 +21,35 @@ const ChatWindowSettings = () => {
 
     return (
         <View style={{ rowGap: 8 }}>
-            <SectionTitle>Chat Window</SectionTitle>
+            <SectionTitle>{t('settings.chatWindow.title')}</SectionTitle>
 
             <ThemedSwitch
-                label="Auto Scroll"
+                label={t('settings.chatWindow.autoScroll')}
                 value={autoScroll}
                 onChangeValue={setAutoScroll}
-                description="Autoscrolls text during generations"
+                description={t('settings.chatWindow.autoScrollDesc')}
             />
 
             <ThemedSwitch
-                label="Send on Enter"
+                label={t('settings.chatWindow.sendOnEnter')}
                 value={sendOnEnter}
                 onChangeValue={setSendOnEnter}
-                description="Submits messages when Enter is pressed"
+                description={t('settings.chatWindow.sendOnEnterDesc')}
             />
 
             <ThemedSwitch
-                label="Show Tokens Per Second"
+                label={t('settings.chatWindow.showTps')}
                 value={showTokensPerSecond}
                 onChangeValue={setShowTokensPerSecond}
-                description="Show tokens per second when using local models"
+                description={t('settings.chatWindow.showTpsDesc')}
             />
 
             {capabilities.supportsScrollPersistence && (
                 <ThemedSwitch
-                    label="Save Scroll Position"
+                    label={t('settings.chatWindow.saveScroll')}
                     value={saveScroll}
                     onChangeValue={setSaveScroll}
-                    description="Automatically move to last scrolled position in chat"
+                    description={t('settings.chatWindow.saveScrollDesc')}
                 />
             )}
         </View>

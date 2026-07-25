@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router'
 import React from 'react'
 import { View } from 'react-native'
+import { useTranslation } from 'react-i18next'
 import { useShallow } from 'zustand/react/shallow'
 
 import ThemedButton from '@components/buttons/ThemedButton'
@@ -9,6 +10,7 @@ import Alert from '@components/views/Alert'
 import { hasCustomGlobalBackground, useBackgroundStore } from '@lib/state/BackgroundImage'
 
 const StyleSettings = () => {
+    const { t } = useTranslation()
     const router = useRouter()
 
     const { chatBackground, importBackground, deleteBackground } = useBackgroundStore(
@@ -21,31 +23,30 @@ const StyleSettings = () => {
 
     return (
         <View style={{ rowGap: 8 }}>
-            <SectionTitle>Style</SectionTitle>
+            <SectionTitle>{t('settings.style.title')}</SectionTitle>
 
             <ThemedButton
-                label="Change Theme"
+                label={t('settings.style.changeTheme')}
                 variant="secondary"
                 onPress={() => router.push('/screens/AppSettingsScreen/ColorSelector')}
             />
             <ThemedButton
-                label="Change Default Background"
+                label={t('settings.style.changeBackground')}
                 variant="secondary"
                 onPress={importBackground}
             />
             {hasCustomGlobalBackground(chatBackground) && (
                 <ThemedButton
-                    label="Remove Default Background"
+                    label={t('settings.style.removeBackground')}
                     variant="critical"
                     onPress={() =>
                         Alert.alert({
-                            title: 'Remove Default Background?',
-                            description:
-                                'This removes your custom background and restores the built-in default.',
+                            title: t('settings.style.removeBackgroundTitle'),
+                            description: t('settings.style.removeBackgroundDesc'),
                             buttons: [
-                                { label: 'Cancel' },
+                                { label: t('common.cancel') },
                                 {
-                                    label: 'Remove Default Background',
+                                    label: t('settings.style.removeBackground'),
                                     type: 'warning',
                                     onPress: deleteBackground,
                                 },

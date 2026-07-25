@@ -2,12 +2,13 @@ import { AntDesign } from '@expo/vector-icons'
 import { Href, useRouter } from 'expo-router'
 import { FlatList, StyleSheet, Text, TouchableOpacity } from 'react-native'
 import Animated, { Easing, SlideInLeft } from 'react-native-reanimated'
+import { useTranslation } from 'react-i18next'
 
 import { useAppMode } from '@lib/state/AppMode'
 import { Theme } from '@lib/theme/ThemeManager'
 
 type ButtonData = {
-    name: string
+    nameKey: string
     path: Href
     icon?: keyof typeof AntDesign.glyphMap
 }
@@ -21,6 +22,7 @@ const DrawerButton = ({ item, index }: DrawerButtonProps) => {
     const styles = useStyles()
     const router = useRouter()
     const { color } = Theme.useTheme()
+    const { t } = useTranslation()
     return (
         <Animated.View
             key={index}
@@ -33,7 +35,7 @@ const DrawerButton = ({ item, index }: DrawerButtonProps) => {
                     router.push(item.path)
                 }}>
                 <AntDesign size={24} name={item.icon ?? 'question'} color={color.text._400} />
-                <Text style={styles.largeButtonText}>{item.name}</Text>
+                <Text style={styles.largeButtonText}>{t(item.nameKey)}</Text>
             </TouchableOpacity>
         </Animated.View>
     )
@@ -41,9 +43,11 @@ const DrawerButton = ({ item, index }: DrawerButtonProps) => {
 
 const RouteList = () => {
     const { appMode } = useAppMode()
+    const { i18n } = useTranslation()
     const paths = getPaths(appMode === 'remote')
     return (
         <FlatList
+            key={i18n.language}
             showsVerticalScrollIndicator={false}
             data={paths}
             renderItem={({ item, index }) => <DrawerButton item={item} index={index} />}
@@ -74,43 +78,43 @@ const useStyles = () => {
 
 const getPaths = (remote: boolean): ButtonData[] => [
     {
-        name: 'Sampler',
+        nameKey: 'nav.sampler',
         path: '/screens/SamplerManagerScreen',
         icon: 'control',
     },
     {
-        name: 'AI Instructions',
+        nameKey: 'nav.aiInstructions',
         path: '/screens/FormattingManagerScreen',
         icon: 'profile',
     },
     remote
         ? {
-              name: 'API',
+              nameKey: 'nav.api',
               path: '/screens/ConnectionsManagerScreen',
               icon: 'link',
           }
         : {
-              name: 'Models',
+              nameKey: 'nav.models',
               path: '/screens/ModelManagerScreen',
               icon: 'branches',
           },
     {
-        name: 'TTS',
+        nameKey: 'nav.tts',
         path: '/screens/TTSManagerScreen',
         icon: 'sound',
     },
     {
-        name: 'Logs',
+        nameKey: 'nav.logs',
         path: '/screens/LogsScreen',
         icon: 'code',
     },
     {
-        name: 'About',
+        nameKey: 'nav.about',
         path: '/screens/AboutScreen',
         icon: 'info-circle',
     },
     {
-        name: 'Settings',
+        nameKey: 'nav.settings',
         path: '/screens/AppSettingsScreen',
         icon: 'setting',
     },

@@ -1,6 +1,7 @@
 import React from 'react'
 import { View } from 'react-native'
 import { useMMKVBoolean } from 'react-native-mmkv'
+import { useTranslation } from 'react-i18next'
 
 import ThemedSwitch from '@components/input/ThemedSwitch'
 import SectionTitle from '@components/text/SectionTitle'
@@ -8,6 +9,7 @@ import { AppSettings } from '@lib/constants/GlobalValues'
 import { registerForPushNotificationsAsync } from '@lib/notifications/Notifications'
 
 const NotificationSettings = () => {
+    const { t } = useTranslation()
     const [notificationOnGenerate, setNotificationOnGenerate] = useMMKVBoolean(
         AppSettings.NotifyOnComplete
     )
@@ -23,9 +25,9 @@ const NotificationSettings = () => {
 
     return (
         <View>
-            <SectionTitle>Notifications</SectionTitle>
+            <SectionTitle>{t('settings.notifications.title')}</SectionTitle>
             <ThemedSwitch
-                label="Enable Notifications"
+                label={t('settings.notifications.enable')}
                 value={notificationOnGenerate}
                 onChangeValue={async (value) => {
                     if (!value) {
@@ -38,29 +40,29 @@ const NotificationSettings = () => {
                         setNotificationOnGenerate(true)
                     }
                 }}
-                description="Sends notifications when the app is in the background"
+                description={t('settings.notifications.enableDesc')}
             />
             {notificationOnGenerate && (
                 <View>
                     <ThemedSwitch
-                        label="Notification Sound"
+                        label={t('settings.notifications.sound')}
                         value={notificationSound}
                         onChangeValue={setNotificationSound}
                         description=""
                     />
 
                     <ThemedSwitch
-                        label="Notification Vibration"
+                        label={t('settings.notifications.vibrate')}
                         value={notificationVibrate}
                         onChangeValue={setNotificationVibrate}
                         description=""
                     />
 
                     <ThemedSwitch
-                        label="Show Text In Notification"
+                        label={t('settings.notifications.showText')}
                         value={showNotificationText}
                         onChangeValue={setShowNotificationText}
-                        description="Shows generated messages in notifications"
+                        description={t('settings.notifications.showTextDesc')}
                     />
                 </View>
             )}
