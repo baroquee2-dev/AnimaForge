@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 import { useShallow } from 'zustand/react/shallow'
 
@@ -14,6 +15,7 @@ import { CLAUDE_VERSION } from '@lib/constants/GlobalValues'
 import { APIValues } from '@lib/engine/API/APIBuilder.types'
 import { APIManager, APIManagerValue } from '@lib/engine/API/APIManagerState'
 import { useDebounce } from '@lib/hooks/Debounce'
+import i18n from '@lib/i18n'
 import { Logger } from '@lib/state/Logger'
 import { Theme } from '@lib/theme/ThemeManager'
 import { getNestedValue } from '@lib/utils/Parsing'
@@ -31,6 +33,7 @@ const ConnectionEditor: React.FC<ConnectionEditorProps> = ({
     close,
     originalValues,
 }) => {
+    const { t } = useTranslation()
     const { color, fontSize } = Theme.useTheme()
     const styles = useStyles()
 
@@ -49,7 +52,7 @@ const ConnectionEditor: React.FC<ConnectionEditorProps> = ({
     const template = useMemo(() => {
         const match = getTemplates().find((item) => item.name === values.configName)
         if (!match) {
-            Logger.errorToast('Could not get valid template!')
+            Logger.errorToast(i18n.t('api.invalidTemplate'))
             close()
             return getTemplates()[0]
         }
@@ -92,12 +95,12 @@ const ConnectionEditor: React.FC<ConnectionEditorProps> = ({
 
     const handleDelete = () => {
         Alert.alert({
-            title: 'Delete Connection',
-            description: `Are you sure you want to delete "${originalValues.friendlyName}"?`,
+            title: t('api.deleteConnection'),
+            description: t('api.deleteDesc', { name: originalValues.friendlyName }),
             buttons: [
-                { label: 'Cancel' },
+                { label: t('common.cancel') },
                 {
-                    label: 'Delete',
+                    label: t('common.delete'),
                     type: 'warning',
                     onPress: () => {
                         removeValue(index)
@@ -125,7 +128,7 @@ const ConnectionEditor: React.FC<ConnectionEditorProps> = ({
                         fontWeight: '500',
                         paddingBottom: 16,
                     }}>
-                    Edit Connection
+                    {t('api.editConnection')}
                 </Text>
 
                 <ScrollView
@@ -133,7 +136,7 @@ const ConnectionEditor: React.FC<ConnectionEditorProps> = ({
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={{ rowGap: 12, paddingBottom: 32 }}>
                     <ThemedTextInput
-                        label="Friendly Name"
+                        label={t('api.friendlyName')}
                         value={values.friendlyName}
                         onChangeText={(value) => {
                             setValues({ ...values, friendlyName: value })
@@ -143,20 +146,20 @@ const ConnectionEditor: React.FC<ConnectionEditorProps> = ({
                     {template.ui.editableCompletionPath && (
                         <View>
                             <ThemedTextInput
-                                label="Completion URL"
+                                label={t('api.completionUrl')}
                                 value={values.endpoint}
                                 onChangeText={(value) => {
                                     setValues({ ...values, endpoint: value })
                                 }}
                             />
-                            <Text style={styles.hintText}>Note: Use full URL path</Text>
+                            <Text style={styles.hintText}>{t('api.fullUrlNote')}</Text>
                         </View>
                     )}
 
                     {template.ui.editableModelPath && (
                         <View>
                             <ThemedTextInput
-                                label="Model URL"
+                                label={t('api.modelUrl')}
                                 value={values.modelEndpoint}
                                 onChangeText={(value) => {
                                     setValues({ ...values, modelEndpoint: value })
@@ -181,7 +184,7 @@ const ConnectionEditor: React.FC<ConnectionEditorProps> = ({
                     {template.features.useKey && (
                         <ThemedTextInput
                             secureTextEntry
-                            label="API Key"
+                            label={t('api.apiKey')}
                             value={values.key}
                             onChangeText={(value) => {
                                 setValues({ ...values, key: value })
@@ -191,7 +194,7 @@ const ConnectionEditor: React.FC<ConnectionEditorProps> = ({
 
                     {template.features.useModel && (
                         <View style={{ rowGap: 4 }}>
-                            <Text style={styles.title}>Model</Text>
+                            <Text style={styles.title}>{t('api.model')}</Text>
                             <View
                                 style={{
                                     flexDirection: 'row',
@@ -210,7 +213,7 @@ const ConnectionEditor: React.FC<ConnectionEditorProps> = ({
                                             setValues({ ...values, model: item })
                                         }}
                                         search={modelList.length > 10}
-                                        modalTitle="Select Model"
+                                        modalTitle={t('api.selectModel')}
                                     />
                                 )}
                                 {template.features.multipleModels && (
@@ -225,7 +228,7 @@ const ConnectionEditor: React.FC<ConnectionEditorProps> = ({
                                             setValues({ ...values, model: item })
                                         }}
                                         search={modelList.length > 10}
-                                        modalTitle="Select Model"
+                                        modalTitle={t('api.selectModel')}
                                     />
                                 )}
                                 <ThemedButton
@@ -243,38 +246,38 @@ const ConnectionEditor: React.FC<ConnectionEditorProps> = ({
                     {template.features.useFirstMessage && (
                         <View>
                             <ThemedTextInput
-                                label="First Message"
+                                label={t('api.firstMessage')}
                                 value={values.firstMessage}
                                 onChangeText={(value) => {
                                     setValues({ ...values, firstMessage: value })
                                 }}
                             />
                             <Text style={styles.hintText}>
-                                Default first message sent to Claude
+                                {t('api.firstMessageDesc')}
                             </Text>
                         </View>
                     )}
                     {template.features.usePrefill && (
                         <View>
                             <ThemedTextInput
-                                label="Prefill"
+                                label={t('api.prefill')}
                                 value={values.prefill}
                                 onChangeText={(value) => {
                                     setValues({ ...values, prefill: value })
                                 }}
                             />
-                            <Text style={styles.hintText}>Prefill before model response</Text>
+                            <Text style={styles.hintText}>{t('api.prefillDesc')}</Text>
                         </View>
                     )}
 
                     {template.features.useGeminiGrounding && (
                         <ThemedSwitch
-                            label="Search Grounding"
+                            label={t('api.searchGrounding')}
                             value={values.geminiSearchGrounding ?? false}
                             onChangeValue={(enabled) => {
                                 setValues({ ...values, geminiSearchGrounding: enabled })
                             }}
-                            description="Uses Gemini native API to search the web for up-to-date answers. Requires Gemini 2.0+ models."
+                            description={t('api.searchGroundingDesc')}
                         />
                     )}
                 </ScrollView>
@@ -288,21 +291,21 @@ const ConnectionEditor: React.FC<ConnectionEditorProps> = ({
                     <ThemedButton
                         variant="critical"
                         iconName="delete"
-                        label="Delete"
+                        label={t('common.delete')}
                         onPress={handleDelete}
                     />
                     <ThemedButton
                         variant="tertiary"
                         iconName="copy"
-                        label="Clone"
+                        label={t('common.clone')}
                         onPress={() => {
-                            const newName = values.friendlyName + ' (Clone)'
+                            const newName = t('api.cloneSuffix', { name: values.friendlyName })
                             addValue({ ...values, friendlyName: newName })
                             close()
                         }}
                     />
                     <ThemedButton
-                        label="Save Changes"
+                        label={t('api.saveChanges')}
                         onPress={() => {
                             editValue(values, index)
                             close()

@@ -1,5 +1,6 @@
 import { useFocusEffect } from 'expo-router'
 import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { BackHandler, Platform, View } from 'react-native'
 import { useMMKVBoolean, useMMKVNumber } from 'react-native-mmkv'
 import Animated, { Easing, SlideInRight, SlideOutRight } from 'react-native-reanimated'
@@ -27,6 +28,7 @@ type ModelSettingsProp = {
 const deviceLabels = { GPUOpenCL: 'OpenCL', HTP0: 'Hexagon', CPU: 'CPU' }
 
 const ModelSettings: React.FC<ModelSettingsProp> = ({ modelImporting, modelLoading, exit }) => {
+    const { t } = useTranslation()
     const { config, setConfig } = Llama.useLlamaPreferencesStore(
         useShallow((state) => ({
             config: state.config,
@@ -64,12 +66,12 @@ const ModelSettings: React.FC<ModelSettingsProp> = ({ modelImporting, modelLoadi
 
     const handleDeleteKV = () => {
         Alert.alert({
-            title: 'Delete KV Cache',
-            description: `Are you sure you want to delete the KV Cache? This cannot be undone. \n\n This will clear up ${readableFileSize(kvSize)} of space.`,
+            title: t('models.deleteKvTitle'),
+            description: t('models.deleteKvDesc', { size: readableFileSize(kvSize) }),
             buttons: [
-                { label: 'Cancel' },
+                { label: t('common.cancel') },
                 {
-                    label: 'Delete KV Cache',
+                    label: t('models.deleteKvConfirm'),
                     onPress: async () => {
                         await KV.deleteKV()
                         Logger.info('KV Cache deleted!')
@@ -87,12 +89,12 @@ const ModelSettings: React.FC<ModelSettingsProp> = ({ modelImporting, modelLoadi
             style={{ flex: 1 }}
             entering={SlideInRight.easing(Easing.inOut(Easing.cubic))}
             exiting={SlideOutRight.easing(Easing.inOut(Easing.cubic))}>
-            <SectionTitle>CPU Settings</SectionTitle>
+            <SectionTitle>{t('models.cpuSettings')}</SectionTitle>
             <View style={{ marginTop: 16 }} />
             {config && (
                 <>
                     <ThemedSlider
-                        label="Max Context"
+                        label={t('models.maxContext')}
                         value={config.context_length}
                         onValueChange={(value) => setConfig({ ...config, context_length: value })}
                         min={1024}
@@ -101,7 +103,7 @@ const ModelSettings: React.FC<ModelSettingsProp> = ({ modelImporting, modelLoadi
                         disabled={modelImporting || modelLoading}
                     />
                     <ThemedSlider
-                        label="Threads"
+                        label={t('models.threads')}
                         value={config.threads}
                         onValueChange={(value) => setConfig({ ...config, threads: value })}
                         min={1}
@@ -111,7 +113,7 @@ const ModelSettings: React.FC<ModelSettingsProp> = ({ modelImporting, modelLoadi
                     />
 
                     <ThemedSlider
-                        label="Batch"
+                        label={t('models.batch')}
                         value={config.batch}
                         onValueChange={(value) => setConfig({ ...config, batch: value })}
                         min={16}
@@ -123,7 +125,7 @@ const ModelSettings: React.FC<ModelSettingsProp> = ({ modelImporting, modelLoadi
                     {/* Note: llama.rn does not have any Android gpu acceleration */}
                     {(Platform.OS === 'ios' || devices.length > 1) && (
                         <ThemedSlider
-                            label="GPU Layers"
+                            label={t('models.gpuLayers')}
                             value={config.gpu_layers}
                             onValueChange={(value) => setConfig({ ...config, gpu_layers: value })}
                             min={0}
@@ -134,7 +136,7 @@ const ModelSettings: React.FC<ModelSettingsProp> = ({ modelImporting, modelLoadi
                     )}
 
                     <ThemedSwitch
-                        label="Context Shift"
+                        label={t('models.contextShift')}
                         value={config.ctx_shift}
                         onChangeValue={(value) => {
                             setConfig({ ...config, ctx_shift: value })
@@ -144,7 +146,7 @@ const ModelSettings: React.FC<ModelSettingsProp> = ({ modelImporting, modelLoadi
                     {devices.length > 1 && (
                         <HorizontalSelector
                             style={{ paddingBottom: 12 }}
-                            label="Backend Device"
+                            label={t('models.backendDevice')}
                             values={devices.map((item) => ({
                                 label: deviceLabels[item as keyof typeof deviceLabels] ?? item,
                                 value: item,
@@ -158,31 +160,27 @@ const ModelSettings: React.FC<ModelSettingsProp> = ({ modelImporting, modelLoadi
                     )}
                 </>
             )}
-            <SectionTitle>Advanced Settings</SectionTitle>
+            <SectionTitle>{t('models.advancedSettings')}</SectionTitle>
             <ThemedSwitch
-                label="Show Model Name In Chat"
+                label={t('models.showNameInChat')}
                 value={showModelInChat}
                 onChangeValue={setShowModelInChat}
             />
             <ThemedSwitch
-                label="Automatically Load Model on Chat"
+                label={t('models.autoLoadOnChat')}
                 value={autoloadLocal}
                 onChangeValue={setAutoloadLocal}
             />
             <ThemedSwitch
-                label="Save Local KV"
+                label={t('models.saveLocalKv')}
                 value={saveKV}
                 onChangeValue={setSaveKV}
-                description={
-                    saveKV
-                        ? ''
-                        : 'Saves the KV cache on generations, allowing you to continue sessions after closing the app. Must use the same model for this to function properly. Saving the KV cache file may be very big and negatively impact battery life!'
-                }
+                description={saveKV ? '' : t('models.saveLocalKvDesc')}
             />
             {saveKV && (
                 <ThemedButton
                     buttonStyle={{ marginTop: 8 }}
-                    label={'Purge KV Cache (' + readableFileSize(kvSize) + ')'}
+                    label={t('models.purgeKv', { size: readableFileSize(kvSize) })}
                     onPress={handleDeleteKV}
                     variant={kvSize === 0 ? 'disabled' : 'critical'}
                 />

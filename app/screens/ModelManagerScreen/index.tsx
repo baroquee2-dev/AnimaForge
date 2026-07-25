@@ -1,5 +1,6 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { SectionList } from 'react-native'
 import Animated, { Easing, SlideInLeft, SlideOutLeft } from 'react-native-reanimated'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -20,6 +21,7 @@ import ModelNewMenu from './ModelNewMenu'
 import ModelSettings from './ModelSettings'
 
 const ModelManagerScreen = () => {
+    const { t } = useTranslation()
     const { spacing } = Theme.useTheme()
 
     const { data: mmprojLinks } = useLiveQuery(Model.getMMPROJLinks())
@@ -42,11 +44,11 @@ const ModelManagerScreen = () => {
 
     const data = [
         {
-            title: 'Models',
+            title: t('models.title'),
             data: modelList,
         },
         {
-            title: 'Multimodal Adapters',
+            title: t('models.multimodalAdapters'),
             data: mmprojList,
         },
     ]
@@ -60,7 +62,7 @@ const ModelManagerScreen = () => {
                 paddingBottom: spacing.xl2,
                 flex: 1,
             }}>
-            <HeaderTitle title={showSettings ? 'Model Settings' : 'Models'} />
+            <HeaderTitle title={showSettings ? t('models.modelSettings') : t('models.title')} />
             <HeaderButton
                 headerRight={() =>
                     !showSettings && (
@@ -129,7 +131,7 @@ const ModelManagerScreen = () => {
                 />
             )}
             <ThemedButton
-                label={showSettings ? 'Back To Models' : 'Show Settings'}
+                label={showSettings ? t('models.backToModels') : t('models.showSettings')}
                 onPress={() => setShowSettings(!showSettings)}
             />
         </SafeAreaView>

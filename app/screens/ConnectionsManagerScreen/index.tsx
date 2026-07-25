@@ -2,6 +2,7 @@ import { AntDesign, Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
 import { FlatList, Pressable, Text, View } from 'react-native'
+import { useTranslation } from 'react-i18next'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useShallow } from 'zustand/react/shallow'
 
@@ -17,6 +18,7 @@ import TemplatePicker from './TemplatePicker'
 const ConnectionsManagerScreen = () => {
     // eslint-disable-next-line react-compiler/react-compiler
     'use no memo'
+    const { t } = useTranslation()
     const { apiValues } = APIManager.useConnectionsStore(
         useShallow((state) => ({
             apiValues: state.values,
@@ -35,7 +37,7 @@ const ConnectionsManagerScreen = () => {
                 paddingBottom: spacing.xl2,
                 flex: 1,
             }}>
-            <HeaderTitle title="API Manager" />
+            <HeaderTitle title={t('api.title')} />
             <HeaderButton
                 headerRight={() => (
                     <Pressable
@@ -71,7 +73,7 @@ const ConnectionsManagerScreen = () => {
                             fontStyle: 'italic',
                             marginTop: spacing.l,
                         }}>
-                        No Connections Added
+                        {t('api.noConnections')}
                     </Text>
                 </View>
             )}
@@ -81,7 +83,7 @@ const ConnectionsManagerScreen = () => {
                     marginHorizontal: spacing.xl,
                 }}
                 onPress={() => setShowTemplatePicker(true)}
-                label="Add Connection"
+                label={t('api.addConnection')}
             />
             <TemplatePicker
                 visible={showTemplatePicker}

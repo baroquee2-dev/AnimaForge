@@ -1,6 +1,7 @@
 import { Stack, useRouter } from 'expo-router'
 import { useCallback, useEffect, useState } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
+import { useTranslation } from 'react-i18next'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useShallow } from 'zustand/react/shallow'
 
@@ -13,10 +14,12 @@ import ThemedTextInput from '@components/input/ThemedTextInput'
 import { CLAUDE_VERSION } from '@lib/constants/GlobalValues'
 import { APIManagerValue, APIManager } from '@lib/engine/API/APIManagerState'
 import { Logger } from '@lib/state/Logger'
+import i18n from '@lib/i18n'
 import { Theme } from '@lib/theme/ThemeManager'
 import { getNestedValue } from '@lib/utils/Parsing'
 
 const AddConnection = () => {
+    const { t } = useTranslation()
     const styles = useStyles()
     const router = useRouter()
     const { addValue, getTemplates } = APIManager.useConnectionsStore(
@@ -30,7 +33,7 @@ const AddConnection = () => {
     const [values, setValues] = useState<APIManagerValue>({
         ...template.defaultValues,
         configName: template.name,
-        friendlyName: 'New API',
+        friendlyName: i18n.t('api.newApi'),
         active: true,
     })
     const [modelList, setModelList] = useState<any[]>([])
@@ -72,7 +75,7 @@ const AddConnection = () => {
 
     return (
         <SafeAreaView edges={['bottom']} style={styles.mainContainer}>
-            <Stack.Screen options={{ title: 'Add Connection' }} />
+            <Stack.Screen options={{ title: t('api.addConnection') }} />
             <ScrollView
                 style={{ flex: 1 }}
                 showsVerticalScrollIndicator={false}
@@ -93,12 +96,12 @@ const AddConnection = () => {
                             model: undefined,
                         })
                     }}
-                    modalTitle="Select Connection Type"
+                    modalTitle={t('api.selectType')}
                     search
                 />
 
                 <ThemedTextInput
-                    label="Friendly Name"
+                    label={t('api.friendlyName')}
                     value={values.friendlyName}
                     onChangeText={(value) => {
                         setValues({ ...values, friendlyName: value })
@@ -108,20 +111,20 @@ const AddConnection = () => {
                 {template.ui.editableCompletionPath && (
                     <View>
                         <ThemedTextInput
-                            label="Completion URL"
+                            label={t('api.completionUrl')}
                             value={values.endpoint}
                             onChangeText={(value) => {
                                 setValues({ ...values, endpoint: value })
                             }}
                         />
-                        <Text style={styles.hintText}>Note: Use full URL path</Text>
+                        <Text style={styles.hintText}>{t('api.fullUrlNote')}</Text>
                     </View>
                 )}
 
                 {template.ui.editableModelPath && (
                     <View>
                         <ThemedTextInput
-                            label="Model URL"
+                            label={t('api.modelUrl')}
                             value={values.modelEndpoint}
                             onChangeText={(value) => {
                                 setValues({ ...values, modelEndpoint: value })
@@ -145,7 +148,7 @@ const AddConnection = () => {
 
                 {template.features.useKey && (
                     <ThemedTextInput
-                        label="API Key"
+                        label={t('api.apiKey')}
                         secureTextEntry
                         value={values.key}
                         onChangeText={(value) => {
@@ -156,7 +159,7 @@ const AddConnection = () => {
 
                 {template.features.useModel && (
                     <View>
-                        <Text style={styles.title}>Model</Text>
+                        <Text style={styles.title}>{t('api.model')}</Text>
                         <View
                             style={{
                                 flexDirection: 'row',
@@ -176,7 +179,7 @@ const AddConnection = () => {
                                         setValues({ ...values, model: item })
                                     }}
                                     search={modelList.length > 10}
-                                    modalTitle="Select Model"
+                                    modalTitle={t('api.selectModel')}
                                 />
                             )}
                             {template.features.multipleModels && (
@@ -191,7 +194,7 @@ const AddConnection = () => {
                                         setValues({ ...values, model: item })
                                     }}
                                     search={modelList.length > 10}
-                                    modalTitle="Select Model"
+                                    modalTitle={t('api.selectModel')}
                                 />
                             )}
                             <ThemedButton
@@ -209,41 +212,41 @@ const AddConnection = () => {
                 {template.features.useFirstMessage && (
                     <View>
                         <ThemedTextInput
-                            label="First Message"
+                            label={t('api.firstMessage')}
                             value={values.firstMessage}
                             onChangeText={(value) => {
                                 setValues({ ...values, firstMessage: value })
                             }}
                         />
-                        <Text style={styles.hintText}>Default first message sent to Claude</Text>
+                        <Text style={styles.hintText}>{t('api.firstMessageDesc')}</Text>
                     </View>
                 )}
                 {template.features.usePrefill && (
                     <View>
                         <ThemedTextInput
-                            label="Prefill"
+                            label={t('api.prefill')}
                             value={values.prefill}
                             onChangeText={(value) => {
                                 setValues({ ...values, prefill: value })
                             }}
                         />
-                        <Text style={styles.hintText}>Prefill before model response</Text>
+                        <Text style={styles.hintText}>{t('api.prefillDesc')}</Text>
                     </View>
                 )}
 
                 {template.features.useGeminiGrounding && (
                     <ThemedSwitch
-                        label="Search Grounding"
+                        label={t('api.searchGrounding')}
                         value={values.geminiSearchGrounding ?? false}
                         onChangeValue={(enabled) => {
                             setValues({ ...values, geminiSearchGrounding: enabled })
                         }}
-                        description="Uses Gemini native API to search the web for up-to-date answers. Requires Gemini 2.0+ models."
+                        description={t('api.searchGroundingDesc')}
                     />
                 )}
             </ScrollView>
             <ThemedButton
-                label="Create API"
+                label={t('api.createApi')}
                 onPress={() => {
                     addValue(values)
                     router.back()

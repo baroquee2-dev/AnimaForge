@@ -1,6 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons'
 import { useEffect, useMemo, useState } from 'react'
 import { FlatList, Linking, Pressable, Text, View } from 'react-native'
+import { useTranslation } from 'react-i18next'
 import Animated, {
     interpolateColor,
     useAnimatedStyle,
@@ -14,6 +15,7 @@ import BottomSheet from '@components/views/BottomSheet'
 import { APIConfiguration } from '@lib/engine/API/APIBuilder.types'
 import { APIManager } from '@lib/engine/API/APIManagerState'
 import { Theme } from '@lib/theme/ThemeManager'
+import i18n from '@lib/i18n'
 
 type TemplatePickerProps = {
     visible: boolean
@@ -103,6 +105,7 @@ const TemplateItem: React.FC<{
 }
 
 const TemplatePicker: React.FC<TemplatePickerProps> = ({ visible, setVisible, setPending }) => {
+    const { t } = useTranslation()
     const [selected, setSelected] = useState<number | undefined>()
     const { color, fontSize, spacing } = Theme.useTheme()
     const { addValue, getTemplates, valuesLength } = APIManager.useConnectionsStore(
@@ -138,7 +141,7 @@ const TemplatePicker: React.FC<TemplatePickerProps> = ({ visible, setVisible, se
                     paddingBottom: spacing.xl,
                     fontSize: fontSize.xl,
                 }}>
-                Add Connection
+                {t('api.addConnection')}
             </Text>
             <FlatList
                 data={templates}
@@ -162,7 +165,7 @@ const TemplatePicker: React.FC<TemplatePickerProps> = ({ visible, setVisible, se
             <View style={{ paddingTop: 12 }}>
                 <ThemedButton
                     disabled={selected === undefined}
-                    label="Create"
+                    label={t('api.create')}
                     onPress={() => {
                         if (selected === undefined) return
                         const template = templates.at(selected)
@@ -171,7 +174,7 @@ const TemplatePicker: React.FC<TemplatePickerProps> = ({ visible, setVisible, se
                             ...template.defaultValues,
                             active: true,
                             configName: template.name,
-                            friendlyName: 'New API',
+                            friendlyName: i18n.t('api.newApi'),
                         })
                         setPending(valuesLength)
                         handleClose()

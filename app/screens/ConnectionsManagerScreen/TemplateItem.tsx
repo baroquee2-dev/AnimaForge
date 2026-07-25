@@ -1,10 +1,12 @@
 import { Text, View } from 'react-native'
+import { useTranslation } from 'react-i18next'
 
 import ThemedButton from '@components/buttons/ThemedButton'
 import Alert from '@components/views/Alert'
 import { APIConfiguration } from '@lib/engine/API/APIBuilder.types'
 import { APIManager } from '@lib/engine/API/APIManagerState'
 import { Logger } from '@lib/state/Logger'
+import i18n from '@lib/i18n'
 import { Theme } from '@lib/theme/ThemeManager'
 import { saveStringToDownload } from '@lib/utils/File'
 
@@ -14,18 +16,19 @@ type TemplateItemProps = {
 }
 
 const TemplateItem: React.FC<TemplateItemProps> = ({ item, index }) => {
+    const { t } = useTranslation()
     const { color, spacing, borderWidth, fontSize, borderRadius } = Theme.useTheme()
 
     const removeTemplate = APIManager.useConnectionsStore((state) => state.removeTemplate)
 
     const handleDelete = () => {
         Alert.alert({
-            title: 'Delete Template',
-            description: `Are you sure you want to delete "${item.name}"?`,
+            title: t('api.deleteTemplate'),
+            description: t('api.deleteTemplateDesc', { name: item.name }),
             buttons: [
-                { label: 'Cancel' },
+                { label: t('common.cancel') },
                 {
-                    label: 'Delete Template',
+                    label: t('api.deleteTemplate'),
                     onPress: () => {
                         removeTemplate(index)
                     },
@@ -37,7 +40,7 @@ const TemplateItem: React.FC<TemplateItemProps> = ({ item, index }) => {
 
     const handleExport = () => {
         saveStringToDownload(JSON.stringify(item), `${item.name}.json`, 'utf8').then(() => {
-            Logger.infoToast(`Saved ${item.name}.json To Downloads`)
+            Logger.infoToast(i18n.t('api.savedTemplate', { filename: `${item.name}.json` }))
         })
     }
 

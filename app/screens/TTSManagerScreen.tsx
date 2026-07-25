@@ -1,5 +1,6 @@
 import * as Speech from 'expo-speech'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { View } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 
@@ -10,6 +11,7 @@ import ThemedSwitch from '@components/input/ThemedSwitch'
 import ThemedTextInput from '@components/input/ThemedTextInput'
 import SectionTitle from '@components/text/SectionTitle'
 import HeaderTitle from '@components/views/HeaderTitle'
+import i18n from '@lib/i18n'
 import { Logger } from '@lib/state/Logger'
 import { useTTS, type TTSProvider } from '@lib/state/TTS'
 import { Theme } from '@lib/theme/ThemeManager'
@@ -93,13 +95,6 @@ const geminiModels: GeminiModel[] = [
     { model_id: 'gemini-2.5-pro-preview-tts', name: 'Gemini 2.5 Pro TTS' },
 ]
 
-const providerLabels: Record<TTSProvider, string> = {
-    device: 'Device voice',
-    elevenlabs: 'ElevenLabs',
-    gemini: 'Gemini',
-    cartesia: 'Cartesia',
-}
-
 type CartesiaVoice = {
     id: string
     name: string
@@ -110,29 +105,20 @@ type CartesiaVoice = {
 type CartesiaModel = {
     model_id: string
     name: string
-    description: string
+    descKey: 'latest' | 'stable' | 'preview'
 }
 
 const cartesiaModels: CartesiaModel[] = [
     {
         model_id: 'sonic-3.5',
         name: 'Sonic 3.5',
-        description: 'Latest, fast and expressive',
+        descKey: 'latest',
     },
-    { model_id: 'sonic-3', name: 'Sonic 3', description: 'Stable, low latency' },
-    { model_id: 'sonic-latest', name: 'Sonic Latest', description: 'Preview track' },
+    { model_id: 'sonic-3', name: 'Sonic 3', descKey: 'stable' },
+    { model_id: 'sonic-latest', name: 'Sonic Latest', descKey: 'preview' },
 ]
 
-const cartesiaLanguages = [
-    { code: 'zh', label: 'Chinese (zh)' },
-    { code: 'en', label: 'English (en)' },
-    { code: 'ja', label: 'Japanese (ja)' },
-    { code: 'ko', label: 'Korean (ko)' },
-    { code: 'fr', label: 'French (fr)' },
-    { code: 'de', label: 'German (de)' },
-    { code: 'es', label: 'Spanish (es)' },
-    { code: 'pt', label: 'Portuguese (pt)' },
-]
+const cartesiaLanguageCodes = ['zh', 'en', 'ja', 'ko', 'fr', 'de', 'es', 'pt'] as const
 
 const fallbackCartesiaVoices: CartesiaVoice[] = [
     {
@@ -144,6 +130,7 @@ const fallbackCartesiaVoices: CartesiaVoice[] = [
 ]
 
 const TTSManagerScreen = () => {
+    const { t } = useTranslation()
     const { color } = Theme.useTheme()
     const {
         voice,
@@ -184,10 +171,22 @@ const TTSManagerScreen = () => {
     const [lang, setLang] = useState(voice?.language ?? 'en-US')
     const [modelList, setModelList] = useState<Speech.Voice[]>([])
     const languageList: LanguageListItem = groupBy(modelList, 'language')
-    const [testAudioText, setTestAudioText] = useState('This is a test audio')
+    const [testAudioText, setTestAudioText] = useState(() => i18n.t('tts.testAudio'))
     const [elevenLabsModels, setElevenLabsModels] = useState(fallbackElevenLabsModels)
     const [elevenLabsVoices, setElevenLabsVoices] = useState(fallbackElevenLabsVoices)
     const [cartesiaVoices, setCartesiaVoices] = useState(fallbackCartesiaVoices)
+
+    const providerLabels: Record<TTSProvider, string> = {
+        device: t('tts.deviceVoice'),
+        elevenlabs: 'ElevenLabs',
+        gemini: 'Gemini',
+        cartesia: 'Cartesia',
+    }
+
+    const cartesiaLanguages = cartesiaLanguageCodes.map((code) => ({
+        code,
+        label: t(`tts.lang.${code}`),
+    }))
 
     const languages = Object.keys(languageList)
         .sort()
@@ -205,7 +204,7 @@ const TTSManagerScreen = () => {
 
     const getCartesiaVoices = async () => {
         if (!cartesiaApiKey.trim()) {
-            Logger.warnToast('Enter a Cartesia API Key first')
+            Logger.warnToast(i18n.t('tts.enterCartesiaKey'))
             return
         }
         try {
@@ -252,18 +251,20 @@ const TTSManagerScreen = () => {
                     setCartesiaVoiceId(voices[0].id)
                 }
             } else {
-                Logger.warnToast('No Cartesia voices returned')
+                Logger.warnToast(i18n.t('tts.noCartesiaVoices'))
             }
         } catch (error) {
             Logger.errorToast(
-                error instanceof Error ? `Cartesia: ${error.message}` : 'Could not load voices'
+                error instanceof Error
+                    ? i18n.t('tts.cartesiaError', { message: error.message })
+                    : i18n.t('tts.couldNotLoadVoices')
             )
         }
     }
 
     const getElevenLabsModels = async () => {
         if (!elevenLabsApiKey.trim()) {
-            Logger.warnToast('Enter an ElevenLabs API Key first')
+            Logger.warnToast(i18n.t('tts.enterElevenLabsKey'))
             return
         }
         try {
@@ -282,14 +283,16 @@ const TTSManagerScreen = () => {
             }
         } catch (error) {
             Logger.errorToast(
-                error instanceof Error ? `ElevenLabs: ${error.message}` : 'Could not load models'
+                error instanceof Error
+                    ? i18n.t('tts.elevenLabsError', { message: error.message })
+                    : i18n.t('tts.couldNotLoadModels')
             )
         }
     }
 
     const getElevenLabsVoices = async () => {
         if (!elevenLabsApiKey.trim()) {
-            Logger.warnToast('Enter an ElevenLabs API Key first')
+            Logger.warnToast(i18n.t('tts.enterElevenLabsKey'))
             return
         }
         try {
@@ -305,11 +308,13 @@ const TTSManagerScreen = () => {
                     setElevenLabsVoiceId(voices[0].voice_id)
                 }
             } else {
-                Logger.warnToast('No ElevenLabs voices returned')
+                Logger.warnToast(i18n.t('tts.noElevenLabsVoices'))
             }
         } catch (error) {
             Logger.errorToast(
-                error instanceof Error ? `ElevenLabs: ${error.message}` : 'Could not load voices'
+                error instanceof Error
+                    ? i18n.t('tts.elevenLabsError', { message: error.message })
+                    : i18n.t('tts.couldNotLoadVoices')
             )
         }
     }
@@ -322,11 +327,11 @@ const TTSManagerScreen = () => {
                 paddingHorizontal: 16,
             }}
             contentContainerStyle={{ rowGap: 8 }}>
-            <HeaderTitle title="TTS" />
-            <SectionTitle>Settings</SectionTitle>
+            <HeaderTitle title={t('tts.title')} />
+            <SectionTitle>{t('tts.settings')}</SectionTitle>
 
             <ThemedSwitch
-                label="Enable"
+                label={t('tts.enable')}
                 value={enabled}
                 onChangeValue={(value) => {
                     if (value) {
@@ -343,7 +348,7 @@ const TTSManagerScreen = () => {
                     }
                     setAuto(value)
                 }}
-                label="Automatically TTS After Inference"
+                label={t('tts.autoAfter')}
             />
 
             <ThemedSwitch
@@ -354,11 +359,11 @@ const TTSManagerScreen = () => {
                     }
                     setLive(value)
                 }}
-                label="Automatically TTS During Inference"
+                label={t('tts.autoDuring')}
             />
 
             <ThemedSlider
-                label="Speed"
+                label={t('tts.speed')}
                 min={0.1}
                 max={2.5}
                 step={0.1}
@@ -367,7 +372,7 @@ const TTSManagerScreen = () => {
                 onValueChange={setRate}
             />
 
-            <SectionTitle style={{ marginTop: 8 }}>Speech Provider</SectionTitle>
+            <SectionTitle style={{ marginTop: 8 }}>{t('tts.speechProvider')}</SectionTitle>
             <DropdownSheet
                 selected={provider}
                 data={['device', 'elevenlabs', 'gemini', 'cartesia'] as const}
@@ -378,7 +383,7 @@ const TTSManagerScreen = () => {
             {provider === 'elevenlabs' && (
                 <>
                     <ThemedTextInput
-                        label="ElevenLabs API Key"
+                        label={t('tts.elevenLabsApiKey')}
                         value={elevenLabsApiKey}
                         onChangeText={setElevenLabsApiKey}
                         secureTextEntry
@@ -386,12 +391,12 @@ const TTSManagerScreen = () => {
                         autoCorrect={false}
                         placeholder="xi-api-key"
                     />
-                    <SectionTitle>ElevenLabs Voice</SectionTitle>
+                    <SectionTitle>{t('tts.elevenLabsVoice')}</SectionTitle>
                     <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}>
                         <DropdownSheet
                             containerStyle={{ flex: 1 }}
                             search
-                            modalTitle="Select ElevenLabs Voice"
+                            modalTitle={t('tts.selectElevenLabsVoice')}
                             selected={elevenLabsVoices.find(
                                 (voice) => voice.voice_id === elevenLabsVoiceId
                             )}
@@ -399,7 +404,7 @@ const TTSManagerScreen = () => {
                             labelExtractor={(voice) =>
                                 `${voice.name}${voice.category ? ` (${voice.category})` : ''}`
                             }
-                            placeholder="Select ElevenLabs voice"
+                            placeholder={t('tts.selectElevenLabsVoiceShort')}
                             onChangeValue={(voice) => setElevenLabsVoiceId(voice.voice_id)}
                         />
                         <ThemedButton
@@ -410,15 +415,15 @@ const TTSManagerScreen = () => {
                         />
                     </View>
                     <ThemedTextInput
-                        label="Voice ID (optional)"
-                        description="Paste a voice ID manually if it does not appear in the list."
+                        label={t('tts.voiceIdOptional')}
+                        description={t('tts.voiceIdManualHint')}
                         value={elevenLabsVoiceId}
                         onChangeText={setElevenLabsVoiceId}
                         autoCapitalize="none"
                         autoCorrect={false}
                         placeholder="21m00Tcm4TlvDq8ikWAM"
                     />
-                    <SectionTitle>ElevenLabs Model</SectionTitle>
+                    <SectionTitle>{t('tts.elevenLabsModel')}</SectionTitle>
                     <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}>
                         <DropdownSheet
                             containerStyle={{ flex: 1 }}
@@ -427,7 +432,7 @@ const TTSManagerScreen = () => {
                             )}
                             data={elevenLabsModels}
                             labelExtractor={(model) => `${model.name} (${model.model_id})`}
-                            placeholder="Select ElevenLabs model"
+                            placeholder={t('tts.selectElevenLabsModel')}
                             onChangeValue={(model) => setElevenLabsModel(model.model_id)}
                         />
                         <ThemedButton
@@ -438,7 +443,7 @@ const TTSManagerScreen = () => {
                         />
                     </View>
                     <ThemedButton
-                        label="Test ElevenLabs Voice"
+                        label={t('tts.testElevenLabs')}
                         variant="secondary"
                         onPress={() => startTTS(testAudioText, -1)}
                     />
@@ -448,7 +453,7 @@ const TTSManagerScreen = () => {
             {provider === 'gemini' && (
                 <>
                     <ThemedTextInput
-                        label="Gemini API Key"
+                        label={t('tts.geminiApiKey')}
                         value={geminiApiKey}
                         onChangeText={setGeminiApiKey}
                         secureTextEntry
@@ -456,26 +461,28 @@ const TTSManagerScreen = () => {
                         autoCorrect={false}
                         placeholder="AIza..."
                     />
-                    <SectionTitle>Gemini Voice</SectionTitle>
+                    <SectionTitle>{t('tts.geminiVoice')}</SectionTitle>
                     <DropdownSheet
                         search
-                        modalTitle="Select Gemini Voice"
+                        modalTitle={t('tts.selectGeminiVoice')}
                         selected={geminiVoices.find((voice) => voice.name === geminiVoiceName)}
                         data={geminiVoices}
-                        labelExtractor={(voice) => `${voice.name} — ${voice.description}`}
-                        placeholder="Select Gemini voice"
+                        labelExtractor={(voice) =>
+                            `${voice.name} — ${t(`tts.voiceDesc.${voice.description}`)}`
+                        }
+                        placeholder={t('tts.selectGeminiVoiceShort')}
                         onChangeValue={(voice) => setGeminiVoiceName(voice.name)}
                     />
-                    <SectionTitle>Gemini Model</SectionTitle>
+                    <SectionTitle>{t('tts.geminiModel')}</SectionTitle>
                     <DropdownSheet
                         selected={geminiModels.find((model) => model.model_id === geminiModel)}
                         data={geminiModels}
                         labelExtractor={(model) => `${model.name} (${model.model_id})`}
-                        placeholder="Select Gemini model"
+                        placeholder={t('tts.selectGeminiModel')}
                         onChangeValue={(model) => setGeminiModel(model.model_id)}
                     />
                     <ThemedButton
-                        label="Test Gemini Voice"
+                        label={t('tts.testGemini')}
                         variant="secondary"
                         onPress={() => startTTS(testAudioText, -1)}
                     />
@@ -485,7 +492,7 @@ const TTSManagerScreen = () => {
             {provider === 'cartesia' && (
                 <>
                     <ThemedTextInput
-                        label="Cartesia API Key"
+                        label={t('tts.cartesiaApiKey')}
                         value={cartesiaApiKey}
                         onChangeText={setCartesiaApiKey}
                         secureTextEntry
@@ -493,18 +500,18 @@ const TTSManagerScreen = () => {
                         autoCorrect={false}
                         placeholder="sk_car_..."
                     />
-                    <SectionTitle>Cartesia Voice</SectionTitle>
+                    <SectionTitle>{t('tts.cartesiaVoice')}</SectionTitle>
                     <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}>
                         <DropdownSheet
                             containerStyle={{ flex: 1 }}
                             search
-                            modalTitle="Select Cartesia Voice"
+                            modalTitle={t('tts.selectCartesiaVoice')}
                             selected={cartesiaVoices.find((voice) => voice.id === cartesiaVoiceId)}
                             data={cartesiaVoices}
                             labelExtractor={(voice) =>
                                 `${voice.name}${voice.language ? ` (${voice.language})` : ''}`
                             }
-                            placeholder="Select Cartesia voice"
+                            placeholder={t('tts.selectCartesiaVoiceShort')}
                             onChangeValue={(voice) => setCartesiaVoiceId(voice.id)}
                         />
                         <ThemedButton
@@ -515,32 +522,34 @@ const TTSManagerScreen = () => {
                         />
                     </View>
                     <ThemedTextInput
-                        label="Voice ID (optional)"
-                        description="Paste a voice ID from play.cartesia.ai if you prefer manual entry."
+                        label={t('tts.voiceIdOptional')}
+                        description={t('tts.cartesiaVoiceIdHint')}
                         value={cartesiaVoiceId}
                         onChangeText={setCartesiaVoiceId}
                         autoCapitalize="none"
                         autoCorrect={false}
                         placeholder="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4"
                     />
-                    <SectionTitle>Cartesia Model</SectionTitle>
+                    <SectionTitle>{t('tts.cartesiaModel')}</SectionTitle>
                     <DropdownSheet
                         selected={cartesiaModels.find((model) => model.model_id === cartesiaModel)}
                         data={cartesiaModels}
-                        labelExtractor={(model) => `${model.name} — ${model.description}`}
-                        placeholder="Select Cartesia model"
+                        labelExtractor={(model) =>
+                            `${model.name} — ${t(`tts.cartesiaModelDesc.${model.descKey}`)}`
+                        }
+                        placeholder={t('tts.selectCartesiaModel')}
                         onChangeValue={(model) => setCartesiaModel(model.model_id)}
                     />
-                    <SectionTitle>Language</SectionTitle>
+                    <SectionTitle>{t('tts.language')}</SectionTitle>
                     <DropdownSheet
                         selected={cartesiaLanguages.find((item) => item.code === cartesiaLanguage)}
                         data={cartesiaLanguages}
                         labelExtractor={(item) => item.label}
-                        placeholder="Select language"
+                        placeholder={t('tts.selectLanguageShort')}
                         onChangeValue={(item) => setCartesiaLanguage(item.code)}
                     />
                     <ThemedButton
-                        label="Test Cartesia Voice"
+                        label={t('tts.testCartesia')}
                         variant="secondary"
                         onPress={() => startTTS(testAudioText, -1)}
                     />
@@ -550,7 +559,7 @@ const TTSManagerScreen = () => {
             {provider === 'device' && (
                 <>
                     <SectionTitle style={{ marginTop: 8 }}>
-                        Language ({Object.keys(languageList).length})
+                        {t('tts.languageCount', { count: Object.keys(languageList).length })}
                     </SectionTitle>
                     <View style={{ marginTop: 8 }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}>
@@ -559,7 +568,7 @@ const TTSManagerScreen = () => {
                                 selected={lang}
                                 data={languages}
                                 labelExtractor={(item) => item}
-                                placeholder="Select Language"
+                                placeholder={t('tts.selectLanguage')}
                                 onChangeValue={(item) => setLang(item)}
                             />
                             <ThemedButton
@@ -572,17 +581,19 @@ const TTSManagerScreen = () => {
                     </View>
 
                     <SectionTitle style={{ marginTop: 8 }}>
-                        Voices ({modelList.filter((item) => item.language === lang).length})
+                        {t('tts.voicesCount', {
+                            count: modelList.filter((item) => item.language === lang).length,
+                        })}
                     </SectionTitle>
 
                     <DropdownSheet
                         style={{ marginBottom: 8 }}
                         search
-                        modalTitle="Select Voice"
+                        modalTitle={t('tts.selectVoice')}
                         selected={voice}
                         data={languageList?.[lang] ?? []}
                         labelExtractor={(item) => item.identifier}
-                        placeholder="Select Voice"
+                        placeholder={t('tts.selectVoice')}
                         onChangeValue={(item) => setVoice(item)}
                     />
                     <View
@@ -598,11 +609,11 @@ const TTSManagerScreen = () => {
                             style={{ color: color.text._400, fontStyle: 'italic' }}
                         />
                         <ThemedButton
-                            label="Test"
+                            label={t('tts.test')}
                             variant="secondary"
                             onPress={() => {
                                 if (voice === undefined) {
-                                    Logger.warnToast(`No Speaker Chosen`)
+                                    Logger.warnToast(i18n.t('tts.noSpeaker'))
                                     return
                                 }
                                 Speech.speak(testAudioText, {

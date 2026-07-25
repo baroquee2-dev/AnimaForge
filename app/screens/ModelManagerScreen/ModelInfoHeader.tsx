@@ -1,5 +1,6 @@
 import { AntDesign } from '@expo/vector-icons'
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { View, Text, StyleSheet } from 'react-native'
 import * as Progress from 'react-native-progress'
 import { useShallow } from 'zustand/react/shallow'
@@ -20,6 +21,7 @@ const ModelInfoHeader: React.FC<ModelInfoHeaderProps> = ({
     modelListLength,
     modelUpdatedAt,
 }) => {
+    const { t } = useTranslation()
     const styles = useStyles()
     const { color } = Theme.useTheme()
 
@@ -30,22 +32,26 @@ const ModelInfoHeader: React.FC<ModelInfoHeaderProps> = ({
         }))
     )
 
+    const [importHintBefore, importHintAfter] = t('models.importHint', { icon: '\u0000' }).split(
+        '\u0000'
+    )
+
     return (
         <View style={styles.modelContainer}>
             {!modelImporting && !modelLoading && modelListLength !== 0 && (
                 <Text style={styles.subtitle}>
-                    Model Loaded:{' '}
+                    {t('models.modelLoaded')}
                     <Text style={styles.modelTitle} ellipsizeMode="tail" numberOfLines={1}>
-                        {modelName ?? 'None'}
+                        {modelName ?? t('models.none')}
                     </Text>
                 </Text>
             )}
             {!modelImporting && !modelLoading && modelListLength === 0 && modelUpdatedAt && (
                 <View>
                     <Text style={styles.hint}>
-                        Hint: Press{' '}
-                        <AntDesign name="file-add" size={16} color={color.text._400} /> and import a
-                        GGUF model!
+                        {importHintBefore}
+                        <AntDesign name="file-add" size={16} color={color.text._400} />
+                        {importHintAfter}
                     </Text>
                 </View>
             )}
@@ -69,7 +75,7 @@ const ModelInfoHeader: React.FC<ModelInfoHeaderProps> = ({
                             color: color.text._100,
                             textAlign: 'center',
                         }}>
-                        Importing...
+                        {t('models.importing')}
                     </Text>
                 </View>
             )}

@@ -1,9 +1,11 @@
 import { AntDesign } from '@expo/vector-icons'
 import { Text, View } from 'react-native'
+import { useTranslation } from 'react-i18next'
 
 import { Theme } from '@lib/theme/ThemeManager'
 
 const ModelEmpty = () => {
+    const { t } = useTranslation()
     const { color, spacing, fontSize } = Theme.useTheme()
     return (
         <View
@@ -20,7 +22,7 @@ const ModelEmpty = () => {
                     fontStyle: 'italic',
                     fontSize: fontSize.l,
                 }}>
-                No Models Found. Try Importing Some!
+                {t('models.empty')}
             </Text>
         </View>
     )

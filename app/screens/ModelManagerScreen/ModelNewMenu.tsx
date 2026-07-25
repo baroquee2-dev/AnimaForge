@@ -1,4 +1,5 @@
 import { View } from 'react-native'
+import { useTranslation } from 'react-i18next'
 
 import ContextMenu from '@components/views/ContextMenu'
 import { Model } from '@lib/engine/Local/Model'
@@ -9,6 +10,8 @@ type ModelNewMenuProps = {
 }
 
 const ModelNewMenu: React.FC<ModelNewMenuProps> = ({ modelImporting, setModelImporting }) => {
+    const { t } = useTranslation()
+
     const handleSetExternal = async (close: () => void) => {
         close()
         if (modelImporting) return
@@ -33,12 +36,12 @@ const ModelNewMenu: React.FC<ModelNewMenuProps> = ({ modelImporting, setModelImp
                 disabled={modelImporting}
                 buttons={[
                     {
-                        label: 'Copy Model Into AnimaForge',
+                        label: t('models.copyIntoApp'),
                         icon: 'download',
                         onPress: handleImportModel,
                     },
                     {
-                        label: 'Use External Model',
+                        label: t('models.useExternal'),
                         icon: 'link',
                         onPress: handleSetExternal,
                     },
