@@ -55,7 +55,7 @@ export const resolveGeminiModelName = (
 const toGeminiParts = (content: string | { type: string; text?: string; image_url?: { url: string }; input_audio?: { data: string; format: string } }[]): GeminiPart[] => {
     if (typeof content === 'string') return [{ text: content }]
 
-    return content.flatMap((item) => {
+    return content.flatMap((item): GeminiPart[] => {
         if (item.type === 'text' || item.type === 'input_text') {
             return item.text ? [{ text: item.text }] : []
         }

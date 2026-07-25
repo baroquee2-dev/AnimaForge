@@ -117,5 +117,18 @@
     "@xmldom/xmldom": ">=0.8.13",
     "uuid": ">=14.0.0"
   },
+  "expo": {
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "exclude": [
+          "react-native-background-actions",
+          "@vali98/react-native-cpu-info",
+          "@vali98/react-native-fs",
+          "@vali98/react-native-png-utils",
+          "cui-llama.rn"
+        ]
+      }
+    }
+  },
   "private": true
 }

@@ -73,13 +73,14 @@ export const buildAndSendRequest = async ({
             return
         }
 
+        const completionType = apiConfig.request.completionType
         const useGeminiGrounding =
             apiConfig.features.useGeminiGrounding &&
             apiValues.geminiSearchGrounding &&
-            apiConfig.request.completionType.type === 'chatCompletions'
+            completionType.type === 'chatCompletions'
 
         let endpoint = apiValues.endpoint
-        if (useGeminiGrounding) {
+        if (useGeminiGrounding && completionType.type === 'chatCompletions') {
             if (!Array.isArray(prompt)) {
                 Logger.errorToast(i18n.t('toast.geminiGroundingNeedsChat'))
                 stopGenerating()
@@ -88,16 +89,17 @@ export const buildAndSendRequest = async ({
 
             payload = buildGeminiGroundingPayload(
                 prompt,
-                apiConfig.request.completionType.contentName,
+                completionType.contentName,
                 samplers,
                 stopSequence
             )
-            endpoint = getGeminiGroundingEndpoint(apiConfig, apiValues)
-            if (!endpoint) {
+            const groundingEndpoint = getGeminiGroundingEndpoint(apiConfig, apiValues)
+            if (!groundingEndpoint) {
                 Logger.errorToast(i18n.t('toast.geminiModelResolveFailed'))
                 stopGenerating()
                 return
             }
+            endpoint = groundingEndpoint
             Logger.info(`Using Gemini grounding: ${endpoint}`)
         } else {
             payload = await buildRequest({
