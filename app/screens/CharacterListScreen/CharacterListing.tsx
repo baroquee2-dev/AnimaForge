@@ -2,6 +2,7 @@ import { ImageBackground } from 'expo-image'
 import { StyleSheet, Text, View } from 'react-native'
 import { useMMKVBoolean } from 'react-native-mmkv'
 import Animated, { SlideInLeft, Easing } from 'react-native-reanimated'
+import { useTranslation } from 'react-i18next'
 import { useShallow } from 'zustand/react/shallow'
 
 import Avatar from '@components/views/Avatar'
@@ -39,6 +40,7 @@ const CharacterListing: React.FC<CharacterListingProps> = ({
     setNowLoading,
     index,
 }) => {
+    const { t } = useTranslation()
     const [showTags] = useMMKVBoolean(AppSettings.ShowTags)
     const { setShowSearch, setTagFilter, tagFilter } = CharacterSorter.useSorterStore(
         useShallow((state) => ({
@@ -108,7 +110,7 @@ const CharacterListing: React.FC<CharacterListingProps> = ({
                                 ) : (
                                     <View style={styles.messagePanel}>
                                         <Text style={styles.latestPlaceholder} numberOfLines={1}>
-                                            尚無對話
+                                            {t('characterList.noChats')}
                                         </Text>
                                     </View>
                                 )}

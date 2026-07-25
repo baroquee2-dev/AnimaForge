@@ -15,6 +15,7 @@ import HeaderTitle from '@components/views/HeaderTitle'
 import SettingsDrawer from '@components/views/SettingsDrawer'
 import { playChatEnterSound } from '@lib/audio/playInputFocusSound'
 import { useChatLayout } from '@lib/constants/ChatLayout'
+import i18n from '@lib/i18n'
 import { Characters } from '@lib/state/Characters'
 import { Chats, useInference } from '@lib/state/Chat'
 import { Logger } from '@lib/state/Logger'
@@ -105,14 +106,14 @@ const ChatScreen = () => {
 
     const handleImportChat = async () => {
         if (!charId || !userId) {
-            Logger.errorToast('You are somehow importing a chat without a character or user')
+            Logger.errorToast(i18n.t('chat.importNoCharacter'))
             return
         }
         const file = await FileUtils.pickText({ type: 'application/json' })
         if (!file.success) return
         const result = ChatImportSchema.safeParse(JSON.parse(file.data))
         if (!result.success) {
-            Logger.errorToast('Failed to Import')
+            Logger.errorToast(i18n.t('chat.importFailed'))
             Logger.error('Incorrect format')
             return
         }

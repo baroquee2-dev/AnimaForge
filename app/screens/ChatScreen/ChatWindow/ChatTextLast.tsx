@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Pressable, View, Animated, Easing, useAnimatedValue } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
+import { useTranslation } from 'react-i18next'
 import Markdown from 'react-native-markdown-display'
 import { useShallow } from 'zustand/react/shallow'
 
@@ -31,6 +32,7 @@ const ChatTextLast: React.FC<ChatTextProps> = ({
     onBubblePress,
     onBubbleLongPress,
 }) => {
+    const { t } = useTranslation()
     const { markdown, rules, style } = MarkdownStyle.useCustomFormatting()
 
     const { swipeText, swipeId } = Chats.useSwipeData(index)
@@ -100,7 +102,7 @@ const ChatTextLast: React.FC<ChatTextProps> = ({
                     <ThemedButton
                         onPress={() => setShowHidden(!showHidden)}
                         variant="secondary"
-                        label={showHidden ? 'Hide Filtered' : 'Show Filtered'}
+                        label={showHidden ? t('chat.hideFiltered') : t('chat.showFiltered')}
                         labelStyle={{ flex: 0, fontSize: 12 }}
                         buttonStyle={{
                             paddingVertical: 0,

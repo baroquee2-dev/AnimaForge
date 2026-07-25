@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
+import { useTranslation } from 'react-i18next'
 import { create } from 'zustand'
 import { useShallow } from 'zustand/react/shallow'
 
@@ -29,6 +30,7 @@ export const useChatEditorStore = create<ChatEditorStateProps>()((set) => ({
 }))
 
 const ChatEditor = () => {
+    const { t } = useTranslation()
     const { index, editMode, hide } = useChatEditorStore(
         useShallow((state) => ({
             index: state.index,
@@ -91,7 +93,7 @@ const ChatEditor = () => {
                     justifyContent: 'space-between',
                 }}>
                 <ThemedButton
-                    label="Delete"
+                    label={t('common.delete')}
                     iconName="delete"
                     onPress={handleDeleteMessage}
                     variant="critical"
@@ -99,11 +101,11 @@ const ChatEditor = () => {
                 <ThemedButton
                     iconName="reload"
                     variant="tertiary"
-                    label="Reset"
+                    label={t('common.reset')}
                     onPress={() => swipeText && setPlaceholderText(swipeText)}
                 />
                 <ThemedButton
-                    label="Confirm"
+                    label={t('common.confirm')}
                     iconName="check"
                     onPress={handleEditMessage}
                     variant="secondary"

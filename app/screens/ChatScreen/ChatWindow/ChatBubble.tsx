@@ -1,5 +1,6 @@
 import { Pressable, Text, View } from 'react-native'
 import { useMMKVBoolean } from 'react-native-mmkv'
+import { useTranslation } from 'react-i18next'
 import { useShallow } from 'zustand/react/shallow'
 
 import { AppSettings } from '@lib/constants/GlobalValues'
@@ -34,6 +35,7 @@ const ChatBubble: React.FC<ChatTextProps> = ({
     historyCompact = false,
     toolbarExternal = false,
 }) => {
+    const { t } = useTranslation()
     const message = Chats.useEntryData(index)
     const { appMode } = useAppMode()
     const isVisualNovel = useIsVisualNovelPresentation()
@@ -158,8 +160,14 @@ const ChatBubble: React.FC<ChatTextProps> = ({
                                 textAlign: 'right',
                                 fontSize: fontSize.s,
                             }}>
-                            {`Prompt: ${getFiniteValue(timings.prompt_per_second)} t/s | ${getFiniteValue(timings.prompt_ms / 1000)}s`}
-                            {`   Text Gen: ${getFiniteValue(timings.predicted_per_second)} t/s | ${getFiniteValue(timings.predicted_ms / 1000)}s`}
+                            {t('chat.promptTiming', {
+                                tps: getFiniteValue(timings.prompt_per_second),
+                                seconds: getFiniteValue(timings.prompt_ms / 1000),
+                            })}
+                            {t('chat.textGenTiming', {
+                                tps: getFiniteValue(timings.predicted_per_second),
+                                seconds: getFiniteValue(timings.predicted_ms / 1000),
+                            })}
                         </Text>
                     )}
 

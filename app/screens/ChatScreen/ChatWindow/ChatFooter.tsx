@@ -1,15 +1,17 @@
 import { StyleSheet, Text, View } from 'react-native'
+import { useTranslation } from 'react-i18next'
 
 import { Chats } from '@lib/state/Chat'
 import { Theme } from '@lib/theme/ThemeManager'
 
 const ChatFooter = () => {
+    const { t } = useTranslation()
     const { chatLength } = Chats.useChat()
     const { color, fontSize, spacing, borderRadius } = Theme.useTheme()
     const message =
         chatLength !== undefined && chatLength <= 1
-            ? 'Send a message to begin!'
-            : 'Start of chat'
+            ? t('chat.sendToBegin')
+            : t('chat.startOfChat')
 
     return (
         <View style={styles.wrapper}>

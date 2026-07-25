@@ -5,6 +5,7 @@ import { useCallback } from 'react'
 import { BackHandler, Text, View } from 'react-native'
 import { useMMKVBoolean } from 'react-native-mmkv'
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated'
+import { useTranslation } from 'react-i18next'
 import { useShallow } from 'zustand/react/shallow'
 
 import ThemedButton from '@components/buttons/ThemedButton'
@@ -12,6 +13,7 @@ import StringArrayEditor from '@components/input/StringArrayEditor'
 import ThemedTextInput from '@components/input/ThemedTextInput'
 import { db } from '@db'
 import { AppSettings } from '@lib/constants/GlobalValues'
+import i18n from '@lib/i18n'
 import { CharacterSorter } from '@lib/state/CharacterSorter'
 import { Logger } from '@lib/state/Logger'
 import { TagHider } from '@lib/state/TagHider'
@@ -25,6 +27,7 @@ type CharacterListHeaderProps = {
 }
 
 const CharacterListHeader: React.FC<CharacterListHeaderProps> = ({ resultLength }) => {
+    const { t } = useTranslation()
     const [useTagHider, setUseTagHider] = useMMKVBoolean(AppSettings.UseTagHider)
     const { showSearch, setShowSearch, textFilter, setTextFilter, tagFilter, setTagFilter } =
         CharacterSorter.useSorterStore(
@@ -90,10 +93,10 @@ const CharacterListHeader: React.FC<CharacterListHeaderProps> = ({ resultLength 
                             color: color.text._400,
                             fontSize: 16,
                         }}>
-                        Sort By
+                        {t('characterList.sortBy')}
                     </Text>
-                    <SortButton type="modified" label="Recent" />
-                    <SortButton type="name" label="Name" />
+                    <SortButton type="modified" label={t('characterList.recent')} />
+                    <SortButton type="name" label={t('characterList.name')} />
                 </View>
                 <View
                     style={{
@@ -123,7 +126,11 @@ const CharacterListHeader: React.FC<CharacterListHeaderProps> = ({ resultLength 
                         delayLongPress={5000}
                         onLongPress={() => {
                             setUseTagHider(!useTagHider)
-                            Logger.infoToast('Hider ' + (!useTagHider ? 'Enabled' : 'Disabled'))
+                            Logger.infoToast(
+                                !useTagHider
+                                    ? i18n.t('characterList.hiderEnabled')
+                                    : i18n.t('characterList.hiderDisabled')
+                            )
                         }}
                     />
                 </View>
@@ -141,23 +148,23 @@ const CharacterListHeader: React.FC<CharacterListHeaderProps> = ({ resultLength 
                                 suggestions={data
                                     .sort((a, b) => b.tagCount - a.tagCount)
                                     .map((item) => item.tag)}
-                                label="Search By Tags"
+                                label={t('characterList.searchByTags')}
                                 value={tagFilter}
                                 setValue={setTagFilter}
-                                placeholder="Filter Tags..."
+                                placeholder={t('characterList.filterTagsPlaceholder')}
                                 filterOnly
                                 showSuggestionsOnEmpty
                             />
                         )}
                         <ThemedTextInput
-                            label="Search By Name"
+                            label={t('characterList.searchByName')}
                             containerStyle={{ flex: 0 }}
                             value={textFilter}
                             onChangeText={setTextFilter}
                             style={{
                                 color: resultLength === 0 ? color.text._700 : color.text._100,
                             }}
-                            placeholder="Name..."
+                            placeholder={t('characterList.namePlaceholder')}
                         />
                         {(textFilter || tagFilter.length > 0) && (
                             <Text
@@ -165,7 +172,7 @@ const CharacterListHeader: React.FC<CharacterListHeaderProps> = ({ resultLength 
                                     marginTop: 8,
                                     color: color.text._400,
                                 }}>
-                                Results: {resultLength}
+                                {t('characterList.results', { count: resultLength })}
                             </Text>
                         )}
                     </Animated.View>

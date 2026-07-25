@@ -5,6 +5,7 @@ import { Image } from 'expo-image'
 import React, { useState } from 'react'
 import { Keyboard, TextInput, TouchableOpacity, View } from 'react-native'
 import { useMMKVBoolean } from 'react-native-mmkv'
+import { useTranslation } from 'react-i18next'
 import Animated, {
     BounceIn,
     FadeIn,
@@ -25,6 +26,7 @@ import { generateResponse } from '@lib/engine/Inference'
 import { useSpeechInput } from '@lib/hooks/useSpeechInput'
 import { useUnfocusTextInput } from '@lib/hooks/UnfocusTextInput'
 import { playInputFocusSound, playInputSendSound } from '@lib/audio/playInputFocusSound'
+import i18n from '@lib/i18n'
 import { Characters } from '@lib/state/Characters'
 import { Chats, useInference } from '@lib/state/Chat'
 import { useChatInputTextStore } from '@lib/state/components/ChatInput'
@@ -52,6 +54,7 @@ export const useInputHeightStore = create<ChatInputHeightStoreProps>()((set) => 
 }))
 
 const ChatInput = () => {
+    const { t } = useTranslation()
     const inputRef = useUnfocusTextInput()
 
     const { color, borderRadius, spacing } = Theme.useTheme()
@@ -121,7 +124,7 @@ const ChatInput = () => {
             setAttachments([])
             if (swipeId) generateResponse(swipeId)
         } catch (e) {
-            Logger.errorToast('Failed to send message')
+            Logger.errorToast(i18n.t('chat.failedToSend'))
             Logger.error(JSON.stringify(e))
         } finally {
             setDisableSend(false)
@@ -259,7 +262,7 @@ const ChatInput = () => {
                                 triggerIconSize={20}
                                 buttons={[
                                     {
-                                        label: 'Take Picture',
+                                        label: t('chat.takePicture'),
                                         icon: 'camera',
                                         onPress: (close) => {
                                             setShowCamera(true)
@@ -267,7 +270,7 @@ const ChatInput = () => {
                                         },
                                     },
                                     {
-                                        label: 'Add Image',
+                                        label: t('chat.addImage'),
                                         icon: 'picture',
                                         onPress: async (close) => {
                                             close()
@@ -324,7 +327,7 @@ const ChatInput = () => {
                         playInputFocusSound()
                     }}
                     numberOfLines={8}
-                    placeholder="Message..."
+                    placeholder={t('chat.messagePlaceholder')}
                     placeholderTextColor={color.text._700}
                     value={newMessage}
                     onChangeText={(text) => {

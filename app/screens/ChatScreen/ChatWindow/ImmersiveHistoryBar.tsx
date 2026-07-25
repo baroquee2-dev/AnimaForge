@@ -1,10 +1,10 @@
 import { MaterialIcons } from '@expo/vector-icons'
-import { Pressable, Text, View } from 'react-native'
+import { Pressable, Text } from 'react-native'
+import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { Theme } from '@lib/theme/ThemeManager'
-
 import { IMMERSIVE_HEADER_BODY_HEIGHT } from '@lib/chat/immersiveLayout'
+import { Theme } from '@lib/theme/ThemeManager'
 
 type ImmersiveHistoryBarProps = {
     count: number
@@ -22,6 +22,7 @@ const ImmersiveHistoryBar: React.FC<ImmersiveHistoryBarProps> = ({
     variant = 'inline',
     clearHeaderOverlay = false,
 }) => {
+    const { t } = useTranslation()
     const { color, spacing, borderRadius, fontSize } = Theme.useTheme()
     const insets = useSafeAreaInsets()
 
@@ -65,7 +66,7 @@ const ImmersiveHistoryBar: React.FC<ImmersiveHistoryBarProps> = ({
                     color={color.text._300}
                 />
                 <Text style={{ color: color.text._300, fontSize: fontSize.s, fontWeight: '600' }}>
-                    {expanded ? '收起' : `${count}`}
+                    {expanded ? t('chat.collapse') : `${count}`}
                 </Text>
             </Pressable>
         )
@@ -85,7 +86,11 @@ const ImmersiveHistoryBar: React.FC<ImmersiveHistoryBarProps> = ({
                 borderColor: color.neutral._300,
             }}>
             <Text style={{ color: color.text._300, fontSize: fontSize.s, fontWeight: '500' }}>
-                {expanded ? '▲ Hide earlier messages' : `▼ ${count} earlier message${count > 1 ? 's' : ''}`}
+                {expanded
+                    ? t('chat.hideEarlier')
+                    : count === 1
+                      ? t('chat.earlierMessage', { count })
+                      : t('chat.earlierMessages', { count })}
             </Text>
         </Pressable>
     )

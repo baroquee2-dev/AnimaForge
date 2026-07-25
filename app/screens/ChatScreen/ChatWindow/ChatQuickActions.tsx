@@ -2,12 +2,14 @@ import { setStringAsync } from 'expo-clipboard'
 import React, { useCallback } from 'react'
 import { View } from 'react-native'
 import Animated, { StretchInY, StretchOutY, ZoomIn, ZoomOut } from 'react-native-reanimated'
+import { useTranslation } from 'react-i18next'
 import { create } from 'zustand'
 import { useShallow } from 'zustand/react/shallow'
 
 import ThemedButton from '@components/buttons/ThemedButton'
 import Alert from '@components/views/Alert'
 import { useBackAction } from '@lib/hooks/BackAction'
+import i18n from '@lib/i18n'
 import { Chats, useInference } from '@lib/state/Chat'
 import { Logger } from '@lib/state/Logger'
 import { useTTS } from '@lib/state/TTS'
@@ -45,6 +47,7 @@ const ChatQuickActions: React.FC<ChatActionProps> = ({
     visualNovelDialogue = false,
     immersiveDialogue = false,
 }) => {
+    const { t } = useTranslation()
     const { activeIndex, setShowOptions } = useChatActionsState(
         useShallow((state) => ({
             setShowOptions: state.setActiveIndex,
@@ -67,16 +70,16 @@ const ChatQuickActions: React.FC<ChatActionProps> = ({
     const handleFork = () => {
         if (!chatId) return
         Alert.alert({
-            title: 'Fork Chat',
-            description: 'This will create a clone of this chat from this message',
+            title: t('chat.forkTitle'),
+            description: t('chat.forkDesc'),
             buttons: [
-                { label: 'Cancel' },
+                { label: t('common.cancel') },
                 {
-                    label: 'Fork Chat',
+                    label: t('chat.forkConfirm'),
                     onPress: async () => {
                         const newChatId = await Chats.db.mutate.cloneChatFromId(chatId, index + 1)
                         if (!newChatId) {
-                            Logger.errorToast('Failed to clone chat')
+                            Logger.errorToast(i18n.t('chat.cloneFailed'))
                             return
                         }
                         setShowOptions(undefined)
@@ -176,10 +179,10 @@ const ChatQuickActions: React.FC<ChatActionProps> = ({
                                 if (showOptions) setShowOptions(undefined)
                                 setStringAsync(swipe.swipe)
                                     .then(() => {
-                                        Logger.infoToast('Copied')
+                                        Logger.infoToast(i18n.t('chat.copied'))
                                     })
                                     .catch(() => {
-                                        Logger.errorToast('Failed to copy to clipboard')
+                                        Logger.errorToast(i18n.t('chat.copyFailed'))
                                     })
                             }}
                         />
