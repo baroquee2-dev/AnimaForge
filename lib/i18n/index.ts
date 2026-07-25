@@ -5,7 +5,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 import { Storage } from '@lib/enums/Storage'
-import { createMMKVStorage } from '@lib/storage/MMKV'
+import { createMMKVStorage, mmkv } from '@lib/storage/MMKV'
 
 import en from './locales/en.json'
 import zhTW from './locales/zh-TW.json'
@@ -31,6 +31,9 @@ export const supportedLanguages: SupportedLanguage[] = [
     },
 ]
 
+const isAppLanguageId = (value: unknown): value is AppLanguageId =>
+    value === 'en' || value === 'zh-TW'
+
 const resolveDeviceLanguage = (): AppLanguageId => {
     const locale = getLocales()[0]
     const tag = locale?.languageTag ?? 'en'
@@ -42,20 +45,44 @@ const resolveDeviceLanguage = (): AppLanguageId => {
     return 'en'
 }
 
+/** Read persisted language synchronously so i18n can init before async zustand rehydrate. */
+const readPersistedLanguage = (): AppLanguageId | null => {
+    try {
+        const raw = mmkv.getString(Storage.Language)
+        if (!raw) return null
+        const parsed = JSON.parse(raw) as { state?: { language?: unknown } }
+        return isAppLanguageId(parsed?.state?.language) ? parsed.state.language : null
+    } catch {
+        return null
+    }
+}
+
 const deviceLanguage = resolveDeviceLanguage()
+const initialLanguage = readPersistedLanguage() ?? deviceLanguage
 
 type LanguageStoreProps = {
     language: AppLanguageId
     setLanguage: (language: AppLanguageId) => void
 }
 
+const applyLanguage = (language: AppLanguageId) => {
+    if (i18n.isInitialized) {
+        void i18n.changeLanguage(language)
+        return
+    }
+    // Ensure late rehydrate still wins if it races ahead of init.
+    i18n.once('initialized', () => {
+        void i18n.changeLanguage(language)
+    })
+}
+
 export const useLanguageStore = create<LanguageStoreProps>()(
     persist(
         (set) => ({
-            language: deviceLanguage,
+            language: initialLanguage,
             setLanguage: (language) => {
                 set({ language })
-                void i18n.changeLanguage(language)
+                applyLanguage(language)
             },
         }),
         {
@@ -64,8 +91,8 @@ export const useLanguageStore = create<LanguageStoreProps>()(
             partialize: (state) => ({ language: state.language }),
             version: 1,
             onRehydrateStorage: () => (state) => {
-                if (state?.language) {
-                    void i18n.changeLanguage(state.language)
+                if (state?.language && isAppLanguageId(state.language)) {
+                    applyLanguage(state.language)
                 }
             },
         }
@@ -78,7 +105,7 @@ const resources = Object.fromEntries(
 
 void i18n.use(initReactI18next).init({
     resources,
-    lng: useLanguageStore.getState().language ?? deviceLanguage,
+    lng: initialLanguage,
     fallbackLng: 'en',
     interpolation: {
         escapeValue: false,
