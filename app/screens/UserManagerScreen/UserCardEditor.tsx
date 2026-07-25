@@ -1,7 +1,7 @@
 import { AntDesign } from '@expo/vector-icons'
 import * as DocumentPicker from 'expo-document-picker'
 import { useNavigation } from 'expo-router'
-import { usePreventRemove } from '@react-navigation/core'
+import { usePreventRemove } from 'expo-router/react-navigation'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { StyleSheet, View } from 'react-native'

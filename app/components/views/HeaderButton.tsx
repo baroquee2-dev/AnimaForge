@@ -1,6 +1,6 @@
 import { Stack } from 'expo-router'
 import { ReactNode } from 'react'
-import type { NativeStackNavigationOptions } from '@react-navigation/native-stack'
+import type { NativeStackNavigationOptions } from 'expo-router'
 
 type HeaderButtonProps = {
     headerRight?: () => ReactNode

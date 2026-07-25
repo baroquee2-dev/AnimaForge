@@ -1,10 +1,11 @@
 import { Stack } from 'expo-router'
 import { ReactNode } from 'react'
-import type { NativeStackNavigationOptions } from '@react-navigation/native-stack'
+import type { ColorValue } from 'react-native'
+import type { NativeStackNavigationOptions } from 'expo-router'
 
 type HeaderTitleProps = {
     title?: string
-    headerTitle?: ((props: { children: string; tintColor?: string }) => ReactNode) | undefined
+    headerTitle?: ((props: { children: string; tintColor?: ColorValue }) => ReactNode) | undefined
     animation?: NativeStackNavigationOptions['animation']
     screenOptions?: NativeStackNavigationOptions
 }

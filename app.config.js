@@ -103,6 +103,7 @@ module.exports = {
                 },
             ],
             'expo-localization',
+            'expo-audio',
             'expo-router',
             'expo-font',
             'expo-image',

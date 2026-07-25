@@ -52,7 +52,7 @@ const AnimatedChatBackground: React.FC<AnimatedChatBackgroundProps> = ({
             {!!displayUri && (
                 <Animated.View
                     pointerEvents="none"
-                    style={[StyleSheet.absoluteFillObject, animatedStyle]}>
+                    style={[StyleSheet.absoluteFill, animatedStyle]}>
                     <ImageBackground
                         cachePolicy="none"
                         style={{ flex: 1 }}

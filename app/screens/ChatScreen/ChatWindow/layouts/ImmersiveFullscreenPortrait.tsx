@@ -43,7 +43,7 @@ export default ImmersiveFullscreenPortrait
 
 const styles = StyleSheet.create({
     layer: {
-        ...StyleSheet.absoluteFillObject,
+        ...StyleSheet.absoluteFill,
     },
     portraitZoom: {
         transform: [{ scale: IMMERSIVE_PORTRAIT_ZOOM }],

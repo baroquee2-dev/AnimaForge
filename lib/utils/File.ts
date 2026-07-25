@@ -168,7 +168,7 @@ export const directoryExists = (path: string) => {
 
 export const copyFile = async ({ from, to }: { from: string; to: string }) => {
     try {
-        new File(from).copy(new File(to))
+        await new File(from).copy(new File(to))
         return true
     } catch (e) {
         Logger.error('Failed to copy: ' + e)

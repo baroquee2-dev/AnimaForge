@@ -129,7 +129,7 @@ const ChatTextLast: React.FC<ChatTextProps> = ({
                 showsVerticalScrollIndicator
                 keyboardShouldPersistTaps="handled">
                 <Pressable
-                    delayPressIn={120}
+                    unstable_pressDelay={120}
                     onPress={onBubblePress}
                     onLongPress={onBubbleLongPress}>
                     {markdownContent}

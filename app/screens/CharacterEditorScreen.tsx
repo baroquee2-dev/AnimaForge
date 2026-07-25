@@ -1,5 +1,5 @@
 import { AntDesign } from '@expo/vector-icons'
-import { usePreventRemove } from '@react-navigation/core'
+import { usePreventRemove } from 'expo-router/react-navigation'
 import { count, eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import * as DocumentPicker from 'expo-document-picker'

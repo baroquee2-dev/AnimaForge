@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     glow: {
-        ...StyleSheet.absoluteFillObject,
+        ...StyleSheet.absoluteFill,
         transform: [{ scale: 1.04 }],
     },
 })

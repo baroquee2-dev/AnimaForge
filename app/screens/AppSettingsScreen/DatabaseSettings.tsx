@@ -34,7 +34,7 @@ const importDB = async (uri: string, name: string) => {
         await exportDB(false)
         deleteFile(dbPath)
         if (
-            copyFile({
+            await copyFile({
                 from: uri,
                 to: dbPath,
             })

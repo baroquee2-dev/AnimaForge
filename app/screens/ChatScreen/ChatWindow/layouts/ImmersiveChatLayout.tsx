@@ -40,7 +40,7 @@ const ImmersiveChatLayout = () => {
 
     return (
         <View style={{ flex: 1, overflow: 'hidden' }}>
-            <View style={StyleSheet.absoluteFillObject} pointerEvents="box-none">
+            <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
                 {historyCount > 0 && (
                     <ImmersiveHistoryBar
                         variant="floating"
