@@ -14,7 +14,6 @@ import { SamplersManager } from '@lib/state/SamplerState'
 import { useTTSStore } from '@lib/state/TTS'
 
 import { AppDirectory, deleteFile, listFiles, makeDirectory, readStringAsync } from './File'
-// import { patchAndroidText } from './PatchText'
 import { AppSettings, AppSettingsDefault, Global } from '../constants/GlobalValues'
 import { migrateChatLayoutSetting } from '../constants/ChatLayout'
 import { Llama } from '../engine/Local/LlamaLocal'
@@ -237,9 +236,6 @@ export const startupApp = () => {
 
     // set cpu thread count
     setCPUThreads()
-
-    // patch Android text for bold Accessibility (disabled)
-    // patchAndroidText()
 
     // set keep awake settings
     setKeepAwake()

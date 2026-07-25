@@ -89,11 +89,10 @@ const ChatInput = () => {
         useShallow((state) => ({ userName: state.card?.name }))
     )
 
-    const { newMessage, setNewMessage, setInputFocused } = useChatInputTextStore(
+    const { newMessage, setNewMessage } = useChatInputTextStore(
         useShallow((state) => ({
             newMessage: state.text,
             setNewMessage: state.setText,
-            setInputFocused: state.setInputFocused,
         }))
     )
 
@@ -325,11 +324,7 @@ const ChatInput = () => {
                         setHideOptions(!!newMessage)
                     }}
                     onFocus={() => {
-                        setInputFocused(true)
                         playInputFocusSound()
-                    }}
-                    onBlur={() => {
-                        setInputFocused(false)
                     }}
                     numberOfLines={8}
                     placeholder={t('chat.messagePlaceholder')}

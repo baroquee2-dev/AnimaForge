@@ -99,9 +99,6 @@ export const getChatLayoutDefinition = (layout: ChatLayout) => CHAT_LAYOUT_DEFIN
 export const getChatLayoutCapabilities = (layout: ChatLayout) =>
     getChatLayoutDefinition(layout).capabilities
 
-/** @deprecated Use getChatLayoutCapabilities(layout).messagePresentation === 'visualNovel' */
-export const isVisualNovelLayout = (layout: ChatLayout) => layout === 'visualNovel'
-
 export const migrateChatLayoutSetting = () => {
     const stored = mmkv.getString(CHAT_LAYOUT_STORAGE_KEY)
     if (isChatLayout(stored)) return

@@ -13,51 +13,10 @@ export const AppDirectory = {
 }
 
 export namespace FileUtils {
-    export const getDocumentDir = (dir: string) => {
-        return `${Paths.document.uri}${dir}`
-    }
-
-    export const getCacheDir = (dir: string) => {
-        return `${Paths.cache.uri}${dir}`
-    }
-
-    /**
-     *
-     * @param data string data of file
-     * @param filename filename to be written, include extension
-     * @param encoding encoding of file
-     */
-    export const saveStringToDownload = async (
-        data: string,
-        filename: string,
-        encoding: 'base64' | `utf8`
-    ) => {
-        new File(Paths.cache, filename).write(data, { encoding })
-        await localDownload((Paths.cache.uri + filename).replace('file://', '')).catch((e) =>
-            Logger.error('Failed to download: ' + e)
-        )
-    }
-
     export const pickText = async (params: { type?: string } = {}): Promise<PickerResult> => {
         return pickFile(async (file) => {
             return await file.text()
         }, params)
-    }
-
-    export const pickBase64 = async (params: { type?: string } = {}): Promise<PickerResult> => {
-        return pickFile(async (file) => {
-            return await file.base64()
-        }, params)
-    }
-
-    export const pickJSON = async (params: { type?: string } = {}): Promise<PickerResult> => {
-        const result = await pickText(params)
-        if (!result.success) return result
-        try {
-            return { success: true, data: JSON.parse(result.data) }
-        } catch {
-            return { success: false }
-        }
     }
 
     const pickFile = async (
@@ -160,10 +119,6 @@ export const listFiles = (path: string) => {
 
 export const fileExists = (path: string) => {
     return new File(path).exists
-}
-
-export const directoryExists = (path: string) => {
-    return new Directory(path).exists
 }
 
 export const copyFile = async ({ from, to }: { from: string; to: string }) => {
