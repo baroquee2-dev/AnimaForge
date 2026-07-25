@@ -20,7 +20,8 @@ const MessengerChatLayout = () => {
     const { color } = Theme.useTheme()
     const { chat } = Chats.useChat()
     const [saveScroll] = useMMKVBoolean(AppSettings.SaveScrollPosition)
-    const [autoScroll] = useMMKVBoolean(AppSettings.AutoScroll)
+    const [autoScrollSetting] = useMMKVBoolean(AppSettings.AutoScroll)
+    const autoScroll = autoScrollSetting ?? true
     const [showJump, setShowJump] = useState(false)
     const chatInputHeight = useInputHeightStore(useShallow((state) => state.height))
     const list = useChatListItems()
@@ -72,7 +73,9 @@ const MessengerChatLayout = () => {
                 )}
                 ref={flatlistRef}
                 maintainVisibleContentPosition={
-                    autoScroll ? null : { minIndexForVisible: 0, autoscrollToTopThreshold: 50 }
+                    // Off: pin visible row. Do not set autoscrollToTopThreshold —
+                    // it still follows generation while the user is near the bottom.
+                    autoScroll ? undefined : { minIndexForVisible: 0 }
                 }
                 keyboardShouldPersistTaps="handled"
                 inverted

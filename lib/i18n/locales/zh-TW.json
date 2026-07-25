@@ -175,7 +175,7 @@
         "chatWindow": {
             "title": "聊天視窗",
             "autoScroll": "自動捲動",
-            "autoScrollDesc": "產生回覆時自動捲動文字",
+            "autoScrollDesc": "產生回覆時自動捲動文字。僅對「即時通訊」聊天樣式有效。",
             "sendOnEnter": "按 Enter 傳送",
             "sendOnEnterDesc": "按下 Enter 時送出訊息",
             "showTps": "顯示每秒 Token 數",

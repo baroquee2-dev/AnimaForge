@@ -175,7 +175,7 @@
         "chatWindow": {
             "title": "Chat Window",
             "autoScroll": "Auto Scroll",
-            "autoScrollDesc": "Autoscrolls text during generations",
+            "autoScrollDesc": "Autoscrolls text during generations. Only applies to Messenger chat style.",
             "sendOnEnter": "Send on Enter",
             "sendOnEnterDesc": "Submits messages when Enter is pressed",
             "showTps": "Show Tokens Per Second",
