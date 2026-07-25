@@ -562,5 +562,37 @@
             "pt": "葡萄牙文（pt）"
         },
         "friendlyGuide": "友善導覽"
+    },
+    "characterEditor": {
+        "title": "編輯角色",
+        "unsavedTitle": "尚未儲存的變更",
+        "unsavedDesc": "你有尚未儲存的變更，現在離開將捨棄進度。",
+        "discardChanges": "捨棄變更",
+        "exportFailed": "匯出失敗",
+        "exportSuccess": "角色卡已匯出！",
+        "exportError": "無法匯出：{{error}}",
+        "saveSuccess": "角色卡已儲存！",
+        "deleteTitle": "刪除角色",
+        "deleteDesc": "確定要刪除「{{name}}」嗎？此操作無法復原。",
+        "deleteConfirm": "刪除角色",
+        "deleteImageTitle": "刪除圖片",
+        "deleteImageDesc": "確定要刪除此圖片嗎？此操作無法復原。",
+        "deleteImageConfirm": "刪除圖片",
+        "deleteAltTitle": "刪除替代訊息",
+        "deleteAltDesc": "確定要刪除此替代訊息嗎？此操作無法復原。",
+        "deleteSwipeError": "刪除替代訊息時發生錯誤",
+        "changeImage": "更換圖片",
+        "changeBackground": "更換背景",
+        "viewImage": "檢視圖片",
+        "deleteImage": "刪除圖片",
+        "removeBackground": "移除背景",
+        "descriptionTokens": "描述 Token：{{count}}",
+        "firstMessage": "首則訊息（First Message）",
+        "alternateGreeting": "替代開場白（Alternate Greeting）",
+        "noAlternateGreetings": "尚無替代開場白",
+        "personality": "性格（Personality）",
+        "scenario": "場景（Scenario）",
+        "exampleMessages": "範例訊息（Example Messages）",
+        "tags": "標籤（Tags）"
     }
 }
