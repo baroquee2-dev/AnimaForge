@@ -1,5 +1,6 @@
 import Alert from '@components/views/Alert'
 import { AppSettings } from '@lib/constants/GlobalValues'
+import i18n from '@lib/i18n'
 import {
     SamplerConfigData,
     SamplerID,
@@ -141,7 +142,7 @@ const buildLocalPayload = async () => {
                     }
 
                     if (mediaPaths.length > 0 && !hasImage && !hasAudio) {
-                        Logger.warnToast('Media was added without multimodal support.')
+                        Logger.warnToast(i18n.t('toast.mediaNoMultimodal'))
                     }
                 }
             }
@@ -172,7 +173,7 @@ const buildLocalPayload = async () => {
     }
 
     if (!prompt) {
-        Logger.errorToast('Failed to build prompt')
+        Logger.errorToast(i18n.t('toast.failedBuildPrompt'))
         return
     }
 
@@ -218,25 +219,25 @@ const verifyModelLoaded = async (): Promise<boolean> => {
         const autoLoad = mmkv.getBoolean(AppSettings.AutoLoadLocal)
         // If  autoload is disabled, just return
         if (!autoLoad) {
-            Logger.warnToast('No Model Loaded')
+            Logger.warnToast(i18n.t('toast.noModelLoaded'))
             return false
         }
 
         // by default, autoload will attempt to load the last model used
         if (!lastModel) {
-            Logger.warnToast('No Auto-Load Model Set')
+            Logger.warnToast(i18n.t('toast.noAutoLoadModel'))
             return false
         }
 
         // attempt to load model
         if (lastModel) {
-            Logger.infoToast(`Auto-loading Model: ${lastModel.name}`)
+            Logger.infoToast(i18n.t('toast.autoLoadingModel', { name: lastModel.name }))
             await Llama.useLlamaModelStore.getState().load(lastModel)
         }
 
         const lastMmproj = Llama.useLlamaPreferencesStore.getState().lastMmproj
         if (lastMmproj) {
-            Logger.infoToast(`Auto-loading MMPROJ: ${lastMmproj.name}`)
+            Logger.infoToast(i18n.t('toast.autoLoadingMmproj', { name: lastMmproj.name }))
             await Llama.useLlamaModelStore.getState().loadMmproj(lastMmproj)
         }
     }
@@ -254,7 +255,7 @@ export const localInference = async () => {
         const context = Llama.useLlamaModelStore.getState().context
 
         if (!context) {
-            Logger.warnToast('No Model Loaded')
+            Logger.warnToast(i18n.t('toast.noModelLoaded'))
             stopGenerating()
             return
         }
@@ -262,7 +263,7 @@ export const localInference = async () => {
         const payload = await buildLocalPayload()
 
         if (!payload) {
-            Logger.warnToast('Failed to build payload')
+            Logger.warnToast(i18n.t('toast.failedBuildPayload'))
             stopGenerating()
             return
         }
@@ -274,12 +275,15 @@ export const localInference = async () => {
             const result = KV.useKVStore.getState().verifyKVCache(prompt?.tokens ?? [])
             if (!result.match) {
                 Alert.alert({
-                    title: 'Cache Mismatch',
-                    description: `KV Cache does not match current prompt:\n\n${result.matchLength} of ${result.cachedLength} tokens are identical.\n\nPress 'Load Anyway' if you don't mind losing the cache.`,
+                    title: i18n.t('cache.mismatchTitle'),
+                    description: i18n.t('cache.mismatchDesc', {
+                        matchLength: result.matchLength,
+                        cachedLength: result.cachedLength,
+                    }),
                     buttons: [
-                        { label: 'Cancel', onPress: stopGenerating },
+                        { label: i18n.t('common.cancel'), onPress: stopGenerating },
                         {
-                            label: 'Load Anyway',
+                            label: i18n.t('cache.loadAnyway'),
                             onPress: async () => {
                                 Logger.warn('Overriding KV Cache despite mismatch')
                                 const result = await Llama.useLlamaModelStore.getState().loadKV()
@@ -303,7 +307,7 @@ export const localInference = async () => {
         }
         await runLocalCompletion(payload)
     } catch (e) {
-        Logger.errorToast('Failed to run local inference: ' + e)
+        Logger.errorToast(i18n.t('toast.failedLocalInference', { error: e }))
         stopGenerating()
     }
 }
@@ -342,7 +346,7 @@ const runLocalCompletion = async (
         .getState()
         .completion({ ...payload, n_threads: engineData.threads }, outputStream, outputCompleted)
         .catch((error) => {
-            Logger.errorToast(`Failed to generate locally: ${error}`)
+            Logger.errorToast(i18n.t('toast.failedGenerateLocal', { error }))
             stopGenerating()
         })
 }
@@ -428,30 +432,30 @@ const obtainFields = async (): Promise<ContextBuilderParams | void> => {
 
         const userCard = userState.card
         if (!userCard) {
-            Logger.errorToast('No loaded user')
+            Logger.errorToast(i18n.t('toast.noLoadedUser'))
             return
         }
 
         const characterCard = characterState.card
         if (!characterCard) {
-            Logger.errorToast('No loaded character')
+            Logger.errorToast(i18n.t('toast.noLoadedCharacter'))
             return
         }
         const messages = chatState.data?.messages
         if (!messages) {
-            Logger.errorToast('No chat character')
+            Logger.errorToast(i18n.t('toast.noChatCharacter'))
             return
         }
 
         const apiValues = localAPIValues
         if (!apiValues) {
-            Logger.warnToast(`No Active API`)
+            Logger.warnToast(i18n.t('toast.noActiveApi'))
             return
         }
 
         const apiConfig = localAPIConfig
         if (!apiConfig) {
-            Logger.errorToast(`Configuration "${apiValues?.configName}" not found`)
+            Logger.errorToast(i18n.t('toast.configNotFound', { name: apiValues?.configName }))
             return
         }
 
@@ -483,6 +487,6 @@ const obtainFields = async (): Promise<ContextBuilderParams | void> => {
             },
         }
     } catch (e) {
-        Logger.errorToast('Failed to orchestrate request build: ' + e)
+        Logger.errorToast(i18n.t('toast.orchestrateFailed', { error: e }))
     }
 }

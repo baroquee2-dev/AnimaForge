@@ -1,5 +1,6 @@
 import { AntDesign } from '@expo/vector-icons'
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
     Text,
     TextInput,
@@ -11,6 +12,7 @@ import {
 } from 'react-native'
 
 import ThemedButton from '@components/buttons/ThemedButton'
+import i18n from '@lib/i18n'
 import { Logger } from '@lib/state/Logger'
 import { Theme } from '@lib/theme/ThemeManager'
 
@@ -35,15 +37,17 @@ const StringArrayEditor: React.FC<StringArrayEditorProps> = ({
     setValue,
     replaceNewLine = undefined,
     allowDuplicates = false,
-    placeholder = 'Enter value...',
+    placeholder,
     allowBlank = false,
     suggestions = [],
     filterOnly = false,
     showSuggestionsOnEmpty = false,
 }) => {
+    const { t } = useTranslation()
     const { color, borderRadius } = Theme.useTheme()
     const styles = useStyles()
     const [newData, setNewData] = useState('')
+    const resolvedPlaceholder = placeholder ?? t('common.enterValue')
     const filteredSuggestions = suggestions.filter(
         (item) => item.toLowerCase().includes(newData.toLowerCase()) && !value.includes(item)
     )
@@ -53,11 +57,11 @@ const StringArrayEditor: React.FC<StringArrayEditorProps> = ({
 
     const addData = (newData: string) => {
         if (newData === '') {
-            Logger.warnToast('Value cannot be empty')
+            Logger.warnToast(i18n.t('common.valueEmpty'))
             return
         }
         if (value.includes(newData)) {
-            Logger.warnToast('Value already exists')
+            Logger.warnToast(i18n.t('common.valueExists'))
             return
         }
         setNewData('')
@@ -94,7 +98,7 @@ const StringArrayEditor: React.FC<StringArrayEditorProps> = ({
                         }}>
                         {!filterOnly && (
                             <Text style={{ color: color.text._400, marginBottom: 4 }}>
-                                Suggestions
+                                {t('common.suggestions')}
                             </Text>
                         )}
                         <ScrollView
@@ -129,11 +133,13 @@ const StringArrayEditor: React.FC<StringArrayEditorProps> = ({
                         onChangeText={setNewData}
                         keyboardType="default"
                         multiline
-                        placeholder={placeholder}
+                        placeholder={resolvedPlaceholder}
                         placeholderTextColor={color.text._700}
                     />
 
-                    {!filterOnly && <ThemedButton label="Add" onPress={() => addData(newData)} />}
+                    {!filterOnly && (
+                        <ThemedButton label={t('common.add')} onPress={() => addData(newData)} />
+                    )}
                 </View>
             </View>
         </View>

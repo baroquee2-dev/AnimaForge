@@ -5,6 +5,7 @@ import { getDocumentAsync } from 'expo-document-picker'
 import { Platform } from 'react-native'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import i18n from '@lib/i18n'
 
 import { db } from '@db'
 import { Storage } from '@lib/enums/Storage'
@@ -61,7 +62,7 @@ export namespace Model {
             const file = result.assets[0]
             const name = file.name
             const newdir = `${AppDirectory.ModelPath}${name}`
-            Logger.infoToast('Importing file...')
+            Logger.infoToast(i18n.t('toast.importingFile'))
             let success = false
             console.log(file.uri, '\n', newdir)
 
@@ -71,7 +72,7 @@ export namespace Model {
                         success = true
                     })
                     .catch((e) => {
-                        Logger.warnToast('Failed to copy')
+                        Logger.warnToast(i18n.t('toast.failedToCopy'))
                         Logger.warn(JSON.stringify(e))
                         success = false
                     })
@@ -85,7 +86,7 @@ export namespace Model {
             if (!success) return
 
             // database routine here
-            if (await createModelData(name, true)) Logger.infoToast(`Model Imported Sucessfully!`)
+            if (await createModelData(name, true)) Logger.infoToast(i18n.t('toast.modelImported'))
         })
     }
 
@@ -95,15 +96,15 @@ export namespace Model {
         }).then(async (result) => {
             if (result.canceled) return
             const file = result.assets[0]
-            Logger.infoToast('Importing file...')
+            Logger.infoToast(i18n.t('toast.importingFile'))
             if (!file) {
-                Logger.errorToast('File Invalid')
+                Logger.errorToast(i18n.t('toast.fileInvalid'))
                 return
             }
 
             if (await createModelDataExternal(file.uri, file.name)) {
                 persistContentPermission(file.uri)
-                Logger.infoToast(`Model Imported Sucessfully!`)
+                Logger.infoToast(i18n.t('toast.modelImported'))
             }
         })
     }
@@ -121,7 +122,7 @@ export namespace Model {
             // cull not required on iOS
             modelList.forEach(async (item) => {
                 if (item.name === '' || !getModelExists(item.file_path)) {
-                    Logger.warnToast(`Model Missing, its entry will be deleted: ${item.name}`)
+                    Logger.warnToast(i18n.t('toast.modelMissing', { name: item.name }))
                     await db.delete(model_data).where(eq(model_data.id, item.id))
                 }
             })
@@ -151,7 +152,7 @@ export namespace Model {
         deleteOnFailure: boolean = false
     ) => {
         if (!filename) {
-            Logger.errorToast('Filename invalid, Import Failed')
+            Logger.errorToast(i18n.t('toast.filenameInvalid'))
             return
         }
         return setModelDataInternal(filename, newdir, deleteOnFailure)
@@ -268,7 +269,7 @@ export namespace Model {
             await db.update(model_data).set(modelDataEntry).where(eq(model_data.id, id))
             return true
         } catch (e) {
-            Logger.errorToast(`Failed to create data: ${e}`)
+            Logger.errorToast(i18n.t('toast.failedCreateData', { error: e }))
             if (deleteOnFailure) deleteFile(file_path)
             return false
         }

@@ -3,6 +3,7 @@ import * as DocumentPicker from 'expo-document-picker'
 import { useNavigation } from 'expo-router'
 import { usePreventRemove } from '@react-navigation/core'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { StyleSheet, View } from 'react-native'
 import { useShallow } from 'zustand/react/shallow'
 
@@ -17,6 +18,7 @@ import { useAvatarViewerStore } from '@lib/state/components/AvatarViewer'
 import { Theme } from '@lib/theme/ThemeManager'
 
 const UserCardEditor = () => {
+    const { t } = useTranslation()
     const styles = useStyles()
     const { color, spacing } = Theme.useTheme()
     const navigation = useNavigation()
@@ -66,12 +68,12 @@ const UserCardEditor = () => {
 
     const handleDeleteImage = () => {
         Alert.alert({
-            title: `Delete Image`,
-            description: `Are you sure you want to delete this image? This cannot be undone.`,
+            title: t('common.deleteImageTitle'),
+            description: t('common.deleteImageDesc'),
             buttons: [
-                { label: 'Cancel' },
+                { label: t('common.cancel') },
                 {
-                    label: 'Delete Image',
+                    label: t('common.deleteImageConfirm'),
                     onPress: () => {
                         Characters.deleteImage(imageID)
                     },
@@ -84,19 +86,19 @@ const UserCardEditor = () => {
     usePreventRemove(edited, ({ data }) => {
         if (!userCard) return
         Alert.alert({
-            title: 'Unsaved Changes',
-            description: 'You have unsaved changes. Leaving now will discard your progress.',
+            title: t('common.unsavedTitle'),
+            description: t('common.unsavedDesc'),
             buttons: [
-                { label: 'Cancel' },
+                { label: t('common.cancel') },
                 {
-                    label: 'Save',
+                    label: t('common.save'),
                     onPress: async () => {
                         await handleSaveCard()
                         navigation.dispatch(data.action)
                     },
                 },
                 {
-                    label: 'Discard Changes',
+                    label: t('common.discardChanges'),
                     onPress: () => {
                         navigation.dispatch(data.action)
                     },
@@ -114,7 +116,7 @@ const UserCardEditor = () => {
                     placement="right"
                     buttons={[
                         {
-                            label: 'Change Image',
+                            label: t('common.changeImage'),
                             icon: 'picture',
                             onPress: (close) => {
                                 close()
@@ -122,7 +124,7 @@ const UserCardEditor = () => {
                             },
                         },
                         {
-                            label: 'View Image',
+                            label: t('common.viewImage'),
                             icon: 'search',
                             onPress: (close) => {
                                 close()
@@ -130,7 +132,7 @@ const UserCardEditor = () => {
                             },
                         },
                         {
-                            label: 'Delete Image',
+                            label: t('common.deleteImage'),
                             icon: 'delete',
                             onPress: (close) => {
                                 close()
@@ -150,13 +152,13 @@ const UserCardEditor = () => {
                         disabled={!edited}
                         iconName="save"
                         iconSize={20}
-                        label="Save"
+                        label={t('common.save')}
                         onPress={handleSaveCard}
                         variant={edited ? 'secondary' : 'disabled'}
                     />
                     <ThemedTextInput
                         style={{ height: 36 }}
-                        label="Name"
+                        label={t('userManager.name')}
                         value={currentCard?.name ?? ''}
                         onChangeText={(text) => {
                             if (currentCard)
@@ -165,7 +167,7 @@ const UserCardEditor = () => {
                                     name: text,
                                 })
                         }}
-                        placeholder="Empty names are discouraged!"
+                        placeholder={t('userManager.namePlaceholder')}
                     />
                 </View>
             </View>
@@ -181,7 +183,7 @@ const UserCardEditor = () => {
                     borderRadius: 8,
                 }}
                 numberOfLines={10}
-                label="Description"
+                label={t('userManager.description')}
                 value={currentCard?.description ?? ''}
                 onChangeText={(text) => {
                     if (currentCard)
@@ -190,7 +192,7 @@ const UserCardEditor = () => {
                             description: text,
                         })
                 }}
-                placeholder="Describe this user..."
+                placeholder={t('userManager.descriptionPlaceholder')}
             />
         </View>
     )

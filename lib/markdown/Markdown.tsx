@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { Platform, StyleSheet, Text, useWindowDimensions, View } from 'react-native'
 import { MarkdownIt } from 'react-native-markdown-display'
 import MathJax from 'react-native-mathjax-svg'
+import i18n from '@lib/i18n'
 
 import ThemedButton from '@components/buttons/ThemedButton'
 import Accordion from '@components/views/Accordion'
@@ -104,10 +105,10 @@ export namespace MarkdownStyle {
                                 onPress={() => {
                                     setStringAsync(content)
                                         .then(() => {
-                                            Logger.infoToast('Copied Code')
+                                            Logger.infoToast(i18n.t('toast.copiedCode'))
                                         })
                                         .catch(() => {
-                                            Logger.errorToast('Failed to copy to clipboard')
+                                            Logger.errorToast(i18n.t('toast.copyFailed'))
                                         })
                                 }}
                             />

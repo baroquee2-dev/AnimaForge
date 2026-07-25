@@ -2,6 +2,7 @@ import { AntDesign } from '@expo/vector-icons'
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator'
 import { SplashScreen } from 'expo-router'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import ThemedButton from '@components/buttons/ThemedButton'
@@ -16,6 +17,7 @@ import CharacterList from '@screens/CharacterListScreen'
 import migrations from '../db/migrations/migrations'
 
 const Home = () => {
+    const { t } = useTranslation()
     const { color } = Theme.useTheme()
     const styles = useStyles()
     const { success, error } = useMigrations(db, migrations)
@@ -47,16 +49,13 @@ const Home = () => {
         return (
             <View style={styles.centeredContainer}>
                 <HeaderTitle />
-                <Text style={styles.title}>Database Migration Failed!</Text>
+                <Text style={styles.title}>{t('home.migrationFailed')}</Text>
                 <Text style={styles.errorLog}>{error.message}</Text>
-                <Text style={styles.subtitle}>
-                    If you are seeing this, something has gone terribly wrong. Report this error
-                    below, include a screenshot of the log above.
-                </Text>
+                <Text style={styles.subtitle}>{t('home.migrationHelp')}</Text>
                 <Text style={styles.subtitle} />
                 <ThemedButton
                     variant="secondary"
-                    label="Github Repository"
+                    label={t('home.githubRepo')}
                     iconName="github"
                     iconSize={20}
                     onPress={() => {
@@ -76,9 +75,9 @@ const Home = () => {
                     style={{ marginBottom: 12 }}
                     color={color.text._500}
                 />
-                <Text style={styles.title}>Authentication Required</Text>
+                <Text style={styles.title}>{t('home.authRequired')}</Text>
                 <TouchableOpacity onPress={retry} style={styles.button}>
-                    <Text style={styles.buttonText}>Try Again</Text>
+                    <Text style={styles.buttonText}>{t('home.tryAgain')}</Text>
                 </TouchableOpacity>
             </View>
         )

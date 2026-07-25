@@ -1,6 +1,7 @@
 import { FlashList } from '@shopify/flash-list'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Text, View } from 'react-native'
 import { useShallow } from 'zustand/react/shallow'
 
@@ -12,6 +13,7 @@ import { Theme } from '@lib/theme/ThemeManager'
 import UserListing from './UserListing'
 
 const UserList = () => {
+    const { t } = useTranslation()
     const { color, spacing, fontSize } = Theme.useTheme()
 
     const { data } = useLiveQuery(Characters.db.query.cardListQuery('user'))
@@ -31,7 +33,7 @@ const UserList = () => {
             <InputSheet
                 visible={showNewUser}
                 setVisible={setShowNewUser}
-                title="Create New user"
+                title={t('userManager.createNew')}
                 autoFocus
                 onConfirm={async (text) => {
                     const id = await Characters.db.mutate.createCard(text, 'user')
@@ -50,7 +52,7 @@ const UserList = () => {
                         fontSize: fontSize.l,
                         color: color.text._300,
                     }}>
-                    User Profiles ({data.length})
+                    {t('userManager.profiles', { count: data.length })}
                 </Text>
             </View>
             <View style={{ flex: 1 }}>
@@ -61,7 +63,7 @@ const UserList = () => {
                     renderItem={({ item, index }) => <UserListing user={item} />}
                     initialScrollIndex={Math.max(currentIndex, 0)}
                 />
-                <ThemedButton label="New User" onPress={() => setShowNewUser(true)} />
+                <ThemedButton label={t('userManager.newUser')} onPress={() => setShowNewUser(true)} />
             </View>
         </View>
     )

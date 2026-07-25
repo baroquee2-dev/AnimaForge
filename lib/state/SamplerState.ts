@@ -10,6 +10,7 @@ import {
     Samplers,
 } from '@lib/constants/SamplerData'
 import { Storage } from '@lib/enums/Storage'
+import i18n from '@lib/i18n'
 import { Logger } from '@lib/state/Logger'
 import { createMMKVStorage } from '@lib/storage/MMKV'
 import { readStringAsync } from '@lib/utils/File'
@@ -38,7 +39,7 @@ export namespace SamplersManager {
                 addSamplerConfig: (config) => {
                     const configs = get().configList
                     if (configs.some((item) => item.name === config.name)) {
-                        Logger.errorToast(`Sampler Config "${config.name}" already exists!`)
+                        Logger.errorToast(i18n.t('toast.samplerExists', { name: config.name }))
                         return
                     }
                     config.data = fixSamplerConfig(config.data)
@@ -143,7 +144,7 @@ export namespace SamplersManager {
                 (!result.assets[0].name.endsWith('json') &&
                     !result.assets[0].name.endsWith('settings'))
             ) {
-                Logger.errorToast(`Invalid File Type!`)
+                Logger.errorToast(i18n.t('toast.invalidFileType'))
                 return
             }
             const {
@@ -154,7 +155,7 @@ export namespace SamplersManager {
 
             return { data: JSON.parse(data), name: name }
         } catch (e) {
-            Logger.errorToast(`Failed to import: ${e}`)
+            Logger.errorToast(i18n.t('toast.importFailed', { error: e }))
         }
     }
 }

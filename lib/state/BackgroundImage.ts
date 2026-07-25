@@ -3,6 +3,7 @@ import { getDocumentAsync } from 'expo-document-picker'
 import { Image } from 'react-native'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import i18n from '@lib/i18n'
 
 import { Storage } from '@lib/enums/Storage'
 import { createMMKVStorage } from '@lib/storage/MMKV'
@@ -70,7 +71,7 @@ export const useBackgroundStore = create<BackgroundImageStateProps>()(
                     copyFile({ from: uri, to: AppDirectory.Assets + name })
 
                     set({ image: name })
-                    Logger.infoToast('Default background updated')
+                    Logger.infoToast(i18n.t('toast.defaultBgUpdated'))
                 } catch (e) {
                     Logger.error('Something went wrong with importing: ' + e)
                 }
@@ -81,7 +82,7 @@ export const useBackgroundStore = create<BackgroundImageStateProps>()(
                     deleteFile(AppDirectory.Assets + imageName)
                 }
                 set({ image: undefined })
-                Logger.warnToast('Default background restored')
+                Logger.warnToast(i18n.t('toast.defaultBgRestored'))
             },
         }),
         {

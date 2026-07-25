@@ -6,6 +6,7 @@ import { useMMKVBoolean } from 'react-native-mmkv'
 
 import Alert from '@components/views/Alert'
 import { AppSettings, APP_NAME } from '@lib/constants/GlobalValues'
+import i18n from '@lib/i18n'
 import { Characters } from '@lib/state/Characters'
 import { Chats } from '@lib/state/Chat'
 import { Logger } from '@lib/state/Logger'
@@ -40,14 +41,14 @@ export async function registerForPushNotificationsAsync() {
     }
     if (finalStatus !== 'granted') {
         Alert.alert({
-            title: 'Permission Required',
-            description: `${APP_NAME} requires permissions to send you notifications.`,
+            title: i18n.t('permission.title'),
+            description: i18n.t('permission.notificationDesc', { app: APP_NAME }),
             buttons: [
                 {
-                    label: 'Cancel',
+                    label: i18n.t('common.cancel'),
                 },
                 {
-                    label: 'Open Permissions',
+                    label: i18n.t('permission.openSettings'),
                     onPress: () => {
                         Linking.openSettings()
                     },

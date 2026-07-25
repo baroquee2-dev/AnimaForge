@@ -1,4 +1,5 @@
 import { nativeApplicationVersion } from 'expo-application'
+import i18n from '@lib/i18n'
 
 import { AppSettings, CLAUDE_VERSION, GITHUB_REPOSITORY } from '@lib/constants/GlobalValues'
 import { SSEFetch } from '@lib/engine/SSEFetch'
@@ -67,7 +68,7 @@ export const buildAndSendRequest = async ({
             bypassContextLength,
         })
         if (prompt === undefined) {
-            Logger.errorToast(`Prompt construction failed`)
+            Logger.errorToast(i18n.t('toast.promptConstructionFailed'))
             stopGenerating()
             return
         }
@@ -80,7 +81,7 @@ export const buildAndSendRequest = async ({
         let endpoint = apiValues.endpoint
         if (useGeminiGrounding) {
             if (!Array.isArray(prompt)) {
-                Logger.errorToast('Gemini grounding requires chat completion context')
+                Logger.errorToast(i18n.t('toast.geminiGroundingNeedsChat'))
                 stopGenerating()
                 return
             }
@@ -93,7 +94,7 @@ export const buildAndSendRequest = async ({
             )
             endpoint = getGeminiGroundingEndpoint(apiConfig, apiValues)
             if (!endpoint) {
-                Logger.errorToast('Could not resolve Gemini model name for grounding')
+                Logger.errorToast(i18n.t('toast.geminiModelResolveFailed'))
                 stopGenerating()
                 return
             }
@@ -110,7 +111,7 @@ export const buildAndSendRequest = async ({
         }
 
         if (!payload) {
-            Logger.errorToast(`Payload construction failed`)
+            Logger.errorToast(i18n.t('toast.payloadConstructionFailed'))
             stopGenerating()
             return
         }
@@ -194,7 +195,7 @@ export const buildAndSendRequest = async ({
             stopGenerating: stopGenerating,
         })
     } catch (e) {
-        Logger.errorToast('Completion failed: ' + e)
+        Logger.errorToast(i18n.t('toast.completionFailed', { error: e }))
         stopGenerating()
     }
 }
@@ -311,7 +312,7 @@ const readableStreamResponse = async (senderParams: SenderParams) => {
         try {
             const a = JSON.parse(data)
             if (a?.error) {
-                Logger.errorToast('Error During SSE event')
+                Logger.errorToast(i18n.t('toast.sseError'))
                 Logger.error(data)
             }
         } catch {}
@@ -319,7 +320,7 @@ const readableStreamResponse = async (senderParams: SenderParams) => {
     })
 
     sse.setOnError(() => {
-        Logger.errorToast('Generation Failed')
+        Logger.errorToast(i18n.t('toast.generationFailed'))
         closeStream()
     })
 

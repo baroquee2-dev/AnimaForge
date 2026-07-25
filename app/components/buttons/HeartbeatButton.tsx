@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Text, View } from 'react-native'
 
 import { useDebounce } from '@lib/hooks/Debounce'
@@ -38,6 +39,7 @@ const HeartbeatButton: React.FC<HeartbeatButtonProps> = ({
     headers = {},
     callback = () => {},
 }) => {
+    const { t } = useTranslation()
     const { color } = Theme.useTheme()
     const [status, setStatus] = useState<ResponseStatus>(ResponseStatus.DEFAULT)
 
@@ -89,7 +91,7 @@ const HeartbeatButton: React.FC<HeartbeatButtonProps> = ({
 
     return (
         <View style={{ flexDirection: 'row', marginTop: 8 }}>
-            <ThemedButton label="Test" onPress={handleCheck} variant="secondary" />
+            <ThemedButton label={t('common.test')} onPress={handleCheck} variant="secondary" />
             <View
                 style={{
                     marginLeft: 4,

@@ -4,6 +4,7 @@ import * as Speech from 'expo-speech'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { useShallow } from 'zustand/react/shallow'
+import i18n from '@lib/i18n'
 
 import { Storage } from '@lib/enums/Storage'
 import { Logger } from '@lib/state/Logger'
@@ -231,7 +232,7 @@ export const useTTSStore = create<TTSState>()(
                 Logger.info('Starting TTS')
                 if (get().provider === 'elevenlabs') {
                     if (!get().elevenLabsApiKey.trim()) {
-                        Logger.errorToast('Enter an ElevenLabs API Key in TTS settings')
+                        Logger.errorToast(i18n.t('toast.enterElevenLabsKey'))
                         clearIndex()
                         return
                     }
@@ -254,7 +255,7 @@ export const useTTSStore = create<TTSState>()(
                 }
                 if (get().provider === 'gemini') {
                     if (!get().geminiApiKey.trim()) {
-                        Logger.errorToast('Enter a Gemini API Key in TTS settings')
+                        Logger.errorToast(i18n.t('toast.enterGeminiKey'))
                         clearIndex()
                         return
                     }
@@ -277,7 +278,7 @@ export const useTTSStore = create<TTSState>()(
                 }
                 if (get().provider === 'cartesia') {
                     if (!get().cartesiaApiKey.trim()) {
-                        Logger.errorToast('Enter a Cartesia API Key in TTS settings')
+                        Logger.errorToast(i18n.t('toast.enterCartesiaKey'))
                         clearIndex()
                         return
                     }
@@ -300,7 +301,7 @@ export const useTTSStore = create<TTSState>()(
                     return
                 }
                 if (currentSpeaker === undefined) {
-                    Logger.errorToast(`No Speaker Chosen`)
+                    Logger.errorToast(i18n.t('toast.noSpeaker'))
                     clearIndex()
                     return
                 }
@@ -397,7 +398,7 @@ export const useTTSStore = create<TTSState>()(
                 if (get().provider === 'elevenlabs') {
                     const { elevenLabsApiKey, elevenLabsVoiceId, elevenLabsModel, rate } = get()
                     if (!elevenLabsApiKey.trim()) {
-                        Logger.errorToast('Enter an ElevenLabs API Key in TTS settings')
+                        Logger.errorToast(i18n.t('toast.enterElevenLabsKey'))
                         onStop()
                         return
                     }
@@ -418,7 +419,7 @@ export const useTTSStore = create<TTSState>()(
                 if (get().provider === 'gemini') {
                     const { geminiApiKey, geminiVoiceName, geminiModel, rate } = get()
                     if (!geminiApiKey.trim()) {
-                        Logger.errorToast('Enter a Gemini API Key in TTS settings')
+                        Logger.errorToast(i18n.t('toast.enterGeminiKey'))
                         onStop()
                         return
                     }
@@ -434,7 +435,7 @@ export const useTTSStore = create<TTSState>()(
                     const { cartesiaApiKey, cartesiaVoiceId, cartesiaModel, cartesiaLanguage, rate } =
                         get()
                     if (!cartesiaApiKey.trim()) {
-                        Logger.errorToast('Enter a Cartesia API Key in TTS settings')
+                        Logger.errorToast(i18n.t('toast.enterCartesiaKey'))
                         onStop()
                         return
                     }

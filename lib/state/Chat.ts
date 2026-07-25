@@ -4,6 +4,7 @@ import * as Notifications from 'expo-notifications'
 import mime from 'mime/lite'
 import { create } from 'zustand'
 import { useShallow } from 'zustand/react/shallow'
+import i18n from '@lib/i18n'
 
 import { db as database } from '@db'
 import { Tokenizer } from '@lib/engine/Tokenizer'
@@ -204,7 +205,7 @@ export namespace Chats {
                     Logger.info('Autoloading User with ID: ' + data.user_id)
                     const name = await Characters.useUserStore.getState().setCard(data.user_id)
                     if (name) {
-                        Logger.infoToast('Loading User : ' + name)
+                        Logger.infoToast(i18n.t('toast.loadingUser', { name }))
                     } else {
                         Logger.warn(
                             `Failed to load User with ID ${data.user_id}, it was likely deleted. Consider relinking this chat.`

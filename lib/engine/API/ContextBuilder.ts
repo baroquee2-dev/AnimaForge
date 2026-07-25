@@ -1,4 +1,5 @@
 import { AppSettings } from '@lib/constants/GlobalValues'
+import i18n from '@lib/i18n'
 import { buildThinkRules } from '@lib/markdown/ThinkTags'
 import { useAppModeStore } from '@lib/state/AppMode'
 import { CharacterCardData, CharacterTokenCache } from '@lib/state/Characters'
@@ -354,7 +355,7 @@ export const buildTextCompletionContext = async ({
     payload = replaceMacrosInternal(payload + message_acc, instruct)
 
     if (hasMedia) {
-        Logger.errorToast('Text Completions does not support multimodal')
+        Logger.errorToast(i18n.t('toast.textCompletionsNoMultimodal'))
         if (useAppModeStore.getState().appMode === 'local') {
             Logger.warn(
                 "[HINT] You probably have built-in templates disabled. Enable it in 'Formatting > Use Built-In Local Model' template"
@@ -494,7 +495,7 @@ export const getSystemPrompt = ({
 }
 
 const warnNoMessages = () => {
-    Logger.warnToast('No messages added. Check Logs.')
+    Logger.warnToast(i18n.t('toast.noMessagesAdded'))
     Logger.warn(
         'No messages were added to the context. This can be caused by:\n- Generated Length is too high, lower it in AI Instructions\n- Your context length is too low\n- Your first message is too long'
     )

@@ -3,6 +3,7 @@ import { useColorScheme } from 'react-native'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { useShallow } from 'zustand/react/shallow'
+import i18n from '@lib/i18n'
 
 import { Storage } from '@lib/enums/Storage'
 import { Logger } from '@lib/state/Logger'
@@ -55,7 +56,7 @@ export namespace Theme {
                     const validation = themeColorSchemaV1.safeParse(colorScheme)
 
                     if (!validation.success) {
-                        Logger.errorToast(`Schema validation failed!`)
+                        Logger.errorToast(i18n.t('toast.schemaValidationFailed'))
                         Logger.error(
                             'The format of the imported JSON does not match the required color scheme:\n' +
                                 validation.error.issues
@@ -69,7 +70,7 @@ export namespace Theme {
                         get().customColors.some((item) => item.name === colorScheme.name) ||
                         DefaultColorSchemes.schemes.some((item) => item.name === colorScheme.name)
                     ) {
-                        Logger.errorToast('Color Name Already Used')
+                        Logger.errorToast(i18n.t('toast.colorNameUsed'))
                         return
                     }
                     set({ customColors: [...get().customColors, colorScheme] })

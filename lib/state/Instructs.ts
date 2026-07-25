@@ -5,6 +5,7 @@ import { persist } from 'zustand/middleware'
 import { db as database } from '@db'
 import { Tokenizer } from '@lib/engine/Tokenizer'
 import { Storage } from '@lib/enums/Storage'
+import i18n from '@lib/i18n'
 import { instructs } from 'db/schema'
 
 import { Characters } from './Characters'
@@ -275,7 +276,7 @@ export namespace Instructs {
                     const baseInstruct = get().data
 
                     if (!baseInstruct) {
-                        Logger.errorToast('Something wrong happened with Instruct data')
+                        Logger.errorToast(i18n.t('toast.instructDataError'))
                         return Instructs.defaultInstruct
                     }
 

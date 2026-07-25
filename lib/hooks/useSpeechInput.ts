@@ -5,6 +5,7 @@ import {
 } from 'expo-speech-recognition'
 import { useCallback, useRef, useState } from 'react'
 
+import i18n from '@lib/i18n'
 import { Logger } from '@lib/state/Logger'
 
 const getSpeechLocale = () => {
@@ -44,7 +45,9 @@ export const useSpeechInput = (onTextUpdate: (text: string) => void) => {
         setIsListening(false)
         isListeningRef.current = false
         if (event.error === 'aborted') return
-        Logger.warnToast(`Voice input: ${event.message ?? event.error}`)
+        Logger.warnToast(
+            i18n.t('toast.voiceInputEvent', { message: event.message ?? event.error })
+        )
     })
 
     const turnOffListening = useCallback(() => {
@@ -66,14 +69,14 @@ export const useSpeechInput = (onTextUpdate: (text: string) => void) => {
             }
 
             if (!ExpoSpeechRecognitionModule.isRecognitionAvailable()) {
-                Logger.warnToast('Voice input is not available on this device')
+                Logger.warnToast(i18n.t('toast.voiceInputUnavailable'))
                 return
             }
 
             const permission =
                 await ExpoSpeechRecognitionModule.requestMicrophonePermissionsAsync()
             if (!permission.granted) {
-                Logger.warnToast('Microphone permission is required for voice input')
+                Logger.warnToast(i18n.t('toast.micPermissionRequired'))
                 return
             }
 
@@ -86,7 +89,7 @@ export const useSpeechInput = (onTextUpdate: (text: string) => void) => {
                     continuous: true,
                 })
             } catch {
-                Logger.warnToast('Failed to start voice input')
+                Logger.warnToast(i18n.t('toast.voiceInputStartFailed'))
             }
         },
         [turnOffListening]
