@@ -1,6 +1,7 @@
 import React from 'react'
 import { ScrollView, Text, View } from 'react-native'
 import Markdown from 'react-native-markdown-display'
+import { useTranslation } from 'react-i18next'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useShallow } from 'zustand/react/shallow'
 
@@ -21,6 +22,7 @@ A *emphasized* (italic) text example.
 `
 
 const ChatStyling = () => {
+    const { t } = useTranslation()
     const { markdown, rules, style } = MarkdownStyle.useCustomFormatting()
     const { weight, size, dialogueFont, setWeight, setSize, setDialogueFont } = ChatStyle.useChatStyle(
         useShallow((state) => ({
@@ -47,14 +49,14 @@ const ChatStyling = () => {
                 contentContainerStyle={{ padding: 16, paddingBottom: 32, rowGap: 4 }}
                 keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator>
-                <HeaderTitle title="Chat Styling" />
+                <HeaderTitle title={t('chatStyle.title')} />
 
                 <HorizontalSelector
                     values={ChatStyle.SIZES.map((item) => ({
                         value: item,
                         label: item.toUpperCase(),
                     }))}
-                    label={'Font Size'}
+                    label={t('chatStyle.fontSize')}
                     selected={size}
                     onPress={(item) => setSize(item)}
                     style={{ flex: 0 }}
@@ -64,7 +66,7 @@ const ChatStyling = () => {
                         value: item,
                         label: item,
                     }))}
-                    label={'Font Weight'}
+                    label={t('chatStyle.fontWeight')}
                     selected={weight}
                     onPress={(item) => setWeight(item)}
                     style={{ flex: 0 }}
@@ -72,16 +74,16 @@ const ChatStyling = () => {
                 <HorizontalSelector
                     values={ChatStyle.DIALOGUE_FONTS.map((item) => ({
                         value: item,
-                        label: item === 'system' ? 'System' : 'Noto Sans',
+                        label: item === 'system' ? t('chatStyle.system') : t('chatStyle.notoSans'),
                     }))}
-                    label={'Font'}
+                    label={t('chatStyle.font')}
                     selected={dialogueFont}
                     onPress={(item) => setDialogueFont(item)}
                     style={{ flex: 0 }}
                 />
 
                 <Text style={{ color: color.text._300, fontSize: 12, marginTop: 16 }}>
-                    Preview
+                    {t('chatStyle.preview')}
                 </Text>
                 <View style={previewBoxStyle}>
                     <Markdown mergeStyle={false} markdownit={markdown} rules={rules} style={style}>

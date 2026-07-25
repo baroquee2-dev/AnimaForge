@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { StyleSheet, Text, View } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -15,6 +16,7 @@ import HeaderButton from '@components/views/HeaderButton'
 import HeaderTitle from '@components/views/HeaderTitle'
 import InputSheet from '@components/views/InputSheet'
 import { SamplerID, Samplers } from '@lib/constants/SamplerData'
+import i18n, { tSamplerField } from '@lib/i18n'
 import { APIConfiguration, APISampler } from '@lib/engine/API/APIBuilder.types'
 import { APIManager as APIStateNew } from '@lib/engine/API/APIManagerState'
 import { localSamplerData } from '@lib/engine/LocalInference'
@@ -27,6 +29,7 @@ import { saveStringToDownload } from '@lib/utils/File'
 import ContextLimitPreview from './ContextLimitPreview'
 
 const SamplerManagerScreen = () => {
+    const { t } = useTranslation()
     const styles = useStyles()
     const { spacing } = Theme.useTheme()
     const { appMode } = useAppMode()
@@ -68,23 +71,23 @@ const SamplerManagerScreen = () => {
             `${currentConfig.name}.json`,
             'utf8'
         ).then(() => {
-            Logger.infoToast('Downloaded Sampler Configuration!')
+            Logger.infoToast(i18n.t('sampler.downloaded'))
         })
     }
 
     const handleDeleteSampler = () => {
         if (configList.length === 1) {
-            Logger.errorToast(`Cannot Delete Last Configuration`)
+            Logger.errorToast(i18n.t('sampler.cannotDeleteLast'))
             return false
         }
 
         Alert.alert({
-            title: `Delete Sampler`,
-            description: `Are you sure you want to delete '${currentConfig.name}'?`,
+            title: t('sampler.deleteTitle'),
+            description: t('sampler.deleteDesc', { name: currentConfig.name }),
             buttons: [
-                { label: 'Cancel' },
+                { label: t('common.cancel') },
                 {
-                    label: 'Delete Sampler',
+                    label: t('sampler.deleteConfirm'),
                     onPress: async () => {
                         deleteSamplerConfig(currentConfigIndex)
                     },
@@ -104,7 +107,7 @@ const SamplerManagerScreen = () => {
             placement="bottom"
             buttons={[
                 {
-                    label: 'Create Sampler',
+                    label: t('sampler.create'),
                     icon: 'file-add',
                     onPress: (close) => {
                         setShowNewSampler(true)
@@ -112,7 +115,7 @@ const SamplerManagerScreen = () => {
                     },
                 },
                 {
-                    label: 'Export Sampler',
+                    label: t('sampler.export'),
                     icon: 'download',
                     onPress: (close) => {
                         handleExportSampler()
@@ -128,7 +131,7 @@ const SamplerManagerScreen = () => {
                     },
                 },*/
                 {
-                    label: 'Delete Sampler',
+                    label: t('sampler.deleteConfirm'),
                     icon: 'delete',
                     onPress: (close) => {
                         if (handleDeleteSampler()) close()
@@ -142,25 +145,25 @@ const SamplerManagerScreen = () => {
     return (
         <SafeAreaView edges={['bottom']} style={{ flex: 1 }} key={currentConfig.name}>
             <InputSheet
-                title="New Sampler Preset"
+                title={t('sampler.newPreset')}
                 visible={showNewSampler}
                 setVisible={setShowNewSampler}
                 onConfirm={(text: string) => {
                     if (text === '') {
-                        Logger.errorToast(`Sampler name cannot be empty`)
+                        Logger.errorToast(i18n.t('sampler.nameEmpty'))
                         return
                     }
 
                     for (const item of configList)
                         if (item.name === text) {
-                            Logger.errorToast(`Sampler name already exists.`)
+                            Logger.errorToast(i18n.t('sampler.nameExists'))
                             return
                         }
                     addSamplerConfig({ name: text, data: currentConfig.data })
                 }}
             />
 
-            <HeaderTitle title="Samplers" />
+            <HeaderTitle title={t('sampler.title')} />
             <HeaderButton headerRight={headerRight} />
 
             <DropdownSheet
@@ -186,7 +189,7 @@ const SamplerManagerScreen = () => {
                         if (!samplerItem)
                             return (
                                 <Text key={item.samplerID} style={styles.unsupported}>
-                                    Sampler ID {`[${item.samplerID}]`} Not Supported
+                                    {t('sampler.unsupported', { id: item.samplerID })}
                                 </Text>
                             )
                         switch (samplerItem.inputType) {
@@ -208,7 +211,7 @@ const SamplerManagerScreen = () => {
                                                     },
                                                 })
                                             }}
-                                            label={samplerItem.friendlyName}
+                                            label={tSamplerField(samplerItem.internalID, samplerItem.friendlyName)}
                                             min={samplerItem.values.min}
                                             max={samplerItem.values.max}
                                             step={samplerItem.values.step}
@@ -230,7 +233,7 @@ const SamplerManagerScreen = () => {
                                                 },
                                             })
                                         }}
-                                        label={samplerItem.friendlyName}
+                                        label={tSamplerField(samplerItem.internalID, samplerItem.friendlyName)}
                                     />
                                 )
                             case 'textinput':
@@ -247,14 +250,14 @@ const SamplerManagerScreen = () => {
                                                 },
                                             })
                                         }}
-                                        label={samplerItem.friendlyName}
+                                        label={tSamplerField(samplerItem.internalID, samplerItem.friendlyName)}
                                     />
                                 )
                             case 'selector':
                                 return (
                                     <HorizontalSelector
                                         key={item.samplerID}
-                                        label={samplerItem.friendlyName}
+                                        label={tSamplerField(samplerItem.internalID, samplerItem.friendlyName)}
                                         values={samplerItem.values.values.map((item) => ({
                                             label: item.charAt(0).toUpperCase() + item.slice(1),
                                             value: item,
@@ -274,7 +277,7 @@ const SamplerManagerScreen = () => {
                             //case 'custom':
                             default:
                                 return (
-                                    <Text style={styles.warningText}>Invalid Sampler Field!</Text>
+                                    <Text style={styles.warningText}>{t('sampler.invalidField')}</Text>
                                 )
                         }
                     })}
@@ -288,10 +291,10 @@ const SamplerManagerScreen = () => {
                         justifyContent: 'center',
                         rowGap: 12,
                     }}>
-                    <Text style={styles.noSamplersText}>No Samplers to Configure</Text>
+                    <Text style={styles.noSamplersText}>{t('sampler.noSamplers')}</Text>
                     {appMode === 'remote' && (
                         <Text style={styles.noSamplersText}>
-                            {`You probably haven't added an API connection yet`}
+                            {t('sampler.noApiYet')}
                         </Text>
                     )}
                 </View>

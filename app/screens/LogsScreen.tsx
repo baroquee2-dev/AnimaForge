@@ -1,5 +1,6 @@
 import { FlashList } from '@shopify/flash-list'
 import { Text, View } from 'react-native'
+import { useTranslation } from 'react-i18next'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useShallow } from 'zustand/react/shallow'
 
@@ -7,11 +8,13 @@ import Alert from '@components/views/Alert'
 import ContextMenu from '@components/views/ContextMenu'
 import HeaderButton from '@components/views/HeaderButton'
 import HeaderTitle from '@components/views/HeaderTitle'
+import i18n from '@lib/i18n'
 import { Logger, LogLevel } from '@lib/state/Logger'
 import { Theme } from '@lib/theme/ThemeManager'
 import { saveStringToDownload } from '@lib/utils/File'
 
 const LogsScreen = () => {
+    const { t } = useTranslation()
     const { color } = Theme.useTheme()
     const { logs, flushLogs } = Logger.useLoggerStore(
         useShallow((state) => ({
@@ -27,21 +30,21 @@ const LogsScreen = () => {
             .join('\n')
         saveStringToDownload(data, `logs-animaforge-${Date.now()}.txt`, 'utf8')
             .then(() => {
-                Logger.infoToast('Logs Downloaded!')
+                Logger.infoToast(i18n.t('logs.downloaded'))
             })
             .catch((e) => {
-                Logger.errorToast(`Could Not Export Logs: ${e}`)
+                Logger.errorToast(i18n.t('logs.exportFailed', { error: e }))
             })
     }
 
     const handleFlushLogs = () => {
         Alert.alert({
-            title: `Delete Logs`,
-            description: `Are you sure you want to delete all logs? This cannot be undone.`,
+            title: t('logs.deleteTitle'),
+            description: t('logs.deleteDesc'),
             buttons: [
-                { label: 'Cancel' },
+                { label: t('common.cancel') },
                 {
-                    label: 'Delete Logs',
+                    label: t('logs.deleteConfirm'),
                     onPress: async () => {
                         flushLogs()
                     },
@@ -64,7 +67,7 @@ const LogsScreen = () => {
             triggerIcon="setting"
             buttons={[
                 {
-                    label: 'Export Logs',
+                    label: t('logs.export'),
                     icon: 'export',
                     onPress: (close) => {
                         handleExportLogs()
@@ -72,7 +75,7 @@ const LogsScreen = () => {
                     },
                 },
                 {
-                    label: 'Flush Logs',
+                    label: t('logs.flush'),
                     icon: 'delete',
                     onPress: (close) => {
                         handleFlushLogs()
@@ -90,7 +93,7 @@ const LogsScreen = () => {
             style={{
                 flex: 1,
             }}>
-            <HeaderTitle title="Logs" />
+            <HeaderTitle title={t('logs.title')} />
             <HeaderButton headerRight={headerRight} />
             <View
                 style={{

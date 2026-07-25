@@ -1,15 +1,18 @@
 import React, { useState } from 'react'
 import { Image, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { useMMKVBoolean } from 'react-native-mmkv'
+import { useTranslation } from 'react-i18next'
 
 import ThemedButton from '@components/buttons/ThemedButton'
 import HeaderTitle from '@components/views/HeaderTitle'
 import { AppSettings, GITHUB_REPOSITORY } from '@lib/constants/GlobalValues'
+import i18n from '@lib/i18n'
 import { Logger } from '@lib/state/Logger'
 import { Theme } from '@lib/theme/ThemeManager'
 import appConfig from 'app.config'
 
 const AboutScreen = () => {
+    const { t } = useTranslation()
     const styles = useStyles()
     const { spacing } = Theme.useTheme()
     const [counter, setCounter] = useState<number>(0)
@@ -18,7 +21,7 @@ const AboutScreen = () => {
     const updateCounter = () => {
         if (devMode) return
         if (counter === 6) {
-            Logger.infoToast(`You have enabled dev mode.`)
+            Logger.infoToast(i18n.t('about.enabledDevMode'))
             setDevMode(true)
         }
         setCounter(counter + 1)
@@ -27,7 +30,7 @@ const AboutScreen = () => {
     const version = 'v' + appConfig.expo.version
     return (
         <View style={styles.container}>
-            <HeaderTitle title="About" />
+            <HeaderTitle title={t('about.title')} />
             <TouchableOpacity activeOpacity={0.8} onPress={updateCounter}>
                 <View style={styles.iconFrame}>
                     <Image
@@ -43,11 +46,11 @@ const AboutScreen = () => {
                 <Text style={styles.titleForge}>Forge</Text>
             </View>
             <Text style={styles.subtitleText}>
-                Version {version} {devMode && '[DEV MODE]'}
+                {t('about.version', { version })} {devMode && t('about.devMode')}
             </Text>
             {devMode && (
                 <ThemedButton
-                    label="Disable Dev Mode"
+                    label={t('about.disableDevMode')}
                     variant="critical"
                     buttonStyle={{
                         marginTop: spacing.xl,
@@ -63,7 +66,7 @@ const AboutScreen = () => {
             <ThemedButton
                 buttonStyle={{ marginTop: spacing.xl3 }}
                 variant="secondary"
-                label="Github Repository"
+                label={t('about.github')}
                 iconName="github"
                 iconSize={20}
                 onPress={() => {

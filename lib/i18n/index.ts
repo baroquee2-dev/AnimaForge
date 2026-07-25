@@ -86,4 +86,8 @@ void i18n.use(initReactI18next).init({
     compatibilityJSON: 'v4',
 })
 
+/** Translate sampler field labels by SamplerID, falling back to English friendlyName. */
+export const tSamplerField = (samplerId: string, fallback: string) =>
+    i18n.t(`sampler.fields.${samplerId}`, { defaultValue: fallback })
+
 export default i18n
