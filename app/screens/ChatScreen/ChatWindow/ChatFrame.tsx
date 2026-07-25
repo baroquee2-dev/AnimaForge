@@ -4,7 +4,7 @@ import Animated from 'react-native-reanimated'
 
 import Avatar from '@components/views/Avatar'
 import { Characters } from '@lib/state/Characters'
-import { Chats, ChatEntry } from '@lib/state/Chat'
+import { Chats } from '@lib/state/Chat'
 import { useAvatarViewerStore } from '@lib/state/components/AvatarViewer'
 import { Theme } from '@lib/theme/ThemeManager'
 
@@ -18,7 +18,6 @@ import { portraitEntrance } from '@lib/animations/chatAnimations'
 type ChatFrameProps = {
     children?: ReactNode
     index: number
-    entry?: ChatEntry
     nowGenerating: boolean
     isLast?: boolean
     historyCompact?: boolean
@@ -52,7 +51,6 @@ export const getImmersiveDialogueMaxHeight = (inputHeight: number = 64) => {
 const ChatFrame: React.FC<ChatFrameProps> = ({
     children,
     index,
-    entry: entryProp,
     nowGenerating,
     isLast,
     historyCompact = false,
@@ -62,18 +60,12 @@ const ChatFrame: React.FC<ChatFrameProps> = ({
     const isVisualNovel = useIsVisualNovelPresentation()
     const isImmersive = useIsImmersivePresentation()
     const useAlternateAlignment = !isVisualNovel && !isImmersive
-    const messageFromIndex = Chats.useEntryData(index)
-    const message = entryProp ?? messageFromIndex
+    const message = Chats.useEntryData(index)
     const setShowViewer = useAvatarViewerStore((state) => state.setShow)
     const charImageId = Characters.useCharacterStore((state) => state.card?.image_id) ?? 0
     const userImageId = Characters.useUserStore((state) => state.card?.image_id) ?? 0
-    const immersivePortraitSize = useMemo(getImmersivePortraitSize, [])
 
-    const swipe = message.swipes?.[message.swipe_id]
-    if (!swipe) {
-        return null
-    }
-
+    const swipe = message.swipes[message.swipe_id]
     const imageId = message.is_user ? userImageId : charImageId
     const showMetadata = (!isVisualNovel && !isImmersive) || historyCompact
 
@@ -92,6 +84,7 @@ const ChatFrame: React.FC<ChatFrameProps> = ({
         message.is_user && useAlternateAlignment ? 'row-reverse' : 'row'
     const align =
         message.is_user && useAlternateAlignment ? 'flex-end' : 'flex-start'
+    const immersivePortraitSize = useMemo(getImmersivePortraitSize, [])
 
     if ((isVisualNovel || isImmersive) && isLast && !message.is_user) {
         if (portraitExternal || isImmersive) {

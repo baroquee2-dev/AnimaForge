@@ -1,6 +1,6 @@
 import { setStringAsync } from 'expo-clipboard'
 import { Image } from 'expo-image'
-import React, { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { Platform, StyleSheet, Text, useWindowDimensions, View } from 'react-native'
 import { MarkdownIt } from 'react-native-markdown-display'
 import MathJax from 'react-native-mathjax-svg'
@@ -16,34 +16,6 @@ import { Theme } from '@lib/theme/ThemeManager'
 import latexPlugin from './MarkdownLatexPlugin'
 import doubleQuotePlugin from './MarkdownQuotePlugin'
 import thinkPlugin from './MarkdownThinkPlugin'
-
-const getDeepASTDirection = (astNode: any): 'ltr' | 'rtl' | 'neutral' => {
-    if (!astNode) return 'neutral'
-
-    if (
-        astNode.type === 'softbreak' ||
-        astNode.type === 'hardbreak' ||
-        astNode.type === 'double_quote'
-    ) {
-        return 'neutral'
-    }
-
-    if (astNode.type === 'text' && typeof astNode.content === 'string') {
-        if (!astNode.content.trim()) return 'neutral'
-
-        const rtlRegex = /[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]/
-        return rtlRegex.test(astNode.content) ? 'rtl' : 'ltr'
-    }
-
-    if (Array.isArray(astNode.children)) {
-        for (const childNode of astNode.children) {
-            const dir = getDeepASTDirection(childNode)
-            if (dir !== 'neutral') return dir
-        }
-    }
-
-    return 'neutral'
-}
 
 const ImageAdapter = ({
     node,
@@ -203,76 +175,6 @@ export namespace MarkdownStyle {
                 </MathJax>
             )
         },
-        textgroup: (node: any, children: any, parent: any, styles: any) => {
-            const astChildrenArray = node.children || []
-            const renderedChildrenArray = React.Children.toArray(children)
-
-            const componentRuns: {
-                direction: 'ltr' | 'rtl'
-                renderedChildren: React.ReactNode[]
-            }[] = []
-            let currentRunRendered: React.ReactNode[] = []
-
-            let currentDir: 'ltr' | 'rtl' = 'ltr'
-            let isFirstNode = true
-            astChildrenArray.forEach((astChild: any, index: number) => {
-                const renderedChild = renderedChildrenArray[index]
-                if (!renderedChild) return
-
-                let childDir = getDeepASTDirection(astChild)
-
-                if (childDir === 'neutral') {
-                    childDir = currentDir
-                }
-
-                if (isFirstNode) {
-                    currentDir = childDir
-                    isFirstNode = false
-                    currentRunRendered.push(renderedChild)
-                } else if (childDir === currentDir) {
-                    currentRunRendered.push(renderedChild)
-                } else {
-                    componentRuns.push({
-                        direction: currentDir,
-                        renderedChildren: currentRunRendered,
-                    })
-                    currentDir = childDir
-                    currentRunRendered = [renderedChild]
-                }
-            })
-
-            if (currentRunRendered.length > 0) {
-                componentRuns.push({
-                    direction: currentDir,
-                    renderedChildren: currentRunRendered,
-                })
-            }
-
-            return (
-                <View key={node.key} style={{ width: '100%' }}>
-                    {componentRuns.map((run, index) => {
-                        const isRtl = run.direction === 'rtl'
-
-                        return (
-                            <Text
-                                key={`run-${index}`}
-                                style={[
-                                    styles.textgroup,
-                                    {
-                                        width: '100%',
-                                        writingDirection: run.direction,
-                                        textAlign: isRtl ? 'right' : 'left',
-                                    },
-                                ]}>
-                                {isRtl ? '\u2067' : '\u2066'}
-                                {run.renderedChildren}
-                                {'\u2069'}
-                            </Text>
-                        )
-                    })}
-                </View>
-            )
-        },
         image: (
             node: any,
             children: any,
@@ -365,9 +267,7 @@ export namespace MarkdownStyle {
                         ...bodyTypography,
                     },
                     // The main container
-                    body: {
-                        textAlign: 'auto',
-                    },
+                    body: {},
 
                     // Headings
                     heading1: {
@@ -589,7 +489,6 @@ export namespace MarkdownStyle {
 
                     textgroup: {
                         color: color.text._100,
-                        width: '100%',
                         ...bodyTypography,
                     },
                     latex_inline: {
@@ -602,7 +501,10 @@ export namespace MarkdownStyle {
                     },
                     paragraph: {
                         flexWrap: 'wrap',
-                        textAlign: 'auto',
+                        flexDirection: 'row',
+                        alignItems: 'flex-start',
+                        justifyContent: 'flex-start',
+                        width: '100%',
                         color: color.text._100,
                         marginVertical: spacing.sm,
                         ...bodyTypography,

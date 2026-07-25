@@ -4,7 +4,7 @@ import { useShallow } from 'zustand/react/shallow'
 
 import { AppSettings } from '@lib/constants/GlobalValues'
 import { useAppMode } from '@lib/state/AppMode'
-import { Chats, ChatEntry } from '@lib/state/Chat'
+import { Chats } from '@lib/state/Chat'
 import { Theme } from '@lib/theme/ThemeManager'
 
 import { useIsImmersivePresentation, useIsVisualNovelPresentation } from '@lib/chat/ChatLayoutContext'
@@ -19,7 +19,6 @@ import { IMMERSIVE_DIALOGUE_LEFT_PADDING, getImmersiveDialogueWidth } from '@lib
 
 type ChatTextProps = {
     index: number
-    entry?: ChatEntry
     nowGenerating: boolean
     isLastMessage: boolean
     isGreeting: boolean
@@ -29,14 +28,13 @@ type ChatTextProps = {
 
 const ChatBubble: React.FC<ChatTextProps> = ({
     index,
-    entry: entryProp,
     nowGenerating,
     isLastMessage,
     isGreeting,
     historyCompact = false,
     toolbarExternal = false,
 }) => {
-    const message = entryProp ?? Chats.useEntryData(index)
+    const message = Chats.useEntryData(index)
     const { appMode } = useAppMode()
     const isVisualNovel = useIsVisualNovelPresentation()
     const isImmersive = useIsImmersivePresentation()
