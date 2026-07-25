@@ -13,9 +13,6 @@ import ChatWindowSettings from './ChatWindowSettings'
 import DatabaseSettings from './DatabaseSettings'
 import GeneratingSettings from './GeneratingSettings'
 import LanguageSettings from './LanguageSettings'
-import NotificationSettings from './NotificationSettings'
-import ScreenSettings from './ScreenSettings'
-import SecuritySettings from './SecuritySettings'
 import StyleSettings from './StyleSettings'
 
 const AppSettingsMenu = () => {
@@ -39,10 +36,7 @@ const AppSettingsMenu = () => {
             <ChatWindowSettings />
             <CharacterSettings />
             <GeneratingSettings />
-            <NotificationSettings />
-            <ScreenSettings />
             <DatabaseSettings />
-            <SecuritySettings />
 
             <View style={{ paddingVertical: spacing.xl3 }} />
         </KeyboardAwareScrollView>

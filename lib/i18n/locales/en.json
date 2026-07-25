@@ -155,6 +155,7 @@
         "style": {
             "title": "Style",
             "changeTheme": "Change Theme",
+            "chatStyle": "Chat Style",
             "changeBackground": "Change Default Background",
             "removeBackground": "Remove Default Background",
             "removeBackgroundTitle": "Remove Default Background?",
@@ -169,8 +170,7 @@
             "autoLoadUser": "Auto Load User",
             "autoLoadUserDesc": "When opening a chat, automatically loads the User the chat was created with",
             "autoTitle": "Automatically Generate Titles",
-            "autoTitleDesc": "Automatically generates titles for chats (only in Remote mode)",
-            "chatStyle": "Chat Style"
+            "autoTitleDesc": "Automatically generates titles for chats (only in Remote mode)"
         },
         "chatWindow": {
             "title": "Chat Window",
@@ -193,7 +193,7 @@
             "hiddenTagsDesc": "Hide characters with the following tags from the character list."
         },
         "generation": {
-            "title": "Generation",
+            "title": "System",
             "printContext": "Print Context",
             "printContextDesc": "Prints the generation context to logs for debugging",
             "bypassContext": "Bypass Context Length",
@@ -202,11 +202,11 @@
         "notifications": {
             "title": "Notifications",
             "enable": "Enable Notifications",
-            "enableDesc": "Sends notifications when the app is in the background",
+            "enableDesc": "Notify you when an AI response finishes",
             "sound": "Notification Sound",
             "vibrate": "Notification Vibration",
             "showText": "Show Text In Notification",
-            "showTextDesc": "Shows generated messages in notifications"
+            "showTextDesc": "Include the reply text in the notification"
         },
         "screen": {
             "title": "Screen",

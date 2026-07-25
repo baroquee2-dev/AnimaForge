@@ -104,6 +104,11 @@ const getPaths = (remote: boolean): ButtonData[] => [
         icon: 'sound',
     },
     {
+        nameKey: 'nav.settings',
+        path: '/screens/AppSettingsScreen',
+        icon: 'setting',
+    },
+    {
         nameKey: 'nav.logs',
         path: '/screens/LogsScreen',
         icon: 'code',
@@ -112,10 +117,5 @@ const getPaths = (remote: boolean): ButtonData[] => [
         nameKey: 'nav.about',
         path: '/screens/AboutScreen',
         icon: 'info-circle',
-    },
-    {
-        nameKey: 'nav.settings',
-        path: '/screens/AppSettingsScreen',
-        icon: 'setting',
     },
 ]

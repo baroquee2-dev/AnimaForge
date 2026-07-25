@@ -155,6 +155,7 @@
         "style": {
             "title": "外觀",
             "changeTheme": "變更主題",
+            "chatStyle": "聊天樣式",
             "changeBackground": "變更預設背景",
             "removeBackground": "移除預設背景",
             "removeBackgroundTitle": "要移除預設背景嗎？",
@@ -169,8 +170,7 @@
             "autoLoadUser": "自動載入使用者",
             "autoLoadUserDesc": "開啟聊天時，自動載入建立該聊天時使用的使用者",
             "autoTitle": "自動產生標題",
-            "autoTitleDesc": "自動為聊天產生標題（僅遠端模式）",
-            "chatStyle": "聊天樣式"
+            "autoTitleDesc": "自動為聊天產生標題（僅遠端模式）"
         },
         "chatWindow": {
             "title": "聊天視窗",
@@ -193,7 +193,7 @@
             "hiddenTagsDesc": "在角色列表中隱藏帶有下列標籤的角色。"
         },
         "generation": {
-            "title": "生成",
+            "title": "系統相關",
             "printContext": "輸出 Context",
             "printContextDesc": "將生成用的 context 印到日誌以便除錯",
             "bypassContext": "略過 Context 長度限制",
@@ -202,11 +202,11 @@
         "notifications": {
             "title": "通知",
             "enable": "啟用通知",
-            "enableDesc": "應用程式在背景時傳送通知",
+            "enableDesc": "AI 回覆完成時傳送通知",
             "sound": "通知音效",
             "vibrate": "通知震動",
             "showText": "在通知中顯示文字",
-            "showTextDesc": "在通知中顯示生成的訊息內容"
+            "showTextDesc": "通知內容包含回覆文字"
         },
         "screen": {
             "title": "螢幕",

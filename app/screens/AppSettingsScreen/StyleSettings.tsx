@@ -31,6 +31,11 @@ const StyleSettings = () => {
                 onPress={() => router.push('/screens/AppSettingsScreen/ColorSelector')}
             />
             <ThemedButton
+                label={t('settings.style.chatStyle')}
+                variant="secondary"
+                onPress={() => router.push('/screens/AppSettingsScreen/ChatStyleSettings')}
+            />
+            <ThemedButton
                 label={t('settings.style.changeBackground')}
                 variant="secondary"
                 onPress={importBackground}
