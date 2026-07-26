@@ -215,18 +215,18 @@
         },
         "database": {
             "title": "Database Management",
-            "warning": "WARNING: ensure imported database is from the same app version!",
-            "export": "Export Database",
-            "exportTitle": "Export Database",
-            "exportDesc": "Are you sure you want to export the database file?\n\nIt will automatically be downloaded to Downloads",
-            "import": "Import Database",
-            "importTitle": "Import Database",
-            "importDesc": "Are you sure you want to import this database? This may will destroy the current database!\n\nA backup will automatically be downloaded.\n\nApp will restart automatically",
+            "warning": "WARNING: ensure imported backup is from the same app version!",
+            "export": "Export Backup",
+            "exportTitle": "Export Backup",
+            "exportDesc": "Export the database and character images as a zip file?\n\nIt will be downloaded to Downloads.",
+            "import": "Import Backup",
+            "importTitle": "Import Backup",
+            "importDesc": "Import this backup? This will replace the current database and character images!\n\nExport a backup first if you want to keep the current data.\n\nThe app will restart automatically.\n\nLegacy .db files are still supported (database only).",
             "versionWarningTitle": "WARNING: Different Version",
-            "versionWarningDesc": "The imported database file has a different app version ({{dbVersion}}) to installed version ({{appVersion}}).\n\nImporting this database may break or corrupt the database. It is recommended to use the same app version.",
+            "versionWarningDesc": "The imported backup has a different app version ({{dbVersion}}) to installed version ({{appVersion}}).\n\nImporting may break or corrupt the database. It is recommended to use the same app version.",
             "importAnyways": "Import Anyways",
             "downloadSuccess": "Download Successful!",
-            "copyFailed": "Failed to copy database: {{error}}"
+            "copyFailed": "Failed to copy backup: {{error}}"
         },
         "security": {
             "title": "Security",
