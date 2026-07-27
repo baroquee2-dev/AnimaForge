@@ -1,7 +1,6 @@
 import { extractPngTextChunk, replacePngTextChunk } from '@vali98/react-native-png-utils'
 import { and, asc, desc, eq, gte, inArray, like, notExists, notInArray, sql } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
-import { Asset } from 'expo-asset'
 import * as DocumentPicker from 'expo-document-picker'
 import { Paths } from 'expo-file-system'
 import { useEffect } from 'react'
@@ -19,6 +18,7 @@ import {
     fileExists,
     readBase64Async,
     readStringAsync,
+    resolveBundledAssetFileUri,
     saveStringToDownload,
 } from '@lib/utils/File'
 import { replaceMacroBase } from '@lib/utils/Macros'
@@ -974,32 +974,41 @@ export namespace Characters {
     }
 
     export const createDefaultCard = async () => {
+        // Card data is bundled as JSON because Android PNG crunching strips tEXt
+        // character-card chunks from required image assets on device builds.
         const defaultCards = [
             {
                 filename: 'EnglishSample.png',
                 asset: require('./../../assets/characters/EnglishSample.png'),
+                card: require('./../../assets/characters/EnglishSample.json'),
             },
             {
                 filename: 'JapaneseSample.png',
                 asset: require('./../../assets/characters/JapaneseSample.png'),
+                card: require('./../../assets/characters/JapaneseSample.json'),
             },
             {
                 filename: 'ChineseSample.png',
                 asset: require('./../../assets/characters/ChineseSample.png'),
+                card: require('./../../assets/characters/ChineseSample.json'),
             },
         ] as const
 
         for (const card of defaultCards) {
             const cardDefaultDir = `${Paths.document.uri}appAssets/${card.filename}`
             try {
+                Logger.info(`Importing default card: ${card.filename}`)
                 if (!fileExists(cardDefaultDir)) {
-                    Logger.info(`Importing default card: ${card.filename}`)
-                    const [asset] = await Asset.loadAsync(card.asset)
-                    if (asset.localUri) {
-                        await copyFile({ from: asset.localUri, to: cardDefaultDir })
+                    const localUri = await resolveBundledAssetFileUri(card.asset)
+                    if (!localUri) {
+                        throw new Error(`Missing local URI for ${card.filename}`)
+                    }
+                    const copied = await copyFile({ from: localUri, to: cardDefaultDir })
+                    if (!copied || !fileExists(cardDefaultDir)) {
+                        throw new Error(`Failed to copy ${card.filename} into appAssets`)
                     }
                 }
-                await createCharacterFromImage(cardDefaultDir)
+                await createCharacterFromV2JSON(card.card, cardDefaultDir)
             } catch (e) {
                 Logger.errorToast(i18n.t('toast.failedCreateDefaultCharacter'))
                 Logger.error(`Error creating default card ${card.filename}: ` + e)
