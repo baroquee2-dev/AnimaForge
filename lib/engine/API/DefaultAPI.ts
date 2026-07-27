@@ -80,6 +80,85 @@ export const defaultTemplates: APIConfiguration[] = [
             },
         },
     },
+    // xAI (Grok)
+    {
+        version: 1,
+        name: 'XAI',
+
+        defaultValues: {
+            endpoint: 'https://api.x.ai/v1/chat/completions',
+            modelEndpoint: 'https://api.x.ai/v1/models',
+            prefill: '',
+            firstMessage: '',
+            key: '',
+            model: undefined,
+        },
+
+        features: {
+            usePrefill: false,
+            useFirstMessage: false,
+            useKey: true,
+            useModel: true,
+            multipleModels: false,
+        },
+
+        request: {
+            requestType: 'stream',
+            samplerFields: [
+                { externalName: 'max_context_length', samplerID: SamplerID.CONTEXT_LENGTH },
+                { externalName: 'max_completion_tokens', samplerID: SamplerID.GENERATED_LENGTH },
+                { externalName: 'stream', samplerID: SamplerID.STREAMING },
+                { externalName: 'temperature', samplerID: SamplerID.TEMPERATURE },
+                { externalName: 'top_p', samplerID: SamplerID.TOP_P },
+                { externalName: 'presence_penalty', samplerID: SamplerID.PRESENCE_PENALTY },
+                { externalName: 'frequency_penalty', samplerID: SamplerID.FREQUENCY_PENALTY },
+                { externalName: 'seed', samplerID: SamplerID.SEED },
+            ],
+            completionType: {
+                type: 'chatCompletions',
+                userRole: 'user',
+                systemRole: 'system',
+                assistantRole: 'assistant',
+                contentName: 'content',
+                supportsImages: true,
+            },
+            authHeader: 'Authorization',
+            authPrefix: 'Bearer ',
+            responseParsePattern: 'choices.0.delta.content',
+            reasoningParsePattern: [
+                'choices.0.delta.reasoning',
+                'choices.0.delta.reasoning_content',
+            ],
+            useStop: true,
+            stopKey: 'stop',
+            stopSequenceLimit: 8,
+            promptKey: 'messages',
+            removeLength: true,
+        },
+
+        payload: {
+            type: 'openai',
+        },
+
+        model: {
+            useModelContextLength: false,
+            nameParser: 'id',
+            contextSizeParser: '',
+            modelListParser: 'data',
+        },
+
+        ui: {
+            editableCompletionPath: false,
+            editableModelPath: false,
+            selectableModel: true,
+            display: {
+                name: 'xAI',
+                priority: 10095,
+                icon: 'xai',
+                link: 'https://docs.x.ai/',
+            },
+        },
+    },
     // KoboldCPP
     {
         version: 1,
