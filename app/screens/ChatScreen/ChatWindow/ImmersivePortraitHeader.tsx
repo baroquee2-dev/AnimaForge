@@ -3,11 +3,12 @@ import { Text, TouchableOpacity, View } from 'react-native'
 import Animated from 'react-native-reanimated'
 
 import Avatar from '@components/views/Avatar'
+import { portraitEntrance } from '@lib/animations/chatAnimations'
+import { useFocusedValue } from '@lib/hooks/useFocusedValue'
 import { Characters } from '@lib/state/Characters'
 import { useAvatarViewerStore } from '@lib/state/components/AvatarViewer'
 import { Theme } from '@lib/theme/ThemeManager'
 
-import { portraitEntrance } from '@lib/animations/chatAnimations'
 import { getImmersivePortraitSize } from './ChatFrame'
 import PortraitBreathing from './PortraitBreathing'
 
@@ -19,11 +20,16 @@ const ImmersivePortraitHeader: React.FC<ImmersivePortraitHeaderProps> = ({ nowGe
     const { color, spacing, borderRadius } = Theme.useTheme()
     const setShowViewer = useAvatarViewerStore((state) => state.setShow)
     const charImageId = Characters.useCharacterStore((state) => state.card?.image_id) ?? 0
+    // Apply after background so both heavy images are not swapped in one frame.
+    const stableCharImageId = useFocusedValue(charImageId, 'portrait.header', {
+        resumeDelayMs: 350,
+    })
     const immersivePortraitSize = useMemo(getImmersivePortraitSize, [])
 
     return (
         <View style={{ alignItems: 'center', paddingTop: spacing.sm }}>
-            <Animated.View key={charImageId} entering={portraitEntrance}>
+            {/* No key={imageId}: entrance plays on chat mount only, not on image replace. */}
+            <Animated.View entering={portraitEntrance}>
                 <PortraitBreathing active={nowGenerating}>
                     <TouchableOpacity onPress={() => setShowViewer(true, false)}>
                         <Avatar
@@ -35,7 +41,7 @@ const ImmersivePortraitHeader: React.FC<ImmersivePortraitHeaderProps> = ({ nowGe
                                 borderWidth: 2,
                                 borderColor: color.neutral._100 + '88',
                             }}
-                            targetImage={Characters.getImageDir(charImageId)}
+                            targetImage={Characters.getImageDir(stableCharImageId)}
                         />
                     </TouchableOpacity>
                 </PortraitBreathing>

@@ -3,6 +3,8 @@ import { Dimensions, Text, TouchableOpacity, View } from 'react-native'
 import Animated from 'react-native-reanimated'
 
 import Avatar from '@components/views/Avatar'
+import { portraitEntrance } from '@lib/animations/chatAnimations'
+import { useFocusedValue } from '@lib/hooks/useFocusedValue'
 import { Characters } from '@lib/state/Characters'
 import { Chats } from '@lib/state/Chat'
 import { useAvatarViewerStore } from '@lib/state/components/AvatarViewer'
@@ -13,7 +15,6 @@ import {
     useIsVisualNovelPresentation,
 } from '@lib/chat/ChatLayoutContext'
 import PortraitBreathing from './PortraitBreathing'
-import { portraitEntrance } from '@lib/animations/chatAnimations'
 
 type ChatFrameProps = {
     children?: ReactNode
@@ -64,9 +65,15 @@ const ChatFrame: React.FC<ChatFrameProps> = ({
     const setShowViewer = useAvatarViewerStore((state) => state.setShow)
     const charImageId = Characters.useCharacterStore((state) => state.card?.image_id) ?? 0
     const userImageId = Characters.useUserStore((state) => state.card?.image_id) ?? 0
+    const stableCharImageId = useFocusedValue(charImageId, 'portrait.chatFrame', {
+        resumeDelayMs: 350,
+    })
+    const stableUserImageId = useFocusedValue(userImageId, 'portrait.userFrame', {
+        resumeDelayMs: 350,
+    })
 
     const swipe = message.swipes[message.swipe_id]
-    const imageId = message.is_user ? userImageId : charImageId
+    const imageId = message.is_user ? stableUserImageId : stableCharImageId
     const showMetadata = (!isVisualNovel && !isImmersive) || historyCompact
 
     const getDeltaTime = () =>
@@ -93,7 +100,8 @@ const ChatFrame: React.FC<ChatFrameProps> = ({
 
         return (
             <View style={{ alignItems: 'center', paddingTop: spacing.sm }}>
-                <Animated.View key={charImageId} entering={portraitEntrance}>
+                {/* No key={imageId}: entrance plays on chat mount only, not on image replace. */}
+                <Animated.View entering={portraitEntrance}>
                     <PortraitBreathing active={nowGenerating}>
                         <TouchableOpacity onPress={() => setShowViewer(true, false)}>
                             <Avatar
@@ -105,7 +113,7 @@ const ChatFrame: React.FC<ChatFrameProps> = ({
                                     borderWidth: 2,
                                     borderColor: color.neutral._100 + '88',
                                 }}
-                                targetImage={Characters.getImageDir(charImageId)}
+                                targetImage={Characters.getImageDir(stableCharImageId)}
                             />
                         </TouchableOpacity>
                     </PortraitBreathing>
@@ -135,7 +143,7 @@ const ChatFrame: React.FC<ChatFrameProps> = ({
                                 height: 36,
                                 borderRadius: borderRadius.xl,
                             }}
-                            targetImage={Characters.getImageDir(userImageId)}
+                            targetImage={Characters.getImageDir(stableUserImageId)}
                         />
                     </TouchableOpacity>
                 </View>
@@ -164,7 +172,7 @@ const ChatFrame: React.FC<ChatFrameProps> = ({
                                 height: 36,
                                 borderRadius: borderRadius.xl,
                             }}
-                            targetImage={Characters.getImageDir(userImageId)}
+                            targetImage={Characters.getImageDir(stableUserImageId)}
                         />
                     </TouchableOpacity>
                 </View>

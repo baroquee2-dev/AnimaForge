@@ -145,7 +145,10 @@ const ChracterEditorScreen = () => {
 
     useEffect(() => {
         return () => {
-            if (!chat) unloadCharacter()
+            if (!chat) {
+                unloadCharacter()
+                Characters.flushPendingImageDeletes()
+            }
         }
     }, [chat, unloadCharacter])
 
@@ -262,7 +265,7 @@ const ChracterEditorScreen = () => {
                                             close()
                                             await Characters.importBackground(
                                                 charId,
-                                                characterCard.background_image
+                                                backgroundImage
                                             )
                                         },
                                     },

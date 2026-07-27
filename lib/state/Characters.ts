@@ -103,19 +103,24 @@ export namespace Characters {
                     return getImageDir(get().card?.image_id ?? 0)
                 },
                 updateImage: async (sourceURI: string) => {
-                    const id = get().id
-                    const oldImageID = get().card?.image_id
-                    const card = get().card
-                    if (!id || !oldImageID || !card) {
-                        Logger.errorToast(i18n.t('toast.couldNotGetData'))
-                        return
-                    }
-                    const imageID = Date.now()
-                    await db.mutate.updateCardField('image_id', imageID, id)
-                    await deleteImage(oldImageID)
-                    await copyImage(sourceURI, imageID)
-                    card.image_id = imageID
-                    set({ card })
+                    await runCharacterMediaUpdate(async () => {
+                        const id = get().id
+                        const oldImageID = get().card?.image_id
+                        const card = get().card
+                        if (!id || !oldImageID || !card) {
+                            Logger.errorToast(i18n.t('toast.couldNotGetData'))
+                            return
+                        }
+                        const imageID = nextImageId()
+                        const copied = await copyImage(sourceURI, imageID)
+                        if (!copied) {
+                            Logger.errorToast(i18n.t('toast.couldNotGetData'))
+                            return
+                        }
+                        await db.mutate.updateCardField('image_id', imageID, id)
+                        set({ card: { ...card, image_id: imageID } })
+                        queueDeleteImage(oldImageID)
+                    })
                 },
                 getCache: async (userName: string) => {
                     const cache = get().tokenCache
@@ -189,19 +194,24 @@ export namespace Characters {
             return getImageDir(get().card?.image_id ?? 0)
         },
         updateImage: async (sourceURI: string) => {
-            const id = get().id
-            const oldImageID = get().card?.image_id
-            const card = get().card
-            if (!id || !oldImageID || !card) {
-                Logger.errorToast(i18n.t('toast.couldNotGetData'))
-                return
-            }
-            const imageID = Date.now()
-            await db.mutate.updateCardField('image_id', imageID, id)
-            await deleteImage(oldImageID)
-            await copyImage(sourceURI, imageID)
-            card.image_id = imageID
-            set({ card })
+            await runCharacterMediaUpdate(async () => {
+                const id = get().id
+                const oldImageID = get().card?.image_id
+                const card = get().card
+                if (!id || !oldImageID || !card) {
+                    Logger.errorToast(i18n.t('toast.couldNotGetData'))
+                    return
+                }
+                const imageID = nextImageId()
+                const copied = await copyImage(sourceURI, imageID)
+                if (!copied) {
+                    Logger.errorToast(i18n.t('toast.couldNotGetData'))
+                    return
+                }
+                await db.mutate.updateCardField('image_id', imageID, id)
+                set({ card: { ...card, image_id: imageID } })
+                queueDeleteImage(oldImageID)
+            })
         },
         getCache: async (charName: string) => {
             const cache = get().tokenCache
@@ -766,12 +776,17 @@ export namespace Characters {
             if (result.canceled) return
             const dir = result.assets[0].uri
             if (!dir) return
-            const imageId = Date.now()
-            if (oldBackground) {
-                await deleteImage(oldBackground)
-            }
-            await copyImage(dir, imageId)
-            await db.mutate.updateBackground(charId, imageId)
+            await runCharacterMediaUpdate(async () => {
+                const imageId = nextImageId()
+                // Keep the old file until chat UI can leave the URI (chat freezes
+                // media while Character Editor is focused on top).
+                const copied = await copyImage(dir, imageId)
+                if (!copied) return
+                await db.mutate.updateBackground(charId, imageId)
+                if (oldBackground) {
+                    queueDeleteImage(oldBackground)
+                }
+            })
         } catch (e) {
             Logger.error(`Failed to import background`)
             Logger.error(`Error: ` + e)
@@ -781,7 +796,7 @@ export namespace Characters {
     export const deleteBackground = async (charId: number, imageId: number) => {
         try {
             await db.mutate.deleteBackground(charId)
-            await deleteImage(imageId)
+            queueDeleteImage(imageId)
             Logger.info(`Deleted image with id: ` + imageId)
         } catch (e) {
             Logger.errorToast(i18n.t('toast.failedDeleteBackground'))
@@ -789,12 +804,55 @@ export namespace Characters {
         }
     }
 
+    // Portrait + background share characters/*.png named by numeric id. Date.now()
+    // alone can collide when both are changed back-to-back.
+    let imageIdSeq = 0
+    const nextImageId = () => {
+        imageIdSeq = (imageIdSeq + 1) % 1000
+        return Date.now() * 1000 + imageIdSeq
+    }
+
+    // Serialize portrait/background replaces so copies and DB writes do not overlap.
+    let mediaUpdateChain: Promise<void> = Promise.resolve()
+    const runCharacterMediaUpdate = async <T>(fn: () => Promise<T>): Promise<T> => {
+        const run = mediaUpdateChain.then(fn, fn)
+        mediaUpdateChain = run.then(
+            () => undefined,
+            () => undefined
+        )
+        return run
+    }
+
+    let pendingImageDeletes: number[] = []
+
+    const queueDeleteImage = (imageID: number) => {
+        if (!pendingImageDeletes.includes(imageID)) {
+            pendingImageDeletes.push(imageID)
+        }
+    }
+
+    /**
+     * Delete replaced character/background files after chat Image views have
+     * switched off those URIs (call when ChatScreen is focused again, or when
+     * leaving the editor without an active chat).
+     */
+    export const flushPendingImageDeletes = (delayMs = 500) => {
+        if (pendingImageDeletes.length === 0) return
+        const ids = pendingImageDeletes
+        pendingImageDeletes = []
+        setTimeout(() => {
+            for (const id of ids) {
+                void deleteImage(id)
+            }
+        }, delayMs)
+    }
+
     export const deleteImage = async (imageID: number) => {
         await deleteFile(getImageDir(imageID))
     }
 
     export const copyImage = async (uri: string, imageID: number) => {
-        copyFile({
+        return await copyFile({
             from: uri,
             to: getImageDir(imageID),
         })
