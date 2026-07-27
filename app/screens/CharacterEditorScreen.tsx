@@ -151,11 +151,16 @@ const ChracterEditorScreen = () => {
                 {
                     label: t('characterEditor.deleteConfirm'),
                     onPress: () => {
+                        leaveAfterSaveRef.current = true
+                        const name = charName
                         Characters.db.mutate.deleteCard(charId ?? -1)
+                        // dismissTo list first — unloading clears charId and the
+                        // Redirect ".." would only pop onto a blank ChatScreen
+                        // when the editor was opened from chat.
+                        router.dismissTo('/')
                         unloadCharacter()
                         unloadChat()
-                        setEdited(false)
-                        Logger.info(`Deleted character: ${charName}`)
+                        Logger.info(`Deleted character: ${name}`)
                     },
                     type: 'warning',
                 },
