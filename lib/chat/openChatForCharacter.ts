@@ -3,17 +3,12 @@ import { Characters } from '@lib/state/Characters'
 import { Chats } from '@lib/state/Chat'
 import { Logger } from '@lib/state/Logger'
 
-/**
- * Loads a character and its most recent chat, creating one when missing.
- * Navigate to ChatScreen only when this resolves true.
- */
+/** Loads a character and its latest chat (creates one if missing). */
 export const openChatForCharacter = async (
     characterId: number,
     knownChatId?: number
 ): Promise<boolean> => {
     try {
-        // TEMP [SaveFlow] diagnostics — remove once the redbox is understood.
-        Logger.info(`[SaveFlow] openChatForCharacter ${characterId} known=${knownChatId}`)
         await Characters.useCharacterStore.getState().setCard(characterId)
 
         let chatId = knownChatId
@@ -30,7 +25,6 @@ export const openChatForCharacter = async (
         }
 
         await Chats.useChatState.getState().load(chatId)
-        Logger.info(`[SaveFlow] chat ${chatId} loaded`)
         return true
     } catch (e) {
         Logger.errorToast(i18n.t('characterList.loadFailed', { error: e }))

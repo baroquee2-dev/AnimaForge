@@ -19,7 +19,6 @@ import i18n from '@lib/i18n'
 import { Characters } from '@lib/state/Characters'
 import { Chats, useInference } from '@lib/state/Chat'
 import { Logger } from '@lib/state/Logger'
-import { usePendingChatOpen } from '@lib/state/PendingChatOpen'
 import { Theme } from '@lib/theme/ThemeManager'
 import { ChatImportSchema } from '@lib/utils/ChatSchema'
 import { FileUtils } from '@lib/utils/File'
@@ -88,13 +87,6 @@ const ChatScreen = () => {
     useFocusEffect(
         useCallback(() => {
             playChatEnterSound()
-            // TEMP [SaveFlow] diagnostics — remove once the redbox is understood.
-            Logger.info(
-                `[SaveFlow] chat focused pending=${usePendingChatOpen.getState().characterId}`
-            )
-            // Editing from chat pops straight back onto this chat, so an open
-            // request queued by the editor is already fulfilled.
-            usePendingChatOpen.getState().clear()
             // Delete replaced portrait/background files after chat Image views
             // have resumed with the latest URIs.
             const timer = setTimeout(() => Characters.flushPendingImageDeletes(), 1200)
@@ -103,9 +95,7 @@ const ChatScreen = () => {
     )
 
     useEffect(() => {
-        Logger.info('[SaveFlow] chat mounted')
         return () => {
-            Logger.info('[SaveFlow] chat unmounting')
             Characters.flushPendingImageDeletes(0)
             unloadCharacter()
             unloadChat()

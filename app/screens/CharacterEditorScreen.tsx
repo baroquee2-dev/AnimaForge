@@ -69,32 +69,18 @@ const ChracterEditorScreen = () => {
     const setShowViewer = useAvatarViewerStore((state) => state.setShow)
     const [edited, setEdited] = useState(false)
     const [altSwipeIndex, setAltSwipeIndex] = useState(0)
-    const leavingForChatRef = useRef(false)
-
-    // TEMP [SaveFlow] diagnostics — remove once the redbox is understood.
-    const routeTrace = () => {
-        try {
-            const state = navigation.getState() as { routes?: { name: string }[] } | undefined
-            return state?.routes?.map((route) => route.name).join(' > ') ?? 'unknown'
-        } catch (e) {
-            return `state error: ${e}`
-        }
-    }
+    // Must not flip usePreventRemove while leaving — that remounts every stack
+    // header and crashes Android with ScreenStackFragment / canNavigateBack.
+    const leaveAfterSaveRef = useRef(false)
+    const keepCharacterOnLeaveRef = useRef(false)
 
     const setCharacterCardEdited = (card: CharacterCardData) => {
         if (!edited) setEdited(true)
         setCharacterCard(card)
     }
 
-    // Never change the value passed here while leaving: it maps to the native
-    // preventNativeDismiss prop, so flipping it re-renders every header in the
-    // stack. A header update for a screen already detached from the stack dies
-    // in canNavigateBack with "ScreenStackFragment added into a non-stack
-    // container". Saving therefore keeps the guard on and dispatches the removal
-    // from this listener, exactly like the discard button does.
     usePreventRemove(edited, ({ data }) => {
-        Logger.info(`[SaveFlow] preventRemove fired, leaving=${leavingForChatRef.current}`)
-        if (leavingForChatRef.current) {
+        if (leaveAfterSaveRef.current) {
             navigation.dispatch(data.action)
             return
         }
@@ -138,25 +124,22 @@ const ChracterEditorScreen = () => {
         }
     }
 
-    // `edited` is deliberately left alone: both callers leave the screen right
-    // after saving, and clearing it would flip the removal guard mid-transition.
     const handleSaveCard = async ({ openChat = false }: { openChat?: boolean } = {}) => {
-        Logger.info(`[SaveFlow] save pressed openChat=${openChat} stack=${routeTrace()}`)
         if (!characterCard || !charId) return
         await Characters.db.mutate.updateCard(characterCard, charId)
         await setCurrentCard(charId)
-        Logger.info('[SaveFlow] card saved and reloaded')
         Logger.infoToast(i18n.t('characterEditor.saveSuccess'))
         if (!openChat || !router.canGoBack()) return
 
-        leavingForChatRef.current = true
-        requestChatOpen(charId)
-        // Pop on a later tick so the renders caused by saving are committed
-        // while this screen is still attached to the stack.
-        setTimeout(() => {
-            Logger.info(`[SaveFlow] calling router.back() stack=${routeTrace()}`)
-            router.back()
-        }, 0)
+        leaveAfterSaveRef.current = true
+        // New characters have no chats yet — hand off to the list to push chat.
+        // Existing characters (or edit-from-chat) just pop back.
+        const existingChats = await Chats.db.query.chatList(charId)
+        if (existingChats.length === 0) {
+            keepCharacterOnLeaveRef.current = true
+            requestChatOpen(charId)
+        }
+        setTimeout(() => router.back(), 0)
     }
 
     const handleDeleteCard = () => {
@@ -182,11 +165,7 @@ const ChracterEditorScreen = () => {
 
     useEffect(() => {
         return () => {
-            Logger.info(
-                `[SaveFlow] editor unmount leavingForChat=${leavingForChatRef.current} hasChat=${!!chat}`
-            )
-            // Keep the card loaded when heading to chat; the chat opens with it.
-            if (leavingForChatRef.current) return
+            if (keepCharacterOnLeaveRef.current) return
             if (!chat) {
                 unloadCharacter()
                 Characters.flushPendingImageDeletes()
