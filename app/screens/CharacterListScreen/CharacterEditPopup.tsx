@@ -5,10 +5,8 @@ import { useTranslation } from 'react-i18next'
 
 import Alert from '@components/views/Alert'
 import ContextMenu from '@components/views/ContextMenu'
-import i18n from '@lib/i18n'
+import { openChatForCharacter } from '@lib/chat/openChatForCharacter'
 import { CharInfo, Characters } from '@lib/state/Characters'
-import { Chats } from '@lib/state/Chat'
-import { Logger } from '@lib/state/Logger'
 
 type CharacterEditPopupProps = {
     character: CharInfo
@@ -27,28 +25,12 @@ const CharacterEditPopup: React.FC<CharacterEditPopupProps> = ({
     const path = usePathname()
     const router = useRouter()
 
-    const { loadChat } = Chats.useChat()
-
     const setCurrentCharacter = async () => {
         if (nowLoading || path === '/screens/ChatScreen' || !character.id) return
-        try {
-            setNowLoading(true)
-            await setCurrentCard(character.id)
-            let chatId = character.latestChat
-            if (!chatId) {
-                chatId = await Chats.db.mutate.createChat(character.id)
-            }
-            if (!chatId) {
-                Logger.errorToast(i18n.t('characterList.chatCreateFailed'))
-                return
-            }
-            await loadChat(chatId)
-            setNowLoading(false)
-            router.push('/screens/ChatScreen')
-        } catch (error) {
-            Logger.errorToast(i18n.t('characterList.loadFailed', { error }))
-            setNowLoading(false)
-        }
+        setNowLoading(true)
+        const opened = await openChatForCharacter(character.id, character.latestChat)
+        setNowLoading(false)
+        if (opened) router.push('/screens/ChatScreen')
     }
 
     const setCurrentCard = Characters.useCharacterStore((state) => state.setCard)
