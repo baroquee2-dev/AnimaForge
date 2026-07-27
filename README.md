@@ -62,6 +62,51 @@ ChatterUI 是一套功能完整的 LLM 聊天平台，同時支援本地與遠�
 原始專案：
 https://github.com/Vali-98/ChatterUI
 
+## 開發建置
+
+### Android
+
+開發版建置步驟：
+
+- 安裝 Java 17 或 21
+- 透過 Android Studio 安裝 Android SDK
+- Clone 本專案：
+
+```
+git clone https://github.com/baroquee2-dev/AnimaForge.git
+cd AnimaForge
+```
+
+- 安裝依賴並執行開發版：
+
+```
+npm install
+npm run prebuild:android
+npm run dev:android
+```
+
+或直接：
+
+```
+npm install
+npx expo run:android
+```
+
+> 本專案含原生模組（本地模型、檔案下載等），無法使用 Expo Go；需以 `expo run:android` 或自行編譯的 development build 執行。
+
+#### 建置 APK（可選）
+
+需要 Node.js、Java 17/21 與 Android SDK。若使用 EAS 本機建置，通常需要 Linux 環境。
+
+```
+npm install
+eas build --platform android --local
+```
+
+### iOS
+
+目前以 Android 為主；iOS 尚未作為主要支援平台。
+
 ## 額外說明
 
 我是 GitHub 的新手，目前仍在熟悉 GitHub 的使用方式與開源專案的相關慣例。
@@ -123,6 +168,51 @@ This balance between accessibility and advanced functionality is one of the main
 
 Original project:
 https://github.com/Vali-98/ChatterUI
+
+## Development
+
+### Android
+
+To run a development build:
+
+- Install any Java 17/21 SDK of your choosing
+- Install the Android SDK via Android Studio
+- Clone the repo:
+
+```
+git clone https://github.com/baroquee2-dev/AnimaForge.git
+cd AnimaForge
+```
+
+- Install dependencies and run via Expo:
+
+```
+npm install
+npm run prebuild:android
+npm run dev:android
+```
+
+Or:
+
+```
+npm install
+npx expo run:android
+```
+
+> This project includes native modules (on-device models, file download, etc.) and cannot run in Expo Go. Use `expo run:android` or a custom development build.
+
+#### Building an APK
+
+Requires Node.js, Java 17/21, and the Android SDK. Expo's EAS local builds typically require a Linux environment.
+
+```
+npm install
+eas build --platform android --local
+```
+
+### iOS
+
+Android is the primary platform for now. iOS is not yet a main supported target.
 
 ## Additional Note
 
