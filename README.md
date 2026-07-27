@@ -17,6 +17,18 @@
 
 同時，本 App 也盡可能維持設定介面的簡潔與直覺。希望使用者能把注意力放在角色與對話本身，而不需要面對大量複雜的設定，讓聊天過程不至於變得像在寫程式一樣繁瑣。
 
+<p align="center">
+  <img src="assets/readme/visual-novel.png" alt="視覺小說介面" width="240" />
+  &nbsp;
+  <img src="assets/readme/immersive.png" alt="沉浸式介面" width="240" />
+  &nbsp;
+  <img src="assets/readme/messenger.png" alt="訊息介面" width="240" />
+</p>
+
+<p align="center">
+  <em>視覺小說　｜　沉浸式　｜　訊息</em>
+</p>
+
 ## 發展目標
 
 目前本 App 已具備進行角色扮演聊天所需的主要功能，並能提供完整且舒適的基本使用體驗。
