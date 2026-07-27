@@ -185,10 +185,10 @@
         },
         "character": {
             "title": "Character Management",
-            "regenerateDefault": "Regenerate Default Card",
-            "regenerateDefaultTitle": "Regenerate Default Card",
-            "regenerateDefaultDesc": "This will add the default AI Bot card to your character list.",
-            "createDefault": "Create Default Card",
+            "regenerateDefault": "Regenerate Default Cards",
+            "regenerateDefaultTitle": "Regenerate Default Cards",
+            "regenerateDefaultDesc": "This will add the built-in sample character cards to your character list.",
+            "createDefault": "Create Default Cards",
             "hiddenTags": "Hidden Tags",
             "hiddenTagsDesc": "Hide characters with the following tags from the character list."
         },

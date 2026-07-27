@@ -187,7 +187,7 @@
             "title": "角色管理",
             "regenerateDefault": "重新產生預設角色卡",
             "regenerateDefaultTitle": "重新產生預設角色卡",
-            "regenerateDefaultDesc": "這會將預設 AI 角色卡加入你的角色列表。",
+            "regenerateDefaultDesc": "這會將內建範例角色卡加入你的角色列表。",
             "createDefault": "建立預設角色卡",
             "hiddenTags": "隱藏標籤",
             "hiddenTagsDesc": "在角色列表中隱藏帶有下列標籤的角色。"

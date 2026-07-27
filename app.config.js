@@ -48,7 +48,9 @@ module.exports = {
                 'expo-asset',
                 {
                     assets: [
-                        './assets/models/aibot.raw',
+                        './assets/characters/EnglishSample.png',
+                        './assets/characters/JapaneseSample.png',
+                        './assets/characters/ChineseSample.png',
                         './assets/models/llama3tokenizer.gguf',
                         './assets/images/default-chat-background.png',
                     ],

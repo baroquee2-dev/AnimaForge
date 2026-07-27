@@ -916,20 +916,36 @@ export namespace Characters {
     }
 
     export const createDefaultCard = async () => {
-        const filename = 'aibot'
-        const pngName = filename + '.png'
-        const cardDefaultDir = `${Paths.document.uri}appAssets/${pngName}`
+        const defaultCards = [
+            {
+                filename: 'EnglishSample.png',
+                asset: require('./../../assets/characters/EnglishSample.png'),
+            },
+            {
+                filename: 'JapaneseSample.png',
+                asset: require('./../../assets/characters/JapaneseSample.png'),
+            },
+            {
+                filename: 'ChineseSample.png',
+                asset: require('./../../assets/characters/ChineseSample.png'),
+            },
+        ] as const
 
-        try {
-            if (!fileExists(cardDefaultDir)) {
-                Logger.info('Importing default card.')
-                const [asset] = await Asset.loadAsync(require('./../../assets/models/aibot.raw'))
-                if (asset.localUri) copyFile({ from: asset.localUri, to: cardDefaultDir })
+        for (const card of defaultCards) {
+            const cardDefaultDir = `${Paths.document.uri}appAssets/${card.filename}`
+            try {
+                if (!fileExists(cardDefaultDir)) {
+                    Logger.info(`Importing default card: ${card.filename}`)
+                    const [asset] = await Asset.loadAsync(card.asset)
+                    if (asset.localUri) {
+                        await copyFile({ from: asset.localUri, to: cardDefaultDir })
+                    }
+                }
+                await createCharacterFromImage(cardDefaultDir)
+            } catch (e) {
+                Logger.errorToast(i18n.t('toast.failedCreateDefaultCharacter'))
+                Logger.error(`Error creating default card ${card.filename}: ` + e)
             }
-            await createCharacterFromImage(cardDefaultDir)
-        } catch (e) {
-            Logger.errorToast(i18n.t('toast.failedCreateDefaultCharacter'))
-            Logger.error('Error: ' + e)
         }
     }
 
