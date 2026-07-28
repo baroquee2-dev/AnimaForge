@@ -240,7 +240,17 @@
         "devMode": "[DEV MODE]",
         "enabledDevMode": "You have enabled dev mode.",
         "disableDevMode": "Disable Dev Mode",
-        "github": "Github Repository"
+        "github": "Github Repository",
+        "descriptionPrefix": "MiseChat is an AI role-playing chat app built for immersion. Switch freely between ",
+        "modeVisualNovel": "Visual Novel",
+        "modeImmersive": "Fullscreen Immersive",
+        "modeMessenger": "Messaging",
+        "descriptionSep": ", ",
+        "descriptionAnd": ", and ",
+        "descriptionSuffix": " layouts to enjoy conversations with virtual characters at your own pace.",
+        "attributionBase": "Based on ChatterUI (Vali-98).",
+        "attributionLicense": "Released under the GNU AGPL-3.0 license.",
+        "attributionMore": "Full license and third-party notices are on the GitHub project page."
     },
     "logs": {
         "title": "Logs",

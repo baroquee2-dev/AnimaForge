@@ -240,7 +240,17 @@
         "devMode": "[開發模式]",
         "enabledDevMode": "已啟用開發模式。",
         "disableDevMode": "關閉開發模式",
-        "github": "Github 儲存庫"
+        "github": "Github 儲存庫",
+        "descriptionPrefix": "MiseChat 是一款專為沉浸式體驗打造的 AI 角色扮演聊天工具。提供",
+        "modeVisualNovel": "「視覺小說」",
+        "modeImmersive": "「全螢幕沉浸」",
+        "modeMessenger": "「即時訊息」",
+        "descriptionSep": "、",
+        "descriptionAnd": "與",
+        "descriptionSuffix": "三種介面，讓你隨心切換，輕鬆享受與虛擬角色的對話時光。",
+        "attributionBase": "本專案基於 ChatterUI（Vali-98）開發。",
+        "attributionLicense": "採用 GNU AGPL-3.0 授權釋出。",
+        "attributionMore": "完整授權與第三方授權資訊請參閱 GitHub 專案頁面。"
     },
     "logs": {
         "title": "日誌（Logs）",
