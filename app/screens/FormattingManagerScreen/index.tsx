@@ -8,7 +8,6 @@ import { useTranslation } from 'react-i18next'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useShallow } from 'zustand/react/shallow'
 
-import ThemedButton from '@components/buttons/ThemedButton'
 import DropdownSheet from '@components/input/DropdownSheet'
 import StringArrayEditor from '@components/input/StringArrayEditor'
 import ThemedCheckbox from '@components/input/ThemedCheckbox'
@@ -18,7 +17,6 @@ import SectionTitle from '@components/text/SectionTitle'
 import Accordion from '@components/views/Accordion'
 import Alert from '@components/views/Alert'
 import ContextMenu from '@components/views/ContextMenu'
-import HeaderButton from '@components/views/HeaderButton'
 import HeaderTitle from '@components/views/HeaderTitle'
 import InputSheet from '@components/views/InputSheet'
 import { AppSettings } from '@lib/constants/GlobalValues'
@@ -197,10 +195,10 @@ const FormattingManager = () => {
         })
     }
 
-    const headerRight = () => (
+    const styleMenu = () => (
         <ContextMenu
             triggerIcon="setting"
-            triggerIconSize={24}
+            triggerIconSize={22}
             placement="bottom"
             buttons={[
                 {
@@ -295,7 +293,6 @@ const FormattingManager = () => {
                     flex: 1,
                 }}>
                 <HeaderTitle title={t('instruct.title')} />
-                <HeaderButton headerRight={headerRight} />
                 <View>
                     <InputSheet
                         title={t('instruct.newPreset')}
@@ -368,7 +365,7 @@ const FormattingManager = () => {
                         modalTitle={t('instruct.selectConfig')}
                         search
                     />
-                    <ThemedButton iconName="save" iconSize={28} variant="tertiary" />
+                    {styleMenu()}
                 </View>
 
                 <KeyboardAwareScrollView
