@@ -43,6 +43,17 @@
 
 長期目標是從一名 **ACG 愛好者**的角度出發，持續探索 AI 角色互動、視覺小說與虛擬世界體驗之間的可能性，盡可能打造出更具沉浸感的角色聊天體驗。
 
+### 註記
+
+本專案是基於 [ChatterUI](https://github.com/Vali-98/ChatterUI) 發展而來的分支。
+
+ChatterUI 是一套功能完整的 LLM 聊天平台，同時支援本地與遠端 LLM，並提供簡潔、易於理解的操作介面。
+
+對初次接觸 LLM 聊天工具的使用者而言，它相對容易上手；同時也保留了許多適合進階使用者進行底層監看、參數調整與測試的功能。
+
+這種兼顧易用性與進階功能的設計理念，也是我選擇 ChatterUI 作為 MiseChat 開發基礎的重要原因。
+
+
 ## 原始碼與授權聲明
 
 ### 專案來源
@@ -158,6 +169,17 @@ Development will continue with additional features that are commonly useful or n
 As new functionality is introduced, keeping the interface simple, intuitive, and easy to use will remain an important design goal. More features should not necessarily mean more complexity for the user.
 
 The long-term goal is to approach development from the perspective of an **ACG enthusiast**, exploring the possibilities between AI character interaction, visual novels, and virtual worlds to create an increasingly immersive character-chat experience.
+
+### Note
+
+This project is a fork built upon [ChatterUI](https://github.com/Vali-98/ChatterUI).
+
+ChatterUI is a full-featured LLM chat platform that supports both local and remote LLMs while providing a clean and approachable user interface.
+
+It is relatively easy to get started with for users who are new to LLM chat tools, while still offering many features for advanced users who want to inspect underlying behavior, fine-tune settings, and experiment with different configurations.
+
+This balance between accessibility and advanced functionality is one of the main reasons I chose ChatterUI as the foundation for MiseChat.
+
 
 ## Source Code & License
 
