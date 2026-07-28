@@ -3,7 +3,24 @@
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](./LICENSE)
 [![Forked from ChatterUI](https://img.shields.io/badge/Forked_from-ChatterUI-orange.svg)](https://github.com/Vali-98/ChatterUI)
 
+<p align="center">
+  <strong>Language / 語言</strong><br />
+  <a href="#chinese">繁體中文</a>
+  &nbsp;|&nbsp;
+  <a href="#english">English</a>
+</p>
+
+---
+
+## Chinese
+
 ## 軟體說明
+
+<p align="center">
+  <strong>繁體中文</strong>
+  &nbsp;|&nbsp;
+  <a href="#english">English</a>
+</p>
 
 這是一款運行於 **Android** 手機上的 AI 角色扮演聊天 App，主要特色是提供三種不同風格的聊天介面：
 
@@ -143,7 +160,15 @@ MiseChat 的原始碼公開於本 GitHub Repository。
 
 感謝你的理解與協助！
 
+---
+
 ## English
+
+<p align="center">
+  <a href="#chinese">繁體中文</a>
+  &nbsp;|&nbsp;
+  <strong>English</strong>
+</p>
 
 ## About the App
 
