@@ -261,6 +261,88 @@ const FormattingManager = () => {
                         multiline
                     />
 
+                    <SectionTitle>{t('instruct.attachments')}</SectionTitle>
+
+                    <ThemedCheckbox
+                        label={t('instruct.removeThinkTags')}
+                        value={currentInstruct.hide_think_tags}
+                        onChangeValue={(b) => {
+                            setCurrentInstruct({
+                                ...currentInstruct,
+                                hide_think_tags: b,
+                            })
+                        }}
+                    />
+
+                    <View style={{ rowGap: 8 }}>
+                        <SectionTitle>{t('instruct.textFormatter')}</SectionTitle>
+                        <Text
+                            style={{
+                                color: color.text._400,
+                            }}>
+                            {t('instruct.textFormatterDesc')}
+                        </Text>
+                        <View
+                            style={{
+                                backgroundColor: color.neutral._300,
+                                marginTop: spacing.m,
+                                paddingHorizontal: spacing.xl2,
+                                alignItems: 'center',
+                                borderRadius: borderRadius.m,
+                            }}>
+                            <Markdown
+                                markdownit={MarkdownStyle.Rules}
+                                rules={MarkdownStyle.RenderRules}
+                                style={markdownStyle}>
+                                {autoformatterData[currentInstruct.format_type].example}
+                            </Markdown>
+                        </View>
+                        <View>
+                            {autoformatterData.map((item, index) => (
+                                <ThemedCheckbox
+                                    key={item.label}
+                                    label={item.label}
+                                    value={currentInstruct.format_type === index}
+                                    onChangeValue={(b) => {
+                                        if (b)
+                                            setCurrentInstruct({
+                                                ...currentInstruct,
+                                                format_type: index,
+                                            })
+                                    }}
+                                />
+                            ))}
+                        </View>
+                    </View>
+
+                    <SectionTitle>{t('instruct.hiddenText')}</SectionTitle>
+                    <Text
+                        style={{
+                            color: color.text._400,
+                        }}>
+                        {t('instruct.hiddenTextDesc')}
+                    </Text>
+
+                    <StringArrayEditor value={textFilter} setValue={setTextFilter} />
+
+                    <ThemedSwitch
+                        label={t('instruct.sendFiltered')}
+                        description={t('instruct.sendFilteredDesc')}
+                        value={sendFilteredText}
+                        onChangeValue={setSendFilteredText}
+                    />
+
+                    <SectionTitle>{t('instruct.localTemplate')}</SectionTitle>
+
+                    <ThemedSwitch
+                        label={t('instruct.useBuiltInTemplate')}
+                        description={t('instruct.useBuiltInTemplateDesc')}
+                        value={useTemplate}
+                        onChangeValue={setUseTemplate}
+                    />
+
+                    <SectionTitle>{t('instruct.promptStructure')}</SectionTitle>
+
                     <ThemedTextInput
                         label={t('instruct.systemPromptFormat')}
                         value={currentInstruct.system_prompt_format}
@@ -394,210 +476,25 @@ const FormattingManager = () => {
                             })
                         }}
                     />
-
-                    <SectionTitle>{t('instruct.macrosCard')}</SectionTitle>
-
-                    <View
-                        style={{
-                            flexDirection: 'row',
-                            columnGap: spacing.xl2,
-                        }}>
-                        <View style={{ flex: 1 }}>
-                            <ThemedCheckbox
-                                label={t('instruct.wrapNewline')}
-                                value={currentInstruct.wrap}
-                                onChangeValue={(b) => {
-                                    setCurrentInstruct({
-                                        ...currentInstruct,
-                                        wrap: b,
-                                    })
-                                }}
-                            />
-                            <ThemedCheckbox
-                                label={t('instruct.includeNames')}
-                                value={currentInstruct.names}
-                                onChangeValue={(b) => {
-                                    setCurrentInstruct({
-                                        ...currentInstruct,
-                                        names: b,
-                                    })
-                                }}
-                            />
-                            <ThemedCheckbox
-                                label={t('instruct.addTimestamp')}
-                                value={currentInstruct.timestamp}
-                                onChangeValue={(b) => {
-                                    setCurrentInstruct({
-                                        ...currentInstruct,
-                                        timestamp: b,
-                                    })
-                                }}
-                            />
-                            <ThemedCheckbox
-                                label={t('instruct.removeThinkTags')}
-                                value={currentInstruct.hide_think_tags}
-                                onChangeValue={(b) => {
-                                    setCurrentInstruct({
-                                        ...currentInstruct,
-                                        hide_think_tags: b,
-                                    })
-                                }}
-                            />
-                        </View>
-                        <View style={{ flex: 1 }}>
-                            <ThemedCheckbox
-                                label={t('instruct.useExamples')}
-                                value={currentInstruct.examples}
-                                onChangeValue={(b) => {
-                                    setCurrentInstruct({
-                                        ...currentInstruct,
-                                        examples: b,
-                                    })
-                                }}
-                            />
-                            <ThemedCheckbox
-                                label={t('instruct.useScenario')}
-                                value={currentInstruct.scenario}
-                                onChangeValue={(b) => {
-                                    setCurrentInstruct({
-                                        ...currentInstruct,
-                                        scenario: b,
-                                    })
-                                }}
-                            />
-
-                            <ThemedCheckbox
-                                label={t('instruct.usePersonality')}
-                                value={currentInstruct.personality}
-                                onChangeValue={(b) => {
-                                    setCurrentInstruct({
-                                        ...currentInstruct,
-                                        personality: b,
-                                    })
-                                }}
-                            />
-                        </View>
-                    </View>
-
-                    <SectionTitle>{t('instruct.attachments')}</SectionTitle>
-
-                    <View
-                        style={{
-                            flexDirection: 'row',
-                            columnGap: spacing.xl2,
-                            justifyContent: 'space-between',
-                        }}>
-                        <View style={{ flex: 1 }}>
-                            <ThemedCheckbox
-                                label={t('instruct.sendImages')}
-                                value={currentInstruct.send_images}
-                                onChangeValue={(b) => {
-                                    setCurrentInstruct({
-                                        ...currentInstruct,
-                                        send_images: b,
-                                    })
-                                }}
-                            />
-                            <ThemedCheckbox
-                                label={t('instruct.sendDocuments')}
-                                value={currentInstruct.send_documents}
-                                onChangeValue={(b) => {
-                                    setCurrentInstruct({
-                                        ...currentInstruct,
-                                        send_documents: b,
-                                    })
-                                }}
-                            />
-                        </View>
-                        <View style={{ flex: 1 }}>
-                            <ThemedCheckbox
-                                label={t('instruct.sendAudio')}
-                                value={currentInstruct.send_audio}
-                                onChangeValue={(b) => {
-                                    setCurrentInstruct({
-                                        ...currentInstruct,
-                                        send_audio: b,
-                                    })
-                                }}
-                            />
-                            <ThemedCheckbox
-                                label={t('instruct.useLastImageOnly')}
-                                value={currentInstruct.last_image_only}
-                                onChangeValue={(b) => {
-                                    setCurrentInstruct({
-                                        ...currentInstruct,
-                                        last_image_only: b,
-                                    })
-                                }}
-                            />
-                        </View>
-                    </View>
-
-                    <View style={{ rowGap: 8 }}>
-                        <SectionTitle>{t('instruct.textFormatter')}</SectionTitle>
-                        <Text
-                            style={{
-                                color: color.text._400,
-                            }}>
-                            {t('instruct.textFormatterDesc')}
-                        </Text>
-                        <View
-                            style={{
-                                backgroundColor: color.neutral._300,
-                                marginTop: spacing.m,
-                                paddingHorizontal: spacing.xl2,
-                                alignItems: 'center',
-                                borderRadius: borderRadius.m,
-                            }}>
-                            <Markdown
-                                markdownit={MarkdownStyle.Rules}
-                                rules={MarkdownStyle.RenderRules}
-                                style={markdownStyle}>
-                                {autoformatterData[currentInstruct.format_type].example}
-                            </Markdown>
-                        </View>
-                        <View>
-                            {autoformatterData.map((item, index) => (
-                                <ThemedCheckbox
-                                    key={item.label}
-                                    label={item.label}
-                                    value={currentInstruct.format_type === index}
-                                    onChangeValue={(b) => {
-                                        if (b)
-                                            setCurrentInstruct({
-                                                ...currentInstruct,
-                                                format_type: index,
-                                            })
-                                    }}
-                                />
-                            ))}
-                        </View>
-                    </View>
-
-                    <SectionTitle>{t('instruct.hiddenText')}</SectionTitle>
-                    <Text
-                        style={{
-                            color: color.text._400,
-                        }}>
-                        {t('instruct.hiddenTextDesc')}
-                    </Text>
-
-                    <StringArrayEditor value={textFilter} setValue={setTextFilter} />
-
-                    <ThemedSwitch
-                        label={t('instruct.sendFiltered')}
-                        description={t('instruct.sendFilteredDesc')}
-                        value={sendFilteredText}
-                        onChangeValue={setSendFilteredText}
+                    <ThemedCheckbox
+                        label={t('instruct.wrapNewline')}
+                        value={currentInstruct.wrap}
+                        onChangeValue={(b) => {
+                            setCurrentInstruct({
+                                ...currentInstruct,
+                                wrap: b,
+                            })
+                        }}
                     />
-
-                    <SectionTitle>{t('instruct.localTemplate')}</SectionTitle>
-
-                    <ThemedSwitch
-                        label={t('instruct.useBuiltInTemplate')}
-                        description={t('instruct.useBuiltInTemplateDesc')}
-                        value={useTemplate}
-                        onChangeValue={setUseTemplate}
+                    <ThemedCheckbox
+                        label={t('instruct.includeNames')}
+                        value={currentInstruct.names}
+                        onChangeValue={(b) => {
+                            setCurrentInstruct({
+                                ...currentInstruct,
+                                names: b,
+                            })
+                        }}
                     />
 
                     {/* @TODO: Macros are always replaced - people may want this to be changed
