@@ -384,6 +384,8 @@
         "instructionFields": "指令欄位",
         "systemPrompt": "系統提示詞（System Prompt）",
         "promptStructure": "提示詞結構",
+        "advancedSettings": "進階設定",
+        "expertSettings": "專家設定",
         "systemPromptFormat": "系統提示詞格式（System Prompt Format）",
         "systemPrefix": "系統前綴（System Prefix）",
         "systemSuffix": "系統後綴（System Suffix）",

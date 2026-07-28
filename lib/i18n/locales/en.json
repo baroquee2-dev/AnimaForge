@@ -384,6 +384,8 @@
         "instructionFields": "Instruction Fields",
         "systemPrompt": "System Prompt",
         "promptStructure": "Prompt Structure",
+        "advancedSettings": "Advanced Settings",
+        "expertSettings": "Expert Settings",
         "systemPromptFormat": "System Prompt Format",
         "systemPrefix": "System Prefix",
         "systemSuffix": "System Suffix",

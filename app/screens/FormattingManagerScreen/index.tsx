@@ -15,6 +15,7 @@ import ThemedCheckbox from '@components/input/ThemedCheckbox'
 import ThemedSwitch from '@components/input/ThemedSwitch'
 import ThemedTextInput from '@components/input/ThemedTextInput'
 import SectionTitle from '@components/text/SectionTitle'
+import Accordion from '@components/views/Accordion'
 import Alert from '@components/views/Alert'
 import ContextMenu from '@components/views/ContextMenu'
 import HeaderButton from '@components/views/HeaderButton'
@@ -261,238 +262,250 @@ const FormattingManager = () => {
                         multiline
                     />
 
-                    <View style={{ rowGap: 8 }}>
-                        <SectionTitle>{t('instruct.textFormatter')}</SectionTitle>
-                        <Text
-                            style={{
-                                color: color.text._400,
-                            }}>
-                            {t('instruct.textFormatterDesc')}
-                        </Text>
-                        <View
-                            style={{
-                                backgroundColor: color.neutral._300,
-                                marginTop: spacing.m,
-                                paddingHorizontal: spacing.xl2,
-                                alignItems: 'center',
-                                borderRadius: borderRadius.m,
-                            }}>
-                            <Markdown
-                                markdownit={MarkdownStyle.Rules}
-                                rules={MarkdownStyle.RenderRules}
-                                style={markdownStyle}>
-                                {autoformatterData[currentInstruct.format_type].example}
-                            </Markdown>
+                    <Accordion label={t('instruct.advancedSettings')}>
+                        <View style={{ rowGap: spacing.xl }}>
+                            <View style={{ rowGap: 8 }}>
+                                <SectionTitle>{t('instruct.textFormatter')}</SectionTitle>
+                                <Text
+                                    style={{
+                                        color: color.text._400,
+                                    }}>
+                                    {t('instruct.textFormatterDesc')}
+                                </Text>
+                                <View
+                                    style={{
+                                        backgroundColor: color.neutral._300,
+                                        marginTop: spacing.m,
+                                        paddingHorizontal: spacing.xl2,
+                                        alignItems: 'center',
+                                        borderRadius: borderRadius.m,
+                                    }}>
+                                    <Markdown
+                                        markdownit={MarkdownStyle.Rules}
+                                        rules={MarkdownStyle.RenderRules}
+                                        style={markdownStyle}>
+                                        {autoformatterData[currentInstruct.format_type].example}
+                                    </Markdown>
+                                </View>
+                                <View>
+                                    {autoformatterData.map((item, index) => (
+                                        <ThemedCheckbox
+                                            key={item.label}
+                                            label={item.label}
+                                            value={currentInstruct.format_type === index}
+                                            onChangeValue={(b) => {
+                                                if (b)
+                                                    setCurrentInstruct({
+                                                        ...currentInstruct,
+                                                        format_type: index,
+                                                    })
+                                            }}
+                                        />
+                                    ))}
+                                </View>
+                            </View>
+
+                            <View style={{ rowGap: spacing.m }}>
+                                <SectionTitle>{t('instruct.hiddenText')}</SectionTitle>
+                                <Text
+                                    style={{
+                                        color: color.text._400,
+                                    }}>
+                                    {t('instruct.hiddenTextDesc')}
+                                </Text>
+
+                                <StringArrayEditor value={textFilter} setValue={setTextFilter} />
+
+                                <ThemedSwitch
+                                    label={t('instruct.sendFiltered')}
+                                    description={t('instruct.sendFilteredDesc')}
+                                    value={sendFilteredText}
+                                    onChangeValue={setSendFilteredText}
+                                />
+                            </View>
+
+                            <View style={{ rowGap: spacing.m }}>
+                                <SectionTitle>{t('instruct.localTemplate')}</SectionTitle>
+
+                                <ThemedSwitch
+                                    label={t('instruct.useBuiltInTemplate')}
+                                    description={t('instruct.useBuiltInTemplateDesc')}
+                                    value={useTemplate}
+                                    onChangeValue={setUseTemplate}
+                                />
+                            </View>
                         </View>
-                        <View>
-                            {autoformatterData.map((item, index) => (
+                    </Accordion>
+
+                    <Accordion label={t('instruct.expertSettings')}>
+                        <View style={{ rowGap: spacing.xl }}>
+                            <ThemedTextInput
+                                label={t('instruct.systemPromptFormat')}
+                                value={currentInstruct.system_prompt_format}
+                                onChangeText={(text) => {
+                                    setCurrentInstruct({
+                                        ...currentInstruct,
+                                        system_prompt_format: text,
+                                    })
+                                }}
+                                numberOfLines={3}
+                                multiline
+                            />
+                            <View style={{ flexDirection: 'row', columnGap: spacing.m }}>
+                                <ThemedTextInput
+                                    label={t('instruct.systemPrefix')}
+                                    value={currentInstruct.system_prefix}
+                                    onChangeText={(text) => {
+                                        setCurrentInstruct({
+                                            ...currentInstruct,
+                                            system_prefix: text,
+                                        })
+                                    }}
+                                    numberOfLines={5}
+                                    multiline
+                                />
+                                <ThemedTextInput
+                                    label={t('instruct.systemSuffix')}
+                                    value={currentInstruct.system_suffix}
+                                    onChangeText={(text) => {
+                                        setCurrentInstruct({
+                                            ...currentInstruct,
+                                            system_suffix: text,
+                                        })
+                                    }}
+                                    numberOfLines={5}
+                                    multiline
+                                />
+                            </View>
+                            <View style={{ flexDirection: 'row', columnGap: spacing.m }}>
+                                <ThemedTextInput
+                                    label={t('instruct.inputPrefix')}
+                                    value={currentInstruct.input_prefix}
+                                    onChangeText={(text) => {
+                                        setCurrentInstruct({
+                                            ...currentInstruct,
+                                            input_prefix: text,
+                                        })
+                                    }}
+                                    numberOfLines={5}
+                                    multiline
+                                />
+                                <ThemedTextInput
+                                    label={t('instruct.inputSuffix')}
+                                    value={currentInstruct.input_suffix}
+                                    onChangeText={(text) => {
+                                        setCurrentInstruct({
+                                            ...currentInstruct,
+                                            input_suffix: text,
+                                        })
+                                    }}
+                                    numberOfLines={5}
+                                    multiline
+                                />
+                            </View>
+                            <View style={{ flexDirection: 'row', columnGap: spacing.m }}>
+                                <ThemedTextInput
+                                    label={t('instruct.outputPrefix')}
+                                    value={currentInstruct.output_prefix}
+                                    onChangeText={(text) => {
+                                        setCurrentInstruct({
+                                            ...currentInstruct,
+                                            output_prefix: text,
+                                        })
+                                    }}
+                                    numberOfLines={5}
+                                    multiline
+                                />
+                                <ThemedTextInput
+                                    label={t('instruct.outputSuffix')}
+                                    value={currentInstruct.output_suffix}
+                                    onChangeText={(text) => {
+                                        setCurrentInstruct({
+                                            ...currentInstruct,
+                                            output_suffix: text,
+                                        })
+                                    }}
+                                    numberOfLines={5}
+                                    multiline
+                                />
+                            </View>
+
+                            <View style={{ flexDirection: 'row' }}>
+                                <ThemedTextInput
+                                    label={t('instruct.lastOutputPrefix')}
+                                    value={currentInstruct.last_output_prefix}
+                                    onChangeText={(text) => {
+                                        setCurrentInstruct({
+                                            ...currentInstruct,
+                                            last_output_prefix: text,
+                                        })
+                                    }}
+                                    numberOfLines={5}
+                                    multiline
+                                />
+                            </View>
+
+                            <StringArrayEditor
+                                containerStyle={{}}
+                                label={t('instruct.stopSequence')}
+                                value={
+                                    currentInstruct.stop_sequence
+                                        ? currentInstruct.stop_sequence.split(',')
+                                        : []
+                                }
+                                setValue={(data) => {
+                                    setCurrentInstruct({
+                                        ...currentInstruct,
+                                        stop_sequence: data.join(','),
+                                    })
+                                }}
+                                replaceNewLine="\n"
+                            />
+
+                            <View>
                                 <ThemedCheckbox
-                                    key={item.label}
-                                    label={item.label}
-                                    value={currentInstruct.format_type === index}
+                                    label={t('instruct.useCommonStop')}
+                                    value={currentInstruct.use_common_stop}
                                     onChangeValue={(b) => {
-                                        if (b)
-                                            setCurrentInstruct({
-                                                ...currentInstruct,
-                                                format_type: index,
-                                            })
+                                        setCurrentInstruct({
+                                            ...currentInstruct,
+                                            use_common_stop: b,
+                                        })
                                     }}
                                 />
-                            ))}
+                                <ThemedCheckbox
+                                    label={t('instruct.wrapNewline')}
+                                    value={currentInstruct.wrap}
+                                    onChangeValue={(b) => {
+                                        setCurrentInstruct({
+                                            ...currentInstruct,
+                                            wrap: b,
+                                        })
+                                    }}
+                                />
+                                <ThemedCheckbox
+                                    label={t('instruct.includeNames')}
+                                    value={currentInstruct.names}
+                                    onChangeValue={(b) => {
+                                        setCurrentInstruct({
+                                            ...currentInstruct,
+                                            names: b,
+                                        })
+                                    }}
+                                />
+                                <ThemedCheckbox
+                                    label={t('instruct.removeThinkTags')}
+                                    value={currentInstruct.hide_think_tags}
+                                    onChangeValue={(b) => {
+                                        setCurrentInstruct({
+                                            ...currentInstruct,
+                                            hide_think_tags: b,
+                                        })
+                                    }}
+                                />
+                            </View>
                         </View>
-                    </View>
-
-                    <SectionTitle>{t('instruct.hiddenText')}</SectionTitle>
-                    <Text
-                        style={{
-                            color: color.text._400,
-                        }}>
-                        {t('instruct.hiddenTextDesc')}
-                    </Text>
-
-                    <StringArrayEditor value={textFilter} setValue={setTextFilter} />
-
-                    <ThemedSwitch
-                        label={t('instruct.sendFiltered')}
-                        description={t('instruct.sendFilteredDesc')}
-                        value={sendFilteredText}
-                        onChangeValue={setSendFilteredText}
-                    />
-
-                    <SectionTitle>{t('instruct.localTemplate')}</SectionTitle>
-
-                    <ThemedSwitch
-                        label={t('instruct.useBuiltInTemplate')}
-                        description={t('instruct.useBuiltInTemplateDesc')}
-                        value={useTemplate}
-                        onChangeValue={setUseTemplate}
-                    />
-
-                    <SectionTitle>{t('instruct.promptStructure')}</SectionTitle>
-
-                    <ThemedTextInput
-                        label={t('instruct.systemPromptFormat')}
-                        value={currentInstruct.system_prompt_format}
-                        onChangeText={(text) => {
-                            setCurrentInstruct({
-                                ...currentInstruct,
-                                system_prompt_format: text,
-                            })
-                        }}
-                        numberOfLines={3}
-                        multiline
-                    />
-                    <View style={{ flexDirection: 'row', columnGap: spacing.m }}>
-                        <ThemedTextInput
-                            label={t('instruct.systemPrefix')}
-                            value={currentInstruct.system_prefix}
-                            onChangeText={(text) => {
-                                setCurrentInstruct({
-                                    ...currentInstruct,
-                                    system_prefix: text,
-                                })
-                            }}
-                            numberOfLines={5}
-                            multiline
-                        />
-                        <ThemedTextInput
-                            label={t('instruct.systemSuffix')}
-                            value={currentInstruct.system_suffix}
-                            onChangeText={(text) => {
-                                setCurrentInstruct({
-                                    ...currentInstruct,
-                                    system_suffix: text,
-                                })
-                            }}
-                            numberOfLines={5}
-                            multiline
-                        />
-                    </View>
-                    <View style={{ flexDirection: 'row', columnGap: spacing.m }}>
-                        <ThemedTextInput
-                            label={t('instruct.inputPrefix')}
-                            value={currentInstruct.input_prefix}
-                            onChangeText={(text) => {
-                                setCurrentInstruct({
-                                    ...currentInstruct,
-                                    input_prefix: text,
-                                })
-                            }}
-                            numberOfLines={5}
-                            multiline
-                        />
-                        <ThemedTextInput
-                            label={t('instruct.inputSuffix')}
-                            value={currentInstruct.input_suffix}
-                            onChangeText={(text) => {
-                                setCurrentInstruct({
-                                    ...currentInstruct,
-                                    input_suffix: text,
-                                })
-                            }}
-                            numberOfLines={5}
-                            multiline
-                        />
-                    </View>
-                    <View style={{ flexDirection: 'row', columnGap: spacing.m }}>
-                        <ThemedTextInput
-                            label={t('instruct.outputPrefix')}
-                            value={currentInstruct.output_prefix}
-                            onChangeText={(text) => {
-                                setCurrentInstruct({
-                                    ...currentInstruct,
-                                    output_prefix: text,
-                                })
-                            }}
-                            numberOfLines={5}
-                            multiline
-                        />
-                        <ThemedTextInput
-                            label={t('instruct.outputSuffix')}
-                            value={currentInstruct.output_suffix}
-                            onChangeText={(text) => {
-                                setCurrentInstruct({
-                                    ...currentInstruct,
-                                    output_suffix: text,
-                                })
-                            }}
-                            numberOfLines={5}
-                            multiline
-                        />
-                    </View>
-
-                    <View style={{ flexDirection: 'row' }}>
-                        <ThemedTextInput
-                            label={t('instruct.lastOutputPrefix')}
-                            value={currentInstruct.last_output_prefix}
-                            onChangeText={(text) => {
-                                setCurrentInstruct({
-                                    ...currentInstruct,
-                                    last_output_prefix: text,
-                                })
-                            }}
-                            numberOfLines={5}
-                            multiline
-                        />
-                    </View>
-
-                    <StringArrayEditor
-                        containerStyle={{}}
-                        label={t('instruct.stopSequence')}
-                        value={
-                            currentInstruct.stop_sequence
-                                ? currentInstruct.stop_sequence.split(',')
-                                : []
-                        }
-                        setValue={(data) => {
-                            setCurrentInstruct({
-                                ...currentInstruct,
-                                stop_sequence: data.join(','),
-                            })
-                        }}
-                        replaceNewLine="\n"
-                    />
-
-                    <ThemedCheckbox
-                        label={t('instruct.useCommonStop')}
-                        value={currentInstruct.use_common_stop}
-                        onChangeValue={(b) => {
-                            setCurrentInstruct({
-                                ...currentInstruct,
-                                use_common_stop: b,
-                            })
-                        }}
-                    />
-                    <ThemedCheckbox
-                        label={t('instruct.wrapNewline')}
-                        value={currentInstruct.wrap}
-                        onChangeValue={(b) => {
-                            setCurrentInstruct({
-                                ...currentInstruct,
-                                wrap: b,
-                            })
-                        }}
-                    />
-                    <ThemedCheckbox
-                        label={t('instruct.includeNames')}
-                        value={currentInstruct.names}
-                        onChangeValue={(b) => {
-                            setCurrentInstruct({
-                                ...currentInstruct,
-                                names: b,
-                            })
-                        }}
-                    />
-                    <ThemedCheckbox
-                        label={t('instruct.removeThinkTags')}
-                        value={currentInstruct.hide_think_tags}
-                        onChangeValue={(b) => {
-                            setCurrentInstruct({
-                                ...currentInstruct,
-                                hide_think_tags: b,
-                            })
-                        }}
-                    />
+                    </Accordion>
 
                     {/* @TODO: Macros are always replaced - people may want this to be changed
                             <CheckboxTitle
