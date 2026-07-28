@@ -1,3 +1,8 @@
+# MiseChat
+
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](./LICENSE)
+[![Forked from ChatterUI](https://img.shields.io/badge/Forked_from-ChatterUI-orange.svg)](https://github.com/Vali-98/ChatterUI)
+
 ## 軟體說明
 
 這是一款運行於 **Android** 手機上的 AI 角色扮演聊天 App，主要特色是提供三種不同風格的聊天介面：
@@ -43,69 +48,92 @@
 
 長期目標是從一名 **ACG 愛好者**的角度出發，持續探索 AI 角色互動、視覺小說與虛擬世界體驗之間的可能性，盡可能打造出更具沉浸感的角色聊天體驗。
 
+### 註記
+
+本專案是基於 [ChatterUI](https://github.com/Vali-98/ChatterUI) 發展而來的分支。
+
+ChatterUI 是一套功能完整的 LLM 聊天平台，同時支援本地與遠端 LLM，並提供簡潔、易於理解的操作介面。
+
+對初次接觸 LLM 聊天工具的使用者而言，它相對容易上手；同時也保留了許多適合進階使用者進行底層監看、參數調整與測試的功能。
+
+這種兼顧易用性與進階功能的設計理念，也是我選擇 ChatterUI 作為 MiseChat 開發基礎的重要原因。
+
+
 ## 原始碼與授權聲明
 
-本專案採用 **AGPL-3.0** 開源授權條款。
+### 專案來源
 
-本專案並非完全從零開始開發，而是基於 **Vali-98/ChatterUI** 進行修改與延伸，嘗試在原有架構上加入視覺小說風格的呈現方式，以及更具沉浸感的角色互動體驗。
+MiseChat 是基於開源專案 [ChatterUI](https://github.com/Vali-98/ChatterUI) 修改與延伸的衍生專案，並非完全從零開始開發。
 
-目前專案的主要架構以 **ChatterUI 0.9** 版本為基礎，並整合了 ChatterUI dev 版本中的部分後續更新與功能。
+目前 MiseChat 的主要程式架構以 **ChatterUI 0.9 版本**為基礎，並整合了 **ChatterUI dev 版本中的部分後續更新與功能**，在此基礎上持續進行修改、擴充與重新設計。
 
-### 為什麼選擇 ChatterUI？
+MiseChat 主要針對使用者介面、聊天體驗、AI 角色扮演及相關互動功能進行開發，並加入本專案自行設計與實作的功能。
 
-ChatterUI 是一套功能完整的 LLM 聊天平台，同時支援本地與遠端 LLM，並提供簡潔易懂的操作介面。
+原始專案：[Vali-98/ChatterUI](https://github.com/Vali-98/ChatterUI)
 
-它對初次接觸 LLM 聊天工具的使用者相對友善，同時也保留了許多適合進階使用者進行底層監看、調整與測試的功能。
+MiseChat 為獨立開發與維護的衍生專案，並非 ChatterUI 原作者或原專案團隊的官方版本，亦不代表 ChatterUI 原專案或其貢獻者。
 
-這種兼顧易用性與進階功能的設計理念，也是我選擇 ChatterUI 作為本專案開發基礎的重要原因。
+### 修改聲明
 
-原始專案：
-https://github.com/Vali-98/ChatterUI
+MiseChat 自 **2026 年**起基於 ChatterUI 進行修改與開發。
 
-## 開發建置
+相較於原始專案，本專案包含新增、修改、整合或重新設計的功能與介面，包括但不限於：
 
-### Android
+* 視覺小說（Visual Novel）聊天介面
+* 沉浸式聊天介面
+* AI 角色扮演與互動體驗相關功能
+* 使用者介面與操作流程調整
+* 整合部分 ChatterUI dev 版本的後續更新與功能
+* 其他功能改進、修正與維護
 
-開發版建置步驟：
+詳細變更內容與修改日期可透過本專案的 Git commit history 查閱。
 
-- 安裝 Java 17 或 21
-- 透過 Android Studio 安裝 Android SDK
-- Clone 本專案：
+### 軟體授權
 
-```
-git clone https://github.com/baroquee2-dev/MiseChat.git
-cd MiseChat
-```
+MiseChat 的程式碼依 **GNU Affero General Public License v3.0（AGPL-3.0）** 授權發布。
 
-- 安裝依賴並執行開發版：
+你可以依照 AGPL-3.0 的條款使用、研究、修改與再散布本專案的程式碼。若你修改或再散布本專案，或在 AGPL-3.0 所規定的情況下透過網路提供修改版本供使用，必須遵守 AGPL-3.0 所規定的相關義務，包括適用的原始碼提供、授權及修改聲明要求。
 
-```
-npm install
-npm run prebuild:android
-npm run dev:android
-```
+本專案保留 ChatterUI 原始專案及其他第三方元件中適用的著作權、授權與相關聲明。MiseChat 所新增或修改的內容不取代原作者或其他貢獻者對其原始內容所擁有的權利。
 
-或直接：
+完整的 AGPL-3.0 授權條款請參閱本專案根目錄中的 **LICENSE** 文件。
 
-```
-npm install
-npx expo run:android
-```
+#### 網路服務使用規範 (AGPL-3.0 Section 13)
+若您將本專案（或其修改版本）部署於伺服器並透過網路（例如 Web App、雲端 API、遠端服務或 SaaS 形式）提供使用者互動，根據 AGPL-3.0 第 13 條規定，您必須在該服務介面上向所有使用者提供明確且易於存取的連結，以供免費下載對應的完整原始碼（包含您的所有修改）。
 
-> 本專案含原生模組（本地模型、檔案下載等），無法使用 Expo Go；需以 `expo run:android` 或自行編譯的 development build 執行。
+### 原始碼
 
-#### 建置 APK（可選）
+MiseChat 的原始碼公開於本 GitHub Repository。
 
-需要 Node.js、Java 17/21 與 Android SDK。若使用 EAS 本機建置，通常需要 Linux 環境。
+若你取得的是 MiseChat 的編譯版本（例如 APK），可透過本 Repository 取得公開的原始碼及版本歷史。若特定發布版本另有對應的原始碼、Git tag 或 Release 說明，請以該發布版本所提供的資訊為準。
 
-```
-npm install
-eas build --platform android --local
-```
+### 商標、品牌與媒體資產
 
-### iOS
+**AGPL-3.0 對本專案程式碼的授權，不代表授予 MiseChat 品牌識別或本專案自有媒體資產的使用權。**
 
-目前以 Android 為主；iOS 尚未作為主要支援平台。
+除另有明確授權或標示外，MiseChat 專案中由本專案自行建立或持有權利的品牌及媒體資產，包括但不限於：
+
+* **MiseChat** 名稱與品牌識別
+* 商標（Trademark）
+* Logo
+* App Icon／應用程式圖標
+* 品牌圖形與介面識別素材
+* 圖片、插圖、動畫、音訊、影片及其他多媒體素材
+
+上述資產不包含在 AGPL-3.0 對程式碼所授予的權利範圍內，並保留相關權利。
+
+除適用法律另有規定或個別資產另有明確授權外，未經權利人許可，不得使用 MiseChat 的名稱、商標、Logo 或其他品牌識別，使他人誤認為衍生專案、修改版本、產品或服務由 MiseChat 官方發布、認可、贊助或與 MiseChat 存在官方關係。
+
+若你建立 MiseChat 的衍生版本，建議使用不同的名稱、Logo、App Icon 及其他品牌識別，以清楚區分原始 MiseChat 專案與第三方修改版本。
+
+### 第三方軟體與資產
+
+本專案可能包含或使用其他開源軟體、函式庫、圖片、字型、音訊、圖形或其他第三方元件與資產。
+
+這些內容可能適用各自的著作權、商標權及授權條款，其權利仍屬各自的權利人所有。
+
+使用、修改或再散布 MiseChat 時，除 AGPL-3.0 外，亦應遵守適用於相關第三方元件及資產的授權條款。
+
 
 ## 額外說明
 
@@ -150,69 +178,91 @@ As new functionality is introduced, keeping the interface simple, intuitive, and
 
 The long-term goal is to approach development from the perspective of an **ACG enthusiast**, exploring the possibilities between AI character interaction, visual novels, and virtual worlds to create an increasingly immersive character-chat experience.
 
+### Note
+
+This project is a fork built upon [ChatterUI](https://github.com/Vali-98/ChatterUI).
+
+ChatterUI is a full-featured LLM chat platform that supports both local and remote LLMs while providing a clean and approachable user interface.
+
+It is relatively easy to get started with for users who are new to LLM chat tools, while still offering many features for advanced users who want to inspect underlying behavior, fine-tune settings, and experiment with different configurations.
+
+This balance between accessibility and advanced functionality is one of the main reasons I chose ChatterUI as the foundation for MiseChat.
+
+
 ## Source Code & License
 
-This project is licensed under the **AGPL-3.0** license.
+### Project Origin
 
-It is not an entirely original project built from scratch. It is based on **Vali-98/ChatterUI** and has been modified and extended with the goal of introducing visual novel-style presentation and a more immersive approach to AI character interaction.
+MiseChat is a derivative project based on and extended from the open-source project [ChatterUI](https://github.com/Vali-98/ChatterUI). It was not developed entirely from scratch.
 
-The project's main architecture is based on **ChatterUI 0.9**, along with selected updates and features from later ChatterUI development versions.
+The current architecture of MiseChat is primarily based on **ChatterUI 0.9**, with **selected subsequent updates and features from the ChatterUI dev version** integrated into the project. MiseChat continues to modify, extend, and redesign the software on top of this foundation.
 
-### Why ChatterUI?
+Development of MiseChat focuses primarily on the user interface, chat experience, AI character role-playing, and related interactive features, together with additional functionality designed and implemented specifically for this project.
 
-ChatterUI is a comprehensive LLM chat platform that supports both local and remote LLMs while maintaining a clean and approachable user interface.
+Original project: [Vali-98/ChatterUI](https://github.com/Vali-98/ChatterUI)
 
-It is accessible to users who are new to LLM chat applications, while also providing advanced tools for monitoring, configuration, testing, and experimentation.
+MiseChat is an independently developed and maintained derivative project. It is not an official release of ChatterUI, is not maintained by the original ChatterUI developers, and does not represent the original ChatterUI project or its contributors.
 
-This balance between accessibility and advanced functionality is one of the main reasons I chose ChatterUI as the foundation for this project.
+### Modification Notice
 
-Original project:
-https://github.com/Vali-98/ChatterUI
+MiseChat has been modified and developed from ChatterUI since **2026**.
 
-## Development
+Compared with the original project, MiseChat includes new, modified, integrated, or redesigned features and interfaces, including but not limited to:
 
-### Android
+* Visual Novel chat interface
+* Immersive chat interface
+* Features related to AI character role-playing and interaction
+* User interface and workflow changes
+* Selected subsequent updates and features integrated from the ChatterUI dev version
+* Other improvements, fixes, and maintenance changes
 
-To run a development build:
+Detailed changes and their respective dates can be found in this repository's Git commit history.
 
-- Install any Java 17/21 SDK of your choosing
-- Install the Android SDK via Android Studio
-- Clone the repo:
+### Software License
 
-```
-git clone https://github.com/baroquee2-dev/MiseChat.git
-cd MiseChat
-```
+The source code of MiseChat is released under the **GNU Affero General Public License v3.0 (AGPL-3.0)**.
 
-- Install dependencies and run via Expo:
+You may use, study, modify, and redistribute the source code of this project in accordance with the terms of the AGPL-3.0. If you modify or redistribute the project, or make a modified version available for interaction over a network under circumstances covered by the AGPL-3.0, you must comply with the applicable requirements of the license, including requirements concerning source code availability, licensing, and notices of modification.
 
-```
-npm install
-npm run prebuild:android
-npm run dev:android
-```
+Applicable copyright, license, and other notices from the original ChatterUI project and third-party components are retained. Copyright in additions or modifications made as part of MiseChat does not replace or supersede the rights of the original authors or other contributors in their respective works.
 
-Or:
+For the complete AGPL-3.0 license terms, please refer to the **LICENSE** file in the root directory of this repository.
 
-```
-npm install
-npx expo run:android
-```
+#### Network Interaction Notice (AGPL-3.0 Section 13)
+If you modify this Program, or run a modified version of it, and make it accessible to users interacting with it remotely over a computer network (such as a Web application, cloud API, remote server, or SaaS instance), you must ensure that all users are provided with a prominent and accessible means to receive or download the Corresponding Source code of your version under the terms of the AGPL-3.0.
 
-> This project includes native modules (on-device models, file download, etc.) and cannot run in Expo Go. Use `expo run:android` or a custom development build.
+### Source Code
 
-#### Building an APK
+The source code of MiseChat is publicly available in this GitHub repository.
 
-Requires Node.js, Java 17/21, and the Android SDK. Expo's EAS local builds typically require a Linux environment.
+If you obtained a compiled version of MiseChat, such as an APK, the publicly available source code and version history can be found in this repository. Where a particular release provides corresponding source code, a Git tag, or additional Release information, please refer to the information associated with that release.
 
-```
-npm install
-eas build --platform android --local
-```
+### Trademarks, Branding & Media Assets
 
-### iOS
+**The AGPL-3.0 license applicable to the source code does not grant rights to use the MiseChat brand identity or proprietary media assets of this project.**
 
-Android is the primary platform for now. iOS is not yet a main supported target.
+Unless explicitly licensed or otherwise indicated, branding and media assets created by or owned by the MiseChat project include, but are not limited to:
+
+* The **MiseChat** name and brand identity
+* Trademarks
+* Logo
+* App Icon / application icons
+* Brand graphics and interface identity assets
+* Images, illustrations, animations, audio, video, and other multimedia assets
+
+These assets are not included within the rights granted under the AGPL-3.0 license applicable to the source code, and all applicable rights are reserved.
+
+Except where permitted by applicable law or separately licensed, the MiseChat name, trademarks, logo, and other brand identifiers may not be used in a manner that suggests that a derivative project, modified version, product, or service is officially released, endorsed, sponsored by, or otherwise affiliated with MiseChat without permission from the relevant rights holder.
+
+If you create a derivative version of MiseChat, it is recommended that you use a different name, logo, App Icon, and other brand identifiers to clearly distinguish your project from the original MiseChat project.
+
+### Third-Party Software & Assets
+
+This project may include or depend on other open-source software, libraries, images, fonts, audio, graphics, or other third-party components and assets.
+
+Such materials may be subject to their own copyright, trademark, and license terms, and all applicable rights remain with their respective owners.
+
+When using, modifying, or redistributing MiseChat, you are responsible for complying with any applicable third-party licenses in addition to the AGPL-3.0.
 
 ## Additional Note
 
