@@ -4,8 +4,8 @@ import { count, eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import * as DocumentPicker from 'expo-document-picker'
 import { ImageBackground } from 'expo-image'
-import { Redirect, useNavigation } from 'expo-router'
-import { useEffect, useState } from 'react'
+import { Redirect, useNavigation, useRouter } from 'expo-router'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
@@ -27,6 +27,7 @@ import { CharacterCardData, Characters } from '@lib/state/Characters'
 import { Chats } from '@lib/state/Chat'
 import { useAvatarViewerStore } from '@lib/state/components/AvatarViewer'
 import { Logger } from '@lib/state/Logger'
+import { usePendingChatOpen } from '@lib/state/PendingChatOpen'
 import { Theme } from '@lib/theme/ThemeManager'
 import { characterTags, tags } from 'db/schema'
 
@@ -35,6 +36,8 @@ const ChracterEditorScreen = () => {
     const styles = useStyles()
     const { color, spacing } = Theme.useTheme()
     const navigation = useNavigation()
+    const router = useRouter()
+    const requestChatOpen = usePendingChatOpen((state) => state.request)
     const data = useLiveQuery(
         db
             .select({
@@ -66,6 +69,10 @@ const ChracterEditorScreen = () => {
     const setShowViewer = useAvatarViewerStore((state) => state.setShow)
     const [edited, setEdited] = useState(false)
     const [altSwipeIndex, setAltSwipeIndex] = useState(0)
+    // Must not flip usePreventRemove while leaving — that remounts every stack
+    // header and crashes Android with ScreenStackFragment / canNavigateBack.
+    const leaveAfterSaveRef = useRef(false)
+    const keepCharacterOnLeaveRef = useRef(false)
 
     const setCharacterCardEdited = (card: CharacterCardData) => {
         if (!edited) setEdited(true)
@@ -73,6 +80,10 @@ const ChracterEditorScreen = () => {
     }
 
     usePreventRemove(edited, ({ data }) => {
+        if (leaveAfterSaveRef.current) {
+            navigation.dispatch(data.action)
+            return
+        }
         if (!charId) return
         Alert.alert({
             title: t('characterEditor.unsavedTitle'),
@@ -113,13 +124,22 @@ const ChracterEditorScreen = () => {
         }
     }
 
-    const handleSaveCard = async () => {
-        if (characterCard && charId)
-            return Characters.db.mutate.updateCard(characterCard, charId).then(() => {
-                setCurrentCard(charId)
-                setEdited(() => false)
-                Logger.infoToast(i18n.t('characterEditor.saveSuccess'))
-            })
+    const handleSaveCard = async ({ openChat = false }: { openChat?: boolean } = {}) => {
+        if (!characterCard || !charId) return
+        await Characters.db.mutate.updateCard(characterCard, charId)
+        await setCurrentCard(charId)
+        Logger.infoToast(i18n.t('characterEditor.saveSuccess'))
+        if (!openChat || !router.canGoBack()) return
+
+        leaveAfterSaveRef.current = true
+        // New characters have no chats yet — hand off to the list to push chat.
+        // Existing characters (or edit-from-chat) just pop back.
+        const existingChats = await Chats.db.query.chatList(charId)
+        if (existingChats.length === 0) {
+            keepCharacterOnLeaveRef.current = true
+            requestChatOpen(charId)
+        }
+        setTimeout(() => router.back(), 0)
     }
 
     const handleDeleteCard = () => {
@@ -131,11 +151,16 @@ const ChracterEditorScreen = () => {
                 {
                     label: t('characterEditor.deleteConfirm'),
                     onPress: () => {
+                        leaveAfterSaveRef.current = true
+                        const name = charName
                         Characters.db.mutate.deleteCard(charId ?? -1)
+                        // dismissTo list first — unloading clears charId and the
+                        // Redirect ".." would only pop onto a blank ChatScreen
+                        // when the editor was opened from chat.
+                        router.dismissTo('/')
                         unloadCharacter()
                         unloadChat()
-                        setEdited(false)
-                        Logger.info(`Deleted character: ${charName}`)
+                        Logger.info(`Deleted character: ${name}`)
                     },
                     type: 'warning',
                 },
@@ -145,7 +170,11 @@ const ChracterEditorScreen = () => {
 
     useEffect(() => {
         return () => {
-            if (!chat) unloadCharacter()
+            if (keepCharacterOnLeaveRef.current) return
+            if (!chat) {
+                unloadCharacter()
+                Characters.flushPendingImageDeletes()
+            }
         }
     }, [chat, unloadCharacter])
 
@@ -262,7 +291,7 @@ const ChracterEditorScreen = () => {
                                             close()
                                             await Characters.importBackground(
                                                 charId,
-                                                characterCard.background_image
+                                                backgroundImage
                                             )
                                         },
                                     },
@@ -332,7 +361,7 @@ const ChracterEditorScreen = () => {
                                             iconName="save"
                                             iconSize={20}
                                             label={t('common.save')}
-                                            onPress={handleSaveCard}
+                                            onPress={() => handleSaveCard({ openChat: true })}
                                             variant="secondary"
                                         />
                                     )}

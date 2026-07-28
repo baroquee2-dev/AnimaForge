@@ -1,4 +1,5 @@
 import { localDownload } from '@vali98/react-native-fs'
+import { Asset } from 'expo-asset'
 import { getDocumentAsync } from 'expo-document-picker'
 import { Directory, File, Paths } from 'expo-file-system'
 
@@ -129,6 +130,26 @@ export const copyFile = async ({ from, to }: { from: string; to: string }) => {
         Logger.error('Failed to copy: ' + e)
         return false
     }
+}
+
+/**
+ * Resolve a bundled Asset module to a real file:// URI.
+ * On Android release builds, image assets are marked downloaded with a drawable
+ * resource name (not an absolute URI), which breaks File.copy / base64.
+ */
+export const resolveBundledAssetFileUri = async (moduleId: number): Promise<string | null> => {
+    const [asset] = await Asset.loadAsync(moduleId)
+    if (asset.downloaded && asset.localUri && !asset.localUri.includes(':')) {
+        asset.downloaded = false
+    }
+    if (!asset.localUri?.includes(':')) {
+        await asset.downloadAsync()
+    }
+    if (!asset.localUri?.startsWith('file')) {
+        Logger.error(`Bundled asset did not resolve to a file URI: ${asset.localUri ?? 'null'}`)
+        return null
+    }
+    return asset.localUri
 }
 
 export const deleteFile = (path: string) => {

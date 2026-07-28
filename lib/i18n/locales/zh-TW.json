@@ -187,7 +187,7 @@
             "title": "角色管理",
             "regenerateDefault": "重新產生預設角色卡",
             "regenerateDefaultTitle": "重新產生預設角色卡",
-            "regenerateDefaultDesc": "這會將預設 AI 角色卡加入你的角色列表。",
+            "regenerateDefaultDesc": "這會將內建範例角色卡加入你的角色列表。",
             "createDefault": "建立預設角色卡",
             "hiddenTags": "隱藏標籤",
             "hiddenTagsDesc": "在角色列表中隱藏帶有下列標籤的角色。"
@@ -240,7 +240,17 @@
         "devMode": "[開發模式]",
         "enabledDevMode": "已啟用開發模式。",
         "disableDevMode": "關閉開發模式",
-        "github": "Github 儲存庫"
+        "github": "Github 儲存庫",
+        "descriptionPrefix": "MiseChat 是一款專為沉浸式體驗打造的 AI 角色扮演聊天工具。提供",
+        "modeVisualNovel": "「視覺小說」",
+        "modeImmersive": "「全螢幕沉浸」",
+        "modeMessenger": "「即時訊息」",
+        "descriptionSep": "、",
+        "descriptionAnd": "與",
+        "descriptionSuffix": "三種介面，讓你隨心切換，輕鬆享受與虛擬角色的對話時光。",
+        "attributionBase": "本專案基於 ChatterUI（Vali-98）開發。",
+        "attributionLicense": "採用 GNU AGPL-3.0 授權釋出。",
+        "attributionMore": "完整授權與第三方授權資訊請參閱 GitHub 專案頁面。"
     },
     "logs": {
         "title": "日誌（Logs）",
@@ -408,7 +418,7 @@
         "sendFilteredDesc": "將過濾後的文字送去推論（inference）",
         "localTemplate": "本機範本（Local Template）",
         "useBuiltInTemplate": "使用內建本機模型範本",
-        "useBuiltInTemplateDesc": "在本機模式下，AnimaForge 會自動使用已載入模型提供的 Instruct 範本。若要改用上方 Instruct 格式化訊息，請關閉此選項。系統提示詞（System Prompt）仍會一律使用。"
+        "useBuiltInTemplateDesc": "在本機模式下，MiseChat 會自動使用已載入模型提供的 Instruct 範本。若要改用上方 Instruct 格式化訊息，請關閉此選項。系統提示詞（System Prompt）仍會一律使用。"
     },
     "api": {
         "title": "API 管理",
@@ -459,7 +469,7 @@
         "backToModels": "返回模型列表",
         "showSettings": "顯示設定",
         "empty": "找不到模型。試著匯入一些吧！",
-        "copyIntoApp": "複製模型到 AnimaForge",
+        "copyIntoApp": "複製模型到 MiseChat",
         "useExternal": "使用外部模型",
         "modelLoaded": "已載入模型：",
         "none": "無",

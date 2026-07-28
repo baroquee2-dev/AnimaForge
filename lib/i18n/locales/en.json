@@ -185,10 +185,10 @@
         },
         "character": {
             "title": "Character Management",
-            "regenerateDefault": "Regenerate Default Card",
-            "regenerateDefaultTitle": "Regenerate Default Card",
-            "regenerateDefaultDesc": "This will add the default AI Bot card to your character list.",
-            "createDefault": "Create Default Card",
+            "regenerateDefault": "Regenerate Default Cards",
+            "regenerateDefaultTitle": "Regenerate Default Cards",
+            "regenerateDefaultDesc": "This will add the built-in sample character cards to your character list.",
+            "createDefault": "Create Default Cards",
             "hiddenTags": "Hidden Tags",
             "hiddenTagsDesc": "Hide characters with the following tags from the character list."
         },
@@ -240,7 +240,17 @@
         "devMode": "[DEV MODE]",
         "enabledDevMode": "You have enabled dev mode.",
         "disableDevMode": "Disable Dev Mode",
-        "github": "Github Repository"
+        "github": "Github Repository",
+        "descriptionPrefix": "MiseChat is an AI role-playing chat app built for immersion. Switch freely between ",
+        "modeVisualNovel": "Visual Novel",
+        "modeImmersive": "Fullscreen Immersive",
+        "modeMessenger": "Messaging",
+        "descriptionSep": ", ",
+        "descriptionAnd": ", and ",
+        "descriptionSuffix": " layouts to enjoy conversations with virtual characters at your own pace.",
+        "attributionBase": "Based on ChatterUI (Vali-98).",
+        "attributionLicense": "Released under the GNU AGPL-3.0 license.",
+        "attributionMore": "Full license and third-party notices are on the GitHub project page."
     },
     "logs": {
         "title": "Logs",
@@ -408,7 +418,7 @@
         "sendFilteredDesc": "Sends the filtered text for inference",
         "localTemplate": "Local Template",
         "useBuiltInTemplate": "Use Built-In Local Model Template",
-        "useBuiltInTemplateDesc": "When in Local Mode, AnimaForge automatically uses the instruct template provided by the loaded model. Disable this if you want messages to be formatted using Instruct instead. System Prompt however is always used."
+        "useBuiltInTemplateDesc": "When in Local Mode, MiseChat automatically uses the instruct template provided by the loaded model. Disable this if you want messages to be formatted using Instruct instead. System Prompt however is always used."
     },
     "api": {
         "title": "API Manager",
@@ -459,7 +469,7 @@
         "backToModels": "Back To Models",
         "showSettings": "Show Settings",
         "empty": "No Models Found. Try Importing Some!",
-        "copyIntoApp": "Copy Model Into AnimaForge",
+        "copyIntoApp": "Copy Model Into MiseChat",
         "useExternal": "Use External Model",
         "modelLoaded": "Model Loaded: ",
         "none": "None",

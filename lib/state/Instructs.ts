@@ -37,6 +37,38 @@ const defaultGenerics = {
 
 const defaultInstructs: InstructType[] = [
     {
+        system_prompt:
+            "Roleplay as {{char}}, always responding from {{char}}'s perspective and in character.\n\nCombine natural dialogue with novel-style narration, including actions, emotions, and atmosphere when appropriate.\n\nKeep the writing vivid, engaging, immersive, and enjoyable to read.\n",
+        system_prefix: '<|im_start|>system\n',
+        system_suffix: '<|im_end|>\n',
+        input_prefix: '<|im_start|>user\n',
+        input_suffix: '<|im_end|>\n',
+        output_prefix: '<|im_start|>assistant\n',
+        last_output_prefix: '<|im_start|>assistant\n',
+        output_suffix: '<|im_end|>\n',
+        stop_sequence: '<|im_end|>',
+        user_alignment_message: '',
+        activation_regex: '',
+        name: 'NovelStyle',
+        ...defaultGenerics,
+    },
+    {
+        system_prompt:
+            "Roleplay as {{char}}, always responding to {{user}} from {{char}}'s identity and perspective.\n\nSimulate natural, realistic human conversation with concise, casual language. Keep each response around 3-5 sentences and avoid unnecessary verbosity.\n\nOutput only {{char}}'s dialogue. Do not include narration, background descriptions, actions, notes, or any other extra content.\n",
+        system_prefix: '<|im_start|>system\n',
+        system_suffix: '<|im_end|>\n',
+        input_prefix: '<|im_start|>user\n',
+        input_suffix: '<|im_end|>\n',
+        output_prefix: '<|im_start|>assistant\n',
+        last_output_prefix: '<|im_start|>assistant\n',
+        output_suffix: '<|im_end|>\n',
+        stop_sequence: '<|im_end|>',
+        user_alignment_message: '',
+        activation_regex: '',
+        name: 'ChatStyle',
+        ...defaultGenerics,
+    },
+    {
         system_prompt: "Write {{char}}'s next reply in a chat between {{char}} and {{user}}.",
         system_prefix: '<|im_start|>system\n',
         system_suffix: '<|im_end|>\n',
@@ -429,12 +461,12 @@ export namespace Instructs {
     export const generateInitialDefaults = async () => {
         const list = await db.query.instructList()
         let data = -1
-        defaultInstructs.map(async (item) => {
+        for (const item of defaultInstructs) {
             if (!list?.some((e) => e.name === item.name)) {
                 const newid = await db.mutate.createInstruct(item)
                 if (data === -1) data = newid
             }
-        })
+        }
         Logger.info('Default Instructs Successfully Generated')
         return data === -1 ? 1 : data
     }

@@ -145,7 +145,7 @@ export const Samplers = {
             type: 'integer',
             min: 16,
             max: 32768,
-            default: 256,
+            default: 500,
             step: 1,
             precision: 0,
             ignoreIf: 0,

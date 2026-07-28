@@ -87,11 +87,16 @@ const ChatScreen = () => {
     useFocusEffect(
         useCallback(() => {
             playChatEnterSound()
+            // Delete replaced portrait/background files after chat Image views
+            // have resumed with the latest URIs.
+            const timer = setTimeout(() => Characters.flushPendingImageDeletes(), 1200)
+            return () => clearTimeout(timer)
         }, [])
     )
 
     useEffect(() => {
         return () => {
+            Characters.flushPendingImageDeletes(0)
             unloadCharacter()
             unloadChat()
         }

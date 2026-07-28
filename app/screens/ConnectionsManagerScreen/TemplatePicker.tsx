@@ -32,6 +32,7 @@ const vendorIcons: Record<string, keyof typeof MaterialIcons.glyphMap> = {
     cohere: 'hub',
     openrouter: 'router',
     googleai: 'cloud',
+    xai: 'auto-awesome',
     link: 'link',
 }
 

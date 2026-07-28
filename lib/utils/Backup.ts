@@ -18,7 +18,7 @@ const DB_ENTRY = 'db.db'
 
 const backupFileName = (appVersion: string) => {
     const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
-    return `${appVersion}-animaforge-backup-${stamp}.zip`
+    return `${appVersion}-misechat-backup-${stamp}.zip`
 }
 
 const isZipName = (name: string) => name.toLowerCase().endsWith('.zip')

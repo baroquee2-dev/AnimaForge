@@ -1,5 +1,13 @@
 import React, { useState } from 'react'
-import { Image, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import {
+    Image,
+    Linking,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native'
 import { useMMKVBoolean } from 'react-native-mmkv'
 import { useTranslation } from 'react-i18next'
 
@@ -31,48 +39,71 @@ const AboutScreen = () => {
     return (
         <View style={styles.container}>
             <HeaderTitle title={t('about.title')} />
-            <TouchableOpacity activeOpacity={0.8} onPress={updateCounter}>
-                <View style={styles.iconFrame}>
-                    <Image
-                        source={require('../../assets/images/about-icon.png')}
-                        style={styles.iconImage}
-                        resizeMode="cover"
+            <ScrollView
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
+                bounces={false}>
+                <View style={styles.content}>
+                    <TouchableOpacity activeOpacity={0.8} onPress={updateCounter}>
+                        <View style={styles.iconFrame}>
+                            <Image
+                                source={require('../../assets/images/about-icon.png')}
+                                style={styles.iconImage}
+                                resizeMode="contain"
+                            />
+                        </View>
+                    </TouchableOpacity>
+
+                    <Text style={styles.subtitleText}>
+                        {t('about.version', { version })} {devMode && t('about.devMode')}
+                    </Text>
+                    {devMode && (
+                        <ThemedButton
+                            label={t('about.disableDevMode')}
+                            variant="critical"
+                            buttonStyle={{
+                                marginTop: spacing.m,
+                            }}
+                            onPress={() => {
+                                setCounter(0)
+                                setDevMode(false)
+                                Logger.info('Dev mode disabled')
+                            }}
+                        />
+                    )}
+
+                    <Text style={styles.description}>
+                        {t('about.descriptionPrefix')}
+                        <Text style={styles.modeName}>{t('about.modeVisualNovel')}</Text>
+                        {t('about.descriptionSep')}
+                        <Text style={styles.modeName}>{t('about.modeImmersive')}</Text>
+                        {t('about.descriptionAnd')}
+                        <Text style={styles.modeName}>{t('about.modeMessenger')}</Text>
+                        {t('about.descriptionSuffix')}
+                    </Text>
+
+                    <ThemedButton
+                        buttonStyle={{ marginTop: spacing.xl2, alignSelf: 'stretch' }}
+                        variant="secondary"
+                        label={t('about.github')}
+                        iconName="github"
+                        iconSize={20}
+                        onPress={() => {
+                            Linking.openURL(GITHUB_REPOSITORY)
+                        }}
                     />
                 </View>
-            </TouchableOpacity>
 
-            <View style={styles.titleRow}>
-                <Text style={styles.titleAnima}>Anima</Text>
-                <Text style={styles.titleForge}>Forge</Text>
-            </View>
-            <Text style={styles.subtitleText}>
-                {t('about.version', { version })} {devMode && t('about.devMode')}
-            </Text>
-            {devMode && (
-                <ThemedButton
-                    label={t('about.disableDevMode')}
-                    variant="critical"
-                    buttonStyle={{
-                        marginTop: spacing.xl,
-                    }}
-                    onPress={() => {
-                        setCounter(0)
-                        setDevMode(false)
-                        Logger.info('Dev mode disabled')
-                    }}
-                />
-            )}
-
-            <ThemedButton
-                buttonStyle={{ marginTop: spacing.xl3 }}
-                variant="secondary"
-                label={t('about.github')}
-                iconName="github"
-                iconSize={20}
-                onPress={() => {
-                    Linking.openURL(GITHUB_REPOSITORY)
-                }}
-            />
+                <View style={styles.footer}>
+                    <Text style={styles.footerText}>{t('about.attributionBase')}</Text>
+                    <Text style={styles.footerText}>{t('about.attributionLicense')}</Text>
+                    <TouchableOpacity
+                        activeOpacity={0.6}
+                        onPress={() => Linking.openURL(GITHUB_REPOSITORY)}>
+                        <Text style={styles.footerLink}>{t('about.attributionMore')}</Text>
+                    </TouchableOpacity>
+                </View>
+            </ScrollView>
         </View>
     )
 }
@@ -80,47 +111,76 @@ const AboutScreen = () => {
 export default AboutScreen
 
 const useStyles = () => {
-    const { color, spacing } = Theme.useTheme()
+    const { color, spacing, fontSize } = Theme.useTheme()
 
     return StyleSheet.create({
         container: {
             flex: 1,
-            paddingHorizontal: spacing.xl3,
+        },
+        scrollContent: {
+            flexGrow: 1,
+            paddingHorizontal: spacing.xl2,
             paddingBottom: spacing.xl2,
             justifyContent: 'center',
             alignItems: 'center',
         },
-        titleRow: {
-            flexDirection: 'row',
-            alignItems: 'baseline',
-            justifyContent: 'center',
+        content: {
+            width: '100%',
+            maxWidth: 340,
+            alignItems: 'center',
+        },
+        subtitleText: {
+            color: color.text._400,
             marginTop: spacing.m,
+            fontSize: fontSize.m,
         },
-        titleAnima: {
-            fontSize: 32,
+        description: {
+            marginTop: spacing.xl,
+            color: color.text._200,
+            fontSize: fontSize.l,
+            lineHeight: fontSize.l * 1.55,
+            textAlign: 'center',
             fontWeight: '500',
-            color: color.text._100,
         },
-        titleForge: {
-            fontSize: 32,
+        modeName: {
+            color: color.primary._400,
             fontWeight: '700',
-            color: color.primary._500,
-            marginLeft: spacing.sm,
         },
-        subtitleText: { color: color.text._400, marginTop: spacing.sm },
         iconFrame: {
-            width: 160,
-            height: 160,
-            borderRadius: 20,
-            backgroundColor: '#000',
+            width: 210,
+            height: 210,
             overflow: 'hidden',
             alignItems: 'center',
             justifyContent: 'center',
         },
         iconImage: {
+            width: 210,
+            height: 210,
+            transform: [{ scale: 1.35 }],
+        },
+        footer: {
             width: '100%',
-            height: '100%',
-            transform: [{ scale: 1.4 }],
+            maxWidth: 340,
+            marginTop: spacing.xl3,
+            paddingTop: spacing.l,
+            borderTopWidth: StyleSheet.hairlineWidth,
+            borderTopColor: color.neutral._400,
+            alignItems: 'center',
+            rowGap: 2,
+        },
+        footerText: {
+            color: color.text._500,
+            fontSize: fontSize.s,
+            lineHeight: fontSize.s * 1.45,
+            textAlign: 'center',
+        },
+        footerLink: {
+            color: color.text._400,
+            fontSize: fontSize.s,
+            lineHeight: fontSize.s * 1.45,
+            textAlign: 'center',
+            marginTop: 2,
+            opacity: 0.85,
         },
     })
 }

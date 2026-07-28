@@ -1,4 +1,3 @@
-import { Asset } from 'expo-asset'
 import { getDocumentAsync } from 'expo-document-picker'
 import { Image } from 'react-native'
 import { create } from 'zustand'
@@ -7,7 +6,13 @@ import i18n from '@lib/i18n'
 
 import { Storage } from '@lib/enums/Storage'
 import { createMMKVStorage } from '@lib/storage/MMKV'
-import { AppDirectory, copyFile, deleteFile, fileExists } from '@lib/utils/File'
+import {
+    AppDirectory,
+    copyFile,
+    deleteFile,
+    fileExists,
+    resolveBundledAssetFileUri,
+} from '@lib/utils/File'
 
 import { Characters } from './Characters'
 import { Logger } from './Logger'
@@ -108,11 +113,13 @@ export const installDefaultChatBackground = async () => {
     const dest = AppDirectory.Assets + DEFAULT_CHAT_BACKGROUND_FILENAME
     if (!fileExists(dest)) {
         try {
-            const [asset] = await Asset.loadAsync(
+            const localUri = await resolveBundledAssetFileUri(
                 require('@assets/images/default-chat-background.png')
             )
-            if (asset.localUri) {
-                const copied = await copyFile({ from: asset.localUri, to: dest })
+            if (!localUri) {
+                Logger.error('Failed to resolve default chat background asset URI')
+            } else {
+                const copied = await copyFile({ from: localUri, to: dest })
                 if (!copied) {
                     Logger.error('Failed to copy default chat background to app storage')
                 }

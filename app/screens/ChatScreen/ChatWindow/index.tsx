@@ -7,13 +7,14 @@ import Drawer from '@components/views/Drawer'
 import HeaderTitle from '@components/views/HeaderTitle'
 import { AppSettings } from '@lib/constants/GlobalValues'
 import { getChatLayoutCapabilities, useChatLayout } from '@lib/constants/ChatLayout'
+import { useFocusedValue } from '@lib/hooks/useFocusedValue'
 import { useAppMode } from '@lib/state/AppMode'
 import { useBackgroundStore, resolveChatBackgroundUri } from '@lib/state/BackgroundImage'
 import { Characters } from '@lib/state/Characters'
+import { ChatLayoutProvider } from '@lib/chat/ChatLayoutContext'
 
 import AnimatedChatBackground from './AnimatedChatBackground'
 import ChatHeaderGradient from './ChatHeaderGradient'
-import { ChatLayoutProvider } from '@lib/chat/ChatLayoutContext'
 import ChatModelName from './ChatModelName'
 import ChatLayoutRouter from './layouts/ChatLayoutRouter'
 
@@ -26,6 +27,11 @@ const ChatWindow = () => {
     const { data: { background_image: backgroundImage } = {} } = useLiveQuery(
         Characters.db.query.backgroundImageQuery(charId ?? -1)
     )
+    // Freeze while Character Editor is on top so portrait+background edits
+    // do not remount buried expo-image views at the same time.
+    const stableBackgroundImage = useFocusedValue(backgroundImage, 'chat.background', {
+        resumeDelayMs: 0,
+    })
     const { showSettings, showChat } = Drawer.useDrawerStore(
         useShallow((state) => ({
             showSettings: state.values?.[Drawer.ID.SETTINGS],
@@ -35,7 +41,7 @@ const ChatWindow = () => {
 
     const image = useBackgroundStore((state) => state.image)
     const backgroundSource = {
-        uri: resolveChatBackgroundUri(backgroundImage, image),
+        uri: resolveChatBackgroundUri(stableBackgroundImage, image),
     }
 
     const chatContent = (

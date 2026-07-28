@@ -1,12 +1,6 @@
 import { ImageBackground } from 'expo-image'
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useEffect, useRef, useState } from 'react'
 import { StyleSheet, View, ViewStyle } from 'react-native'
-import Animated, {
-    runOnJS,
-    useAnimatedStyle,
-    useSharedValue,
-    withTiming,
-} from 'react-native-reanimated'
 
 type AnimatedChatBackgroundProps = {
     uri: string
@@ -14,51 +8,35 @@ type AnimatedChatBackgroundProps = {
     children?: ReactNode
 }
 
+/**
+ * Chat background layer. Instant swap (no Reanimated crossfade) — combining
+ * fades with portrait remounts crashed on Android when both media changed
+ * while chat was under the character editor.
+ */
 const AnimatedChatBackground: React.FC<AnimatedChatBackgroundProps> = ({
     uri,
     style,
     children,
 }) => {
     const [displayUri, setDisplayUri] = useState(uri)
-    const opacity = useSharedValue(1)
+    const displayUriRef = useRef(uri)
 
     useEffect(() => {
-        if (!uri) {
-            setDisplayUri('')
-            opacity.value = 1
-            return
-        }
-
-        if (!displayUri) {
-            setDisplayUri(uri)
-            return
-        }
-
-        if (uri === displayUri) return
-
-        opacity.value = withTiming(0, { duration: 180 }, (finished) => {
-            if (!finished) return
-            runOnJS(setDisplayUri)(uri)
-            opacity.value = withTiming(1, { duration: 320 })
-        })
-    }, [uri, displayUri, opacity])
-
-    const animatedStyle = useAnimatedStyle(() => ({
-        opacity: opacity.value,
-    }))
+        if (uri === displayUriRef.current) return
+        displayUriRef.current = uri
+        setDisplayUri(uri)
+    }, [uri])
 
     return (
         <View style={[{ flex: 1 }, style]}>
             {!!displayUri && (
-                <Animated.View
-                    pointerEvents="none"
-                    style={[StyleSheet.absoluteFill, animatedStyle]}>
+                <View pointerEvents="none" style={StyleSheet.absoluteFill}>
                     <ImageBackground
                         cachePolicy="none"
                         style={{ flex: 1 }}
                         source={{ uri: displayUri }}
                     />
-                </Animated.View>
+                </View>
             )}
             {children}
         </View>

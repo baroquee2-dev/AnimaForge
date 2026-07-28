@@ -1,5 +1,5 @@
 import { getStringAsync } from 'expo-clipboard'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Text, View } from 'react-native'
 
@@ -42,10 +42,18 @@ const InputSheet: React.FC<InputSheetProps> = ({
     const [errorMessage, setErrorMessage] = useState('')
     const { color, fontSize, spacing } = Theme.useTheme()
 
+    // Sheet stays mounted while unused; reset so the next open is not stale.
+    useEffect(() => {
+        if (!visible) return
+        setText(defaultValue)
+        setErrorMessage('')
+    }, [visible, defaultValue])
+
     const handleClose = () => {
         setVisible(false)
         onClose()
         setErrorMessage('')
+        setText(defaultValue)
     }
 
     return (
