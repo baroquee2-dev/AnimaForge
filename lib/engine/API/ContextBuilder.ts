@@ -363,12 +363,10 @@ export const buildTextCompletionContext = async ({
 const thinkRule = buildThinkRules()
 
 const getMacroRules = (instruct: InstructType) => {
-    const data: Macro[] = []
     if (instruct.hide_think_tags) {
-        data.concat(thinkRule)
+        return thinkRule
     }
-    // for expansion
-    return data
+    return []
 }
 
 const replaceMacrosInternal = (data: string, instruct: InstructType) => {

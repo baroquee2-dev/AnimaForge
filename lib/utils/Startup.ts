@@ -9,7 +9,7 @@ import { Model } from '@lib/engine/Local/Model'
 import { Tokenizer } from '@lib/engine/Tokenizer'
 import { setupNotifications } from '@lib/notifications/Notifications'
 import { useAppModeStore } from '@lib/state/AppMode'
-import { Instructs } from '@lib/state/Instructs'
+import { InstructFormats, Instructs } from '@lib/state/Instructs'
 import { SamplersManager } from '@lib/state/SamplerState'
 import { useTTSStore } from '@lib/state/TTS'
 
@@ -189,13 +189,30 @@ const setKeepAwake = async () => {
 }
 
 const setDefaultInstruct = () => {
+    const migrateKey = 'instruct-style-format-split-v1'
     Instructs.db.query.instructList().then(async (list) => {
         if (!list) {
             Logger.error('Instruct database Invalid, this should not happen! Please report this!')
-        } else if (list?.length === 0) {
-            Logger.warn('No Instructs exist, creating default Instruct')
+            return
+        }
+
+        if (!mmkv.getBoolean(migrateKey)) {
+            await Instructs.migrateToStyleFormatSplit()
+            mmkv.set(migrateKey, true)
+            return
+        }
+
+        if (list.length === 0) {
+            Logger.warn('No Instruct styles exist, creating defaults')
             const id = await Instructs.generateInitialDefaults()
-            Instructs.useInstruct.getState().load(id)
+            await Instructs.useInstruct.getState().load(id)
+        }
+
+        const formatList = await InstructFormats.db.query.formatList()
+        if (!formatList || formatList.length === 0) {
+            Logger.warn('No Instruct formats exist, creating defaults')
+            const id = await InstructFormats.generateInitialDefaults()
+            await InstructFormats.useFormat.getState().load(id)
         }
     })
 }
