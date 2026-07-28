@@ -433,7 +433,7 @@
         "sendFilteredDesc": "Sends the filtered text for inference",
         "localTemplate": "Local Template",
         "useBuiltInTemplate": "Use Built-In Local Model Template",
-        "useBuiltInTemplateDesc": "When in Local Mode, MiseChat automatically uses the instruct template provided by the loaded model. Disable this if you want messages to be formatted using Instruct instead. System Prompt however is always used."
+        "useBuiltInTemplateDesc": "When in Local Mode, MiseChat automatically uses the instruct template provided by the loaded model. Disable this if you want messages to be formatted using the format settings under Expert Settings below. System Prompt however is always used."
     },
     "api": {
         "title": "API Manager",
