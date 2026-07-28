@@ -408,7 +408,7 @@
         "sendFilteredDesc": "將過濾後的文字送去推論（inference）",
         "localTemplate": "本機範本（Local Template）",
         "useBuiltInTemplate": "使用內建本機模型範本",
-        "useBuiltInTemplateDesc": "在本機模式下，AnimaForge 會自動使用已載入模型提供的 Instruct 範本。若要改用上方 Instruct 格式化訊息，請關閉此選項。系統提示詞（System Prompt）仍會一律使用。"
+        "useBuiltInTemplateDesc": "在本機模式下，MiseChat 會自動使用已載入模型提供的 Instruct 範本。若要改用上方 Instruct 格式化訊息，請關閉此選項。系統提示詞（System Prompt）仍會一律使用。"
     },
     "api": {
         "title": "API 管理",
@@ -459,7 +459,7 @@
         "backToModels": "返回模型列表",
         "showSettings": "顯示設定",
         "empty": "找不到模型。試著匯入一些吧！",
-        "copyIntoApp": "複製模型到 AnimaForge",
+        "copyIntoApp": "複製模型到 MiseChat",
         "useExternal": "使用外部模型",
         "modelLoaded": "已載入模型：",
         "none": "無",

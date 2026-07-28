@@ -31,48 +31,46 @@ const AboutScreen = () => {
     return (
         <View style={styles.container}>
             <HeaderTitle title={t('about.title')} />
-            <TouchableOpacity activeOpacity={0.8} onPress={updateCounter}>
-                <View style={styles.iconFrame}>
-                    <Image
-                        source={require('../../assets/images/about-icon.png')}
-                        style={styles.iconImage}
-                        resizeMode="cover"
-                    />
-                </View>
-            </TouchableOpacity>
+            <View style={styles.content}>
+                <TouchableOpacity activeOpacity={0.8} onPress={updateCounter}>
+                    <View style={styles.iconFrame}>
+                        <Image
+                            source={require('../../assets/images/about-icon.png')}
+                            style={styles.iconImage}
+                            resizeMode="contain"
+                        />
+                    </View>
+                </TouchableOpacity>
 
-            <View style={styles.titleRow}>
-                <Text style={styles.titleAnima}>Anima</Text>
-                <Text style={styles.titleForge}>Forge</Text>
-            </View>
-            <Text style={styles.subtitleText}>
-                {t('about.version', { version })} {devMode && t('about.devMode')}
-            </Text>
-            {devMode && (
+                <Text style={styles.subtitleText}>
+                    {t('about.version', { version })} {devMode && t('about.devMode')}
+                </Text>
+                {devMode && (
+                    <ThemedButton
+                        label={t('about.disableDevMode')}
+                        variant="critical"
+                        buttonStyle={{
+                            marginTop: spacing.m,
+                        }}
+                        onPress={() => {
+                            setCounter(0)
+                            setDevMode(false)
+                            Logger.info('Dev mode disabled')
+                        }}
+                    />
+                )}
+
                 <ThemedButton
-                    label={t('about.disableDevMode')}
-                    variant="critical"
-                    buttonStyle={{
-                        marginTop: spacing.xl,
-                    }}
+                    buttonStyle={{ marginTop: spacing.xl, alignSelf: 'stretch' }}
+                    variant="secondary"
+                    label={t('about.github')}
+                    iconName="github"
+                    iconSize={20}
                     onPress={() => {
-                        setCounter(0)
-                        setDevMode(false)
-                        Logger.info('Dev mode disabled')
+                        Linking.openURL(GITHUB_REPOSITORY)
                     }}
                 />
-            )}
-
-            <ThemedButton
-                buttonStyle={{ marginTop: spacing.xl3 }}
-                variant="secondary"
-                label={t('about.github')}
-                iconName="github"
-                iconSize={20}
-                onPress={() => {
-                    Linking.openURL(GITHUB_REPOSITORY)
-                }}
-            />
+            </View>
         </View>
     )
 }
@@ -85,42 +83,31 @@ const useStyles = () => {
     return StyleSheet.create({
         container: {
             flex: 1,
-            paddingHorizontal: spacing.xl3,
-            paddingBottom: spacing.xl2,
+            paddingHorizontal: spacing.xl2,
             justifyContent: 'center',
             alignItems: 'center',
         },
-        titleRow: {
-            flexDirection: 'row',
-            alignItems: 'baseline',
-            justifyContent: 'center',
+        content: {
+            width: '100%',
+            maxWidth: 300,
+            alignItems: 'center',
+        },
+        subtitleText: {
+            color: color.text._400,
             marginTop: spacing.m,
         },
-        titleAnima: {
-            fontSize: 32,
-            fontWeight: '500',
-            color: color.text._100,
-        },
-        titleForge: {
-            fontSize: 32,
-            fontWeight: '700',
-            color: color.primary._500,
-            marginLeft: spacing.sm,
-        },
-        subtitleText: { color: color.text._400, marginTop: spacing.sm },
         iconFrame: {
-            width: 160,
-            height: 160,
-            borderRadius: 20,
-            backgroundColor: '#000',
+            width: 210,
+            height: 210,
             overflow: 'hidden',
             alignItems: 'center',
             justifyContent: 'center',
         },
         iconImage: {
-            width: '100%',
-            height: '100%',
-            transform: [{ scale: 1.4 }],
+            width: 210,
+            height: 210,
+            // Crop white padding baked into the logo PNG
+            transform: [{ scale: 1.35 }],
         },
     })
 }

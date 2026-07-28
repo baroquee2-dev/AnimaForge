@@ -73,8 +73,8 @@ https://github.com/Vali-98/ChatterUI
 - Clone 本專案：
 
 ```
-git clone https://github.com/baroquee2-dev/AnimaForge.git
-cd AnimaForge
+git clone https://github.com/baroquee2-dev/MiseChat.git
+cd MiseChat
 ```
 
 - 安裝依賴並執行開發版：
@@ -180,8 +180,8 @@ To run a development build:
 - Clone the repo:
 
 ```
-git clone https://github.com/baroquee2-dev/AnimaForge.git
-cd AnimaForge
+git clone https://github.com/baroquee2-dev/MiseChat.git
+cd MiseChat
 ```
 
 - Install dependencies and run via Expo:

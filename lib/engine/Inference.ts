@@ -50,7 +50,7 @@ export async function continueResponse(swipeId: number) {
 }
 
 const completionTaskOptions = {
-    taskName: 'animaforge_completion_task',
+    taskName: 'misechat_completion_task',
     taskTitle: 'Running completion...',
     taskDesc: `${APP_NAME} is running a completion task`,
     taskIcon: {

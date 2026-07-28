@@ -1,7 +1,7 @@
 import { nativeApplicationVersion } from 'expo-application'
 import i18n from '@lib/i18n'
 
-import { AppSettings, CLAUDE_VERSION, GITHUB_REPOSITORY } from '@lib/constants/GlobalValues'
+import { AppSettings, APP_NAME, CLAUDE_VERSION, GITHUB_REPOSITORY } from '@lib/constants/GlobalValues'
 import { SSEFetch } from '@lib/engine/SSEFetch'
 import { Logger } from '@lib/state/Logger'
 import { mmkv } from '@lib/storage/MMKV'
@@ -226,7 +226,7 @@ const hordeResponse = (senderParams: SenderParams) => {
             fetch(`${hordeURL}generate/text/status/${generation_id}`, {
                 method: 'DELETE',
                 headers: {
-                    'Client-Agent': `AnimaForge:${nativeApplicationVersion}:${GITHUB_REPOSITORY}`,
+                    'Client-Agent': `${APP_NAME}:${nativeApplicationVersion}:${GITHUB_REPOSITORY}`,
                     accept: 'application/json',
                     'Content-Type': 'application/json',
                 },
@@ -243,7 +243,7 @@ const hordeResponse = (senderParams: SenderParams) => {
             body: senderParams.payload,
             headers: {
                 ...senderParams.header,
-                'Client-Agent': `AnimaForge:${nativeApplicationVersion}:${GITHUB_REPOSITORY}`,
+                'Client-Agent': `${APP_NAME}:${nativeApplicationVersion}:${GITHUB_REPOSITORY}`,
                 accept: 'application/json',
                 'content-type': 'application/json',
             },
@@ -276,7 +276,7 @@ const hordeResponse = (senderParams: SenderParams) => {
             const response = await fetch(`${hordeURL}generate/text/status/${generation_id}`, {
                 method: 'GET',
                 headers: {
-                    'Client-Agent': `AnimaForge:${nativeApplicationVersion}:${GITHUB_REPOSITORY}`,
+                    'Client-Agent': `${APP_NAME}:${nativeApplicationVersion}:${GITHUB_REPOSITORY}`,
                     accept: 'application/json',
                     'content-type': 'application/json',
                 },

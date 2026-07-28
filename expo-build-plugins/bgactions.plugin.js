@@ -41,7 +41,7 @@ module.exports = function withCustomIntentFilter(config) {
                             { $: { 'android:name': 'android.intent.category.DEFAULT' } },
                             { $: { 'android:name': 'android.intent.category.BROWSABLE' } },
                         ],
-                        data: [{ $: { 'android:scheme': 'animaforge' } }],
+                        data: [{ $: { 'android:scheme': 'misechat' } }],
                     })
 
                     hasModified = true

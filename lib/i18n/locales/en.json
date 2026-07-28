@@ -408,7 +408,7 @@
         "sendFilteredDesc": "Sends the filtered text for inference",
         "localTemplate": "Local Template",
         "useBuiltInTemplate": "Use Built-In Local Model Template",
-        "useBuiltInTemplateDesc": "When in Local Mode, AnimaForge automatically uses the instruct template provided by the loaded model. Disable this if you want messages to be formatted using Instruct instead. System Prompt however is always used."
+        "useBuiltInTemplateDesc": "When in Local Mode, MiseChat automatically uses the instruct template provided by the loaded model. Disable this if you want messages to be formatted using Instruct instead. System Prompt however is always used."
     },
     "api": {
         "title": "API Manager",
@@ -459,7 +459,7 @@
         "backToModels": "Back To Models",
         "showSettings": "Show Settings",
         "empty": "No Models Found. Try Importing Some!",
-        "copyIntoApp": "Copy Model Into AnimaForge",
+        "copyIntoApp": "Copy Model Into MiseChat",
         "useExternal": "Use External Model",
         "modelLoaded": "Model Loaded: ",
         "none": "None",

@@ -1,10 +1,10 @@
 {
-  "name": "animaforge",
+  "name": "misechat",
   "main": "expo-router/entry",
-  "version": "0.8.8",
+  "version": "0.1.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/baroquee2-dev/AnimaForge.git"
+    "url": "https://github.com/baroquee2-dev/MiseChat.git"
   },
   "scripts": {
     "start": "expo start",

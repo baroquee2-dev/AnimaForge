@@ -1,16 +1,16 @@
 const IS_DEV = process.env.APP_VARIANT === 'development'
 const APP_ICON = './assets/images/app-icon.png'
-const APP_PACKAGE = IS_DEV ? 'com.baroquee2.animaforge.dev' : 'com.baroquee2.animaforge'
+const APP_PACKAGE = IS_DEV ? 'com.baroquee2.misechat.dev' : 'com.baroquee2.misechat'
 
 module.exports = {
     expo: {
-        name: IS_DEV ? 'AnimaForge (DEV)' : 'AnimaForge',
+        name: IS_DEV ? 'MiseChat (DEV)' : 'MiseChat',
         newArchEnabled: true,
-        slug: 'AnimaForge',
+        slug: 'MiseChat',
         version: '0.1.0',
         orientation: 'default',
         icon: APP_ICON,
-        scheme: 'animaforge',
+        scheme: 'misechat',
         userInterfaceStyle: 'automatic',
         assetBundlePatterns: ['**/*'],
         ios: {
@@ -93,7 +93,7 @@ module.exports = {
             [
                 'expo-camera',
                 {
-                    cameraPermission: 'Allow AnimaForge to access your camera',
+                    cameraPermission: 'Allow MiseChat to access your camera',
                 },
             ],
             ['expo-sqlite', { withSQLiteVecExtension: true }],
@@ -101,7 +101,7 @@ module.exports = {
                 'expo-speech-recognition',
                 {
                     microphonePermission:
-                        'Allow AnimaForge to use the microphone for voice input.',
+                        'Allow MiseChat to use the microphone for voice input.',
                 },
             ],
             'expo-localization',

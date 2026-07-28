@@ -28,7 +28,7 @@ const LogsScreen = () => {
         const data = logs
             .map((item) => `${Logger.LevelName[item.level]} ${item.timestamp}: ${item.message}`)
             .join('\n')
-        saveStringToDownload(data, `logs-animaforge-${Date.now()}.txt`, 'utf8')
+        saveStringToDownload(data, `logs-misechat-${Date.now()}.txt`, 'utf8')
             .then(() => {
                 Logger.infoToast(i18n.t('logs.downloaded'))
             })
