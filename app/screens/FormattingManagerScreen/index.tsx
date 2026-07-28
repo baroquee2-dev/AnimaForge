@@ -261,19 +261,6 @@ const FormattingManager = () => {
                         multiline
                     />
 
-                    <SectionTitle>{t('instruct.attachments')}</SectionTitle>
-
-                    <ThemedCheckbox
-                        label={t('instruct.removeThinkTags')}
-                        value={currentInstruct.hide_think_tags}
-                        onChangeValue={(b) => {
-                            setCurrentInstruct({
-                                ...currentInstruct,
-                                hide_think_tags: b,
-                            })
-                        }}
-                    />
-
                     <View style={{ rowGap: 8 }}>
                         <SectionTitle>{t('instruct.textFormatter')}</SectionTitle>
                         <Text
@@ -493,6 +480,16 @@ const FormattingManager = () => {
                             setCurrentInstruct({
                                 ...currentInstruct,
                                 names: b,
+                            })
+                        }}
+                    />
+                    <ThemedCheckbox
+                        label={t('instruct.removeThinkTags')}
+                        value={currentInstruct.hide_think_tags}
+                        onChangeValue={(b) => {
+                            setCurrentInstruct({
+                                ...currentInstruct,
+                                hide_think_tags: b,
                             })
                         }}
                     />
