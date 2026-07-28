@@ -93,6 +93,9 @@ MiseChat 的程式碼依 **GNU Affero General Public License v3.0（AGPL-3.0）*
 
 完整的 AGPL-3.0 授權條款請參閱本專案根目錄中的 **LICENSE** 文件。
 
+#### 網路服務使用規範 (AGPL-3.0 Section 13)
+若您將本專案（或其修改版本）部署於伺服器並透過網路（例如 Web App、雲端 API、遠端服務或 SaaS 形式）提供使用者互動，根據 AGPL-3.0 第 13 條規定，您必須在該服務介面上向所有使用者提供明確且易於存取的連結，以供免費下載對應的完整原始碼（包含您的所有修改）。
+
 ### 原始碼
 
 MiseChat 的原始碼公開於本 GitHub Repository。
@@ -219,6 +222,9 @@ You may use, study, modify, and redistribute the source code of this project in 
 Applicable copyright, license, and other notices from the original ChatterUI project and third-party components are retained. Copyright in additions or modifications made as part of MiseChat does not replace or supersede the rights of the original authors or other contributors in their respective works.
 
 For the complete AGPL-3.0 license terms, please refer to the **LICENSE** file in the root directory of this repository.
+
+#### Network Interaction Notice (AGPL-3.0 Section 13)
+If you modify this Program, or run a modified version of it, and make it accessible to users interacting with it remotely over a computer network (such as a Web application, cloud API, remote server, or SaaS instance), you must ensure that all users are provided with a prominent and accessible means to receive or download the Corresponding Source code of your version under the terms of the AGPL-3.0.
 
 ### Source Code
 
