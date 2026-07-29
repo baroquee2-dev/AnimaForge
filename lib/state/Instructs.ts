@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+import { eq, notInArray } from 'drizzle-orm'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
@@ -6,7 +6,7 @@ import { db as database } from '@db'
 import { Tokenizer } from '@lib/engine/Tokenizer'
 import { Storage } from '@lib/enums/Storage'
 import i18n from '@lib/i18n'
-import { instructs } from 'db/schema'
+import { instructFormats, instructs } from 'db/schema'
 
 import { Characters } from './Characters'
 import { Logger } from './Logger'
@@ -16,14 +16,25 @@ import { createMMKVStorage } from '../storage/MMKV'
 export const defaultSystemPromptFormat =
     '{{system_prefix}}{{system_prompt}}\n{{character_desc}}\n{{personality}}\n{{scenario}}\n{{user_desc}}{{system_suffix}}'
 
-const defaultGenerics = {
+export const BUILTIN_STYLE_NAMES = ['NovelStyle', 'ChatStyle'] as const
+
+const styleFillerFields = {
+    system_prefix: '<|im_start|>system\n',
+    system_suffix: '<|im_end|>\n',
+    input_prefix: '<|im_start|>user\n',
+    input_suffix: '<|im_end|>\n',
+    output_prefix: '<|im_start|>assistant\n',
+    last_output_prefix: '<|im_start|>assistant\n',
+    output_suffix: '<|im_end|>\n',
+    stop_sequence: '<|im_end|>',
+    user_alignment_message: '',
+    activation_regex: '',
     wrap: false,
     macro: false,
     names: false,
     names_force_groups: false,
     timestamp: false,
     examples: true,
-    format_type: 0,
     scenario: true,
     personality: true,
     hide_think_tags: true,
@@ -35,56 +46,58 @@ const defaultGenerics = {
     system_prompt_format: defaultSystemPromptFormat,
 }
 
-const defaultInstructs: InstructType[] = [
+const defaultStyles: InstructType[] = [
     {
+        name: 'NovelStyle',
         system_prompt:
             "Roleplay as {{char}}, always responding from {{char}}'s perspective and in character.\n\nCombine natural dialogue with novel-style narration, including actions, emotions, and atmosphere when appropriate.\n\nKeep the writing vivid, engaging, immersive, and enjoyable to read.\n",
-        system_prefix: '<|im_start|>system\n',
-        system_suffix: '<|im_end|>\n',
-        input_prefix: '<|im_start|>user\n',
-        input_suffix: '<|im_end|>\n',
-        output_prefix: '<|im_start|>assistant\n',
-        last_output_prefix: '<|im_start|>assistant\n',
-        output_suffix: '<|im_end|>\n',
-        stop_sequence: '<|im_end|>',
-        user_alignment_message: '',
-        activation_regex: '',
-        name: 'NovelStyle',
-        ...defaultGenerics,
+        format_type: 0,
+        ...styleFillerFields,
     },
     {
+        name: 'ChatStyle',
         system_prompt:
             "Roleplay as {{char}}, always responding to {{user}} from {{char}}'s identity and perspective.\n\nSimulate natural, realistic human conversation with concise, casual language. Keep each response around 3-5 sentences and avoid unnecessary verbosity.\n\nOutput only {{char}}'s dialogue. Do not include narration, background descriptions, actions, notes, or any other extra content.\n",
-        system_prefix: '<|im_start|>system\n',
-        system_suffix: '<|im_end|>\n',
-        input_prefix: '<|im_start|>user\n',
-        input_suffix: '<|im_end|>\n',
-        output_prefix: '<|im_start|>assistant\n',
-        last_output_prefix: '<|im_start|>assistant\n',
-        output_suffix: '<|im_end|>\n',
-        stop_sequence: '<|im_end|>',
-        user_alignment_message: '',
-        activation_regex: '',
-        name: 'ChatStyle',
-        ...defaultGenerics,
+        format_type: 0,
+        ...styleFillerFields,
     },
+]
+
+const formatGenerics = {
+    wrap: false,
+    macro: false,
+    names: false,
+    names_force_groups: false,
+    timestamp: false,
+    examples: true,
+    scenario: true,
+    personality: true,
+    hide_think_tags: true,
+    use_common_stop: true,
+    send_images: true,
+    send_audio: true,
+    send_documents: true,
+    last_image_only: true,
+    system_prompt_format: defaultSystemPromptFormat,
+    user_alignment_message: '',
+    activation_regex: '',
+}
+
+const defaultFormats: InstructFormatType[] = [
     {
-        system_prompt: "Write {{char}}'s next reply in a chat between {{char}} and {{user}}.",
-        system_prefix: '<|im_start|>system\n',
-        system_suffix: '<|im_end|>\n',
-        input_prefix: '<|im_start|>user\n',
-        input_suffix: '<|im_end|>\n',
-        output_prefix: '<|im_start|>assistant\n',
-        last_output_prefix: '<|im_start|>assistant\n',
-        output_suffix: '<|im_end|>\n',
-        stop_sequence: '<|im_end|>',
-        user_alignment_message: '',
-        activation_regex: '',
         name: 'ChatML',
-        ...defaultGenerics,
+        system_prefix: '<|im_start|>system\n',
+        system_suffix: '<|im_end|>\n',
+        input_prefix: '<|im_start|>user\n',
+        input_suffix: '<|im_end|>\n',
+        output_prefix: '<|im_start|>assistant\n',
+        last_output_prefix: '<|im_start|>assistant\n',
+        output_suffix: '<|im_end|>\n',
+        stop_sequence: '<|im_end|>',
+        ...formatGenerics,
     },
     {
-        system_prompt: "Write {{char}}'s next reply in a chat between {{char}} and {{user}}.",
+        name: 'Alpaca',
         system_prefix: '### Instruction: ',
         system_suffix: '\n',
         input_prefix: '### Instruction: ',
@@ -93,13 +106,10 @@ const defaultInstructs: InstructType[] = [
         last_output_prefix: '### Response: ',
         output_suffix: '\n',
         stop_sequence: '### Instruction',
-        user_alignment_message: '',
-        activation_regex: '',
-        name: 'Alpaca',
-        ...defaultGenerics,
+        ...formatGenerics,
     },
     {
-        system_prompt: "Write {{char}}'s next reply in a chat between {{char}} and {{user}}.",
+        name: 'Llama 3',
         system_prefix: '<|start_header_id|>system<|end_header_id|>\n\n',
         system_suffix: '<|eot_id|>',
         input_prefix: '<|start_header_id|>user<|end_header_id|>\n\n',
@@ -108,13 +118,10 @@ const defaultInstructs: InstructType[] = [
         last_output_prefix: '<|start_header_id|>assistant<|end_header_id|>\n\n',
         output_suffix: '<|eot_id|>',
         stop_sequence: '<|eot_id|>',
-        user_alignment_message: '',
-        activation_regex: '',
-        name: 'Llama 3',
-        ...defaultGenerics,
+        ...formatGenerics,
     },
     {
-        system_prompt: "Write {{char}}'s next reply in a chat between {{char}} and {{user}}.",
+        name: 'StableLM-Zephyr',
         system_prefix: '<|system|>\n',
         system_suffix: '<|endoftext|>\n',
         input_prefix: '<|user|>\n',
@@ -123,13 +130,10 @@ const defaultInstructs: InstructType[] = [
         last_output_prefix: '<|assistant|>\n',
         output_suffix: '<|endoftext|>\n',
         stop_sequence: '<|endoftext|>',
-        user_alignment_message: '',
-        activation_regex: '',
-        name: 'StableLM-Zephyr',
-        ...defaultGenerics,
+        ...formatGenerics,
     },
     {
-        system_prompt: "Write {{char}}'s next reply in a chat between {{char}} and {{user}}.",
+        name: 'phi3',
         system_prefix: '<|system|>\n',
         system_suffix: '<|end|>\n',
         input_prefix: '<|user|>\n',
@@ -138,13 +142,10 @@ const defaultInstructs: InstructType[] = [
         last_output_prefix: '<|assistant|>\n',
         output_suffix: '<|end|>\n',
         stop_sequence: '<|end|>',
-        user_alignment_message: '',
-        activation_regex: '',
-        name: 'phi3',
-        ...defaultGenerics,
+        ...formatGenerics,
     },
     {
-        system_prompt: "Write {{char}}'s next reply in a chat between {{char}} and {{user}}.",
+        name: 'Gemma 2',
         system_prefix: '<start_of_turn>user\n',
         system_suffix: '<end_of_turn>\n',
         input_prefix: '<start_of_turn>user\n',
@@ -153,13 +154,10 @@ const defaultInstructs: InstructType[] = [
         last_output_prefix: '<start_of_turn>model\n',
         output_suffix: '<end_of_turn>\n',
         stop_sequence: '<end_of_turn>',
-        user_alignment_message: '',
-        activation_regex: '',
-        name: 'Gemma 2',
-        ...defaultGenerics,
+        ...formatGenerics,
     },
     {
-        system_prompt: "Write {{char}}'s next reply in a chat between {{char}} and {{user}}.",
+        name: 'Mistral V1',
         system_prefix: '',
         system_suffix: '',
         input_prefix: '[INST]',
@@ -168,13 +166,10 @@ const defaultInstructs: InstructType[] = [
         last_output_prefix: '[/INST]',
         output_suffix: '</s>',
         stop_sequence: '</s>',
-        user_alignment_message: '',
-        activation_regex: '',
-        name: 'Mistral V1',
-        ...defaultGenerics,
+        ...formatGenerics,
     },
     {
-        system_prompt: "Write {{char}}'s next reply in a chat between {{char}} and {{user}}.",
+        name: 'DeepSeek-R1',
         system_prefix: '',
         system_suffix: '',
         input_prefix: '<｜User｜>',
@@ -183,14 +178,12 @@ const defaultInstructs: InstructType[] = [
         last_output_prefix: '<｜Assistant｜>',
         output_suffix: '<｜end▁of▁sentence｜>',
         stop_sequence: '<｜end▁of▁sentence｜>',
-        user_alignment_message: '',
+        ...formatGenerics,
         activation_regex: 'deepseek',
-        name: 'DeepSeek-R1',
-        ...defaultGenerics,
     },
 ]
 
-export const outputPrefixes = defaultInstructs
+export const outputPrefixes = defaultFormats
     .map((item) => item.output_prefix)
     .filter((item) => !!item)
 
@@ -208,16 +201,6 @@ export const commonStopStrings = [
     '<eos>',
     '<｜end▁of▁sentence｜>',
 ]
-
-type InstructState = {
-    data: InstructType | undefined
-    load: (id: number) => Promise<void>
-    setData: (instruct: InstructType) => void
-    tokenCache: InstructTokenCache | undefined
-    getCache: (charName: string, userName: string) => Promise<InstructTokenCache>
-    replacedMacros: () => InstructType
-    getStopSequence: () => string[]
-}
 
 export type InstructListItem = {
     id: number
@@ -238,27 +221,77 @@ export type InstructTokenCache = {
     user_alignment_message_length: number
 }
 
-export namespace Instructs {
-    export const defaultInstruct: InstructType = {
-        system_prompt: "Write {{char}}'s next reply in a chat between {{char}} and {{user}}.",
-        system_prefix: '### Instruction: ',
-        system_suffix: '\n',
-        input_prefix: '### Instruction: ',
-        input_suffix: '\n',
-        output_prefix: '### Response: ',
-        last_output_prefix: '### Response: ',
-        output_suffix: '\n',
-        stop_sequence: '### Instruction',
-        user_alignment_message: '',
-        activation_regex: '',
-        name: 'Default',
-        ...defaultGenerics,
+export type InstructType = Omit<typeof instructs.$inferSelect, 'id'> & { id?: number }
+export type InstructFormatType = Omit<typeof instructFormats.$inferSelect, 'id'> & { id?: number }
+
+const emptyTokenCache = (charName: string, userName: string): InstructTokenCache => ({
+    charName,
+    userName,
+    system_prompt_length: 0,
+    system_prefix_length: 0,
+    system_suffix_length: 0,
+    input_prefix_length: 0,
+    input_suffix_length: 0,
+    output_prefix_length: 0,
+    last_output_prefix_length: 0,
+    output_suffix_length: 0,
+    user_alignment_message_length: 0,
+})
+
+const applyMacros = (base: InstructType): InstructType => ({
+    ...base,
+    system_prompt: replaceMacros(base.system_prompt),
+    system_prefix: replaceMacros(base.system_prefix),
+    system_suffix: replaceMacros(base.system_suffix),
+    input_prefix: replaceMacros(base.input_prefix),
+    input_suffix: replaceMacros(base.input_suffix),
+    output_prefix: replaceMacros(base.output_prefix),
+    last_output_prefix: replaceMacros(base.last_output_prefix),
+    output_suffix: replaceMacros(base.output_suffix),
+    user_alignment_message: replaceMacros(base.system_prompt),
+    stop_sequence: replaceMacros(base.stop_sequence),
+})
+
+export const mergeInstructPresets = (
+    style: InstructType | undefined,
+    format: InstructFormatType | undefined
+): InstructType => {
+    const safeStyle = style ?? Instructs.defaultInstruct
+    const safeFormat = format ?? InstructFormats.defaultFormat
+    return {
+        ...safeStyle,
+        ...safeFormat,
+        id: safeStyle.id,
+        name: safeStyle.name,
+        system_prompt: safeStyle.system_prompt,
+        format_type: safeStyle.format_type,
     }
+}
+
+type InstructState = {
+    data: InstructType | undefined
+    load: (id: number) => Promise<void>
+    setData: (instruct: InstructType) => void
+    tokenCache: InstructTokenCache | undefined
+    getCache: (charName: string, userName: string) => Promise<InstructTokenCache>
+    replacedMacros: () => InstructType
+    getMergedInstruct: () => InstructType
+    getStopSequence: () => string[]
+}
+
+type InstructFormatState = {
+    data: InstructFormatType | undefined
+    load: (id: number) => Promise<void>
+    setData: (format: InstructFormatType) => void
+}
+
+export namespace Instructs {
+    export const defaultInstruct: InstructType = defaultStyles[0]
 
     export const useInstruct = create<InstructState>()(
         persist(
             (set, get: () => InstructState) => ({
-                data: defaultInstructs[0],
+                data: defaultStyles[0],
                 tokenCache: undefined,
                 load: async (id: number) => {
                     const data = await db.query.instruct(id)
@@ -267,25 +300,18 @@ export namespace Instructs {
                 setData: (instruct: InstructType) => {
                     set({ data: instruct, tokenCache: undefined })
                 },
+                getMergedInstruct: () => {
+                    return mergeInstructPresets(
+                        get().data,
+                        InstructFormats.useFormat.getState().data
+                    )
+                },
                 getCache: async (charName: string, userName: string) => {
                     const cache = get().tokenCache
                     if (cache && cache.charName === charName && cache.userName === userName)
                         return cache
                     const instruct = get().replacedMacros()
-                    if (!instruct)
-                        return {
-                            charName: charName,
-                            userName: userName,
-                            system_prompt_length: 0,
-                            system_prefix_length: 0,
-                            system_suffix_length: 0,
-                            input_prefix_length: 0,
-                            input_suffix_length: 0,
-                            output_prefix_length: 0,
-                            last_output_prefix_length: 0,
-                            output_suffix_length: 0,
-                            user_alignment_message_length: 0,
-                        }
+                    if (!instruct) return emptyTokenCache(charName, userName)
                     const getTokenCount = Tokenizer.getTokenizer()
 
                     const newCache: InstructTokenCache = {
@@ -305,28 +331,12 @@ export namespace Instructs {
                     return newCache
                 },
                 replacedMacros: () => {
-                    const baseInstruct = get().data
-
-                    if (!baseInstruct) {
+                    const merged = get().getMergedInstruct()
+                    if (!merged) {
                         Logger.errorToast(i18n.t('toast.instructDataError'))
                         return Instructs.defaultInstruct
                     }
-
-                    const instruct: InstructType = {
-                        ...baseInstruct,
-                        system_prompt: replaceMacros(baseInstruct.system_prompt),
-                        system_prefix: replaceMacros(baseInstruct.system_prefix),
-                        system_suffix: replaceMacros(baseInstruct.system_suffix),
-                        input_prefix: replaceMacros(baseInstruct.input_prefix),
-                        input_suffix: replaceMacros(baseInstruct.input_suffix),
-                        output_prefix: replaceMacros(baseInstruct.output_prefix),
-                        last_output_prefix: replaceMacros(baseInstruct.last_output_prefix),
-                        output_suffix: replaceMacros(baseInstruct.output_suffix),
-                        user_alignment_message: replaceMacros(baseInstruct.system_prompt),
-                        stop_sequence: replaceMacros(baseInstruct.stop_sequence),
-                    }
-
-                    return instruct
+                    return applyMacros(merged)
                 },
                 getStopSequence: () => {
                     const instruct = get().replacedMacros()
@@ -355,7 +365,7 @@ export namespace Instructs {
                 name: Storage.Instruct,
                 storage: createMMKVStorage(),
                 partialize: (state) => ({ data: state.data }),
-                version: 7,
+                version: 8,
                 migrate: async (persistedState: any, version) => {
                     if (!version) {
                         persistedState.data.timestamp = false
@@ -404,6 +414,11 @@ export namespace Instructs {
                         persistedState.data.system_prompt_format = defaultSystemPromptFormat
                     }
 
+                    if (version === 7) {
+                        // Style/format split: selection is revalidated after DB cleanup
+                        Logger.info('[INSTRUCT] Migrated to v8 (style/format split)')
+                    }
+
                     return persistedState
                 },
             }
@@ -443,17 +458,35 @@ export namespace Instructs {
                 const { id, ...input } = instruct
                 const [{ newid }] = await database
                     .insert(instructs)
-                    .values(input)
+                    .values({
+                        ...styleFillerFields,
+                        ...input,
+                        format_type: input.format_type ?? 0,
+                    })
                     .returning({ newid: instructs.id })
                 return newid
             }
 
             export const updateInstruct = async (id: number, instruct: InstructType) => {
-                await database.update(instructs).set(instruct).where(eq(instructs.id, id))
+                // Styles only own system_prompt + format_type (+ name); keep filler fields stable
+                await database
+                    .update(instructs)
+                    .set({
+                        name: instruct.name,
+                        system_prompt: instruct.system_prompt,
+                        format_type: instruct.format_type,
+                    })
+                    .where(eq(instructs.id, id))
             }
 
             export const deleteInstruct = async (id: number) => {
                 await database.delete(instructs).where(eq(instructs.id, id))
+            }
+
+            export const deleteNonBuiltinStyles = async () => {
+                await database
+                    .delete(instructs)
+                    .where(notInArray(instructs.name, [...BUILTIN_STYLE_NAMES]))
             }
         }
     }
@@ -461,15 +494,125 @@ export namespace Instructs {
     export const generateInitialDefaults = async () => {
         const list = await db.query.instructList()
         let data = -1
-        for (const item of defaultInstructs) {
+        for (const item of defaultStyles) {
             if (!list?.some((e) => e.name === item.name)) {
                 const newid = await db.mutate.createInstruct(item)
                 if (data === -1) data = newid
             }
         }
-        Logger.info('Default Instructs Successfully Generated')
-        return data === -1 ? 1 : data
+        Logger.info('Default Instruct Styles Successfully Generated')
+        return data === -1 ? list?.[0]?.id ?? 1 : data
+    }
+
+    export const migrateToStyleFormatSplit = async () => {
+        await db.mutate.deleteNonBuiltinStyles()
+        const styleId = await generateInitialDefaults()
+        const formatId = await InstructFormats.generateInitialDefaults()
+
+        const styleList = await db.query.instructList()
+        const currentStyle = useInstruct.getState().data
+        if (!currentStyle?.id || !styleList?.some((item) => item.id === currentStyle.id)) {
+            await useInstruct.getState().load(styleId)
+        }
+
+        const formatList = await InstructFormats.db.query.formatList()
+        const currentFormat = InstructFormats.useFormat.getState().data
+        if (!currentFormat?.id || !formatList?.some((item) => item.id === currentFormat.id)) {
+            await InstructFormats.useFormat.getState().load(formatId)
+        }
+
+        Logger.info('Instruct style/format split migration complete')
+        return { styleId, formatId }
     }
 }
 
-export type InstructType = Omit<typeof instructs.$inferSelect, 'id'> & { id?: number }
+export namespace InstructFormats {
+    export const defaultFormat: InstructFormatType = defaultFormats[0]
+
+    export const useFormat = create<InstructFormatState>()(
+        persist(
+            (set) => ({
+                data: defaultFormats[0],
+                load: async (id: number) => {
+                    const data = await db.query.format(id)
+                    set({ data })
+                    Instructs.useInstruct.setState({ tokenCache: undefined })
+                },
+                setData: (format: InstructFormatType) => {
+                    set({ data: format })
+                    Instructs.useInstruct.setState({ tokenCache: undefined })
+                },
+            }),
+            {
+                name: Storage.InstructFormat,
+                storage: createMMKVStorage(),
+                partialize: (state) => ({ data: state.data }),
+                version: 1,
+            }
+        )
+    )
+
+    export namespace db {
+        export namespace query {
+            export const format = async (id: number): Promise<InstructFormatType | undefined> => {
+                return await database.query.instructFormats.findFirst({
+                    where: eq(instructFormats.id, id),
+                })
+            }
+
+            export const formatList = async (): Promise<InstructListItem[] | undefined> => {
+                return await database.query.instructFormats.findMany({
+                    columns: {
+                        id: true,
+                        name: true,
+                    },
+                })
+            }
+
+            export const formatListQuery = () => {
+                return database.query.instructFormats.findMany({
+                    columns: {
+                        id: true,
+                        name: true,
+                    },
+                })
+            }
+        }
+
+        export namespace mutate {
+            export const createFormat = async (format: InstructFormatType): Promise<number> => {
+                const { id, ...input } = format
+                const [{ newid }] = await database
+                    .insert(instructFormats)
+                    .values({
+                        ...formatGenerics,
+                        ...input,
+                    })
+                    .returning({ newid: instructFormats.id })
+                return newid
+            }
+
+            export const updateFormat = async (id: number, format: InstructFormatType) => {
+                const { id: _id, ...input } = format
+                await database.update(instructFormats).set(input).where(eq(instructFormats.id, id))
+            }
+
+            export const deleteFormat = async (id: number) => {
+                await database.delete(instructFormats).where(eq(instructFormats.id, id))
+            }
+        }
+    }
+
+    export const generateInitialDefaults = async () => {
+        const list = await db.query.formatList()
+        let data = -1
+        for (const item of defaultFormats) {
+            if (!list?.some((e) => e.name === item.name)) {
+                const newid = await db.mutate.createFormat(item)
+                if (data === -1) data = newid
+            }
+        }
+        Logger.info('Default Instruct Formats Successfully Generated')
+        return data === -1 ? list?.[0]?.id ?? 1 : data
+    }
+}

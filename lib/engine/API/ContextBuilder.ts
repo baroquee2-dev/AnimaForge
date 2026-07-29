@@ -107,20 +107,16 @@ export const buildChatCompletionContext = async ({
     for (const message of messages.reverse()) {
         const swipe_data = message.swipes[message.swipe_id]
         // special case for claude, prefill may be useful!
-        const timestamp_string = `[${swipe_data.send_date.toString().split(' ')[0]} ${swipe_data.send_date.toLocaleTimeString()}]\n`
-        const timestamp_length = instruct.timestamp ? await tokenizer(timestamp_string) : 0
-
         const name_string = `${message.name} :`
         const name_length = instruct.names ? await tokenizer(name_string) : 0
         const { attachments, hasImageNew } = getValidAttachments(
             message,
             completionFeats,
-            instruct,
             hasImage
         )
 
         const swipe_len = message.id !== -1 ? await chatTokenizer(message, index) : 0
-        const len = swipe_len + name_length + timestamp_length
+        const len = swipe_len + name_length
 
         if (total_length + len > maxLength && !bypassContextLength) break
         hasImage = hasImageNew
@@ -187,7 +183,6 @@ export const buildChatCompletionContext = async ({
     const examples = character?.mes_example
     if (
         first_message_reached &&
-        instruct.examples &&
         examples &&
         total_length + characterCache.examples_length < maxLength
     ) {
@@ -292,13 +287,10 @@ export const buildTextCompletionContext = async ({
                 ? instructCache.input_suffix_length
                 : instructCache.output_suffix_length
 
-        const timestamp_string = `[${swipe_data.send_date.toString().split(' ')[0]} ${swipe_data.send_date.toLocaleTimeString()}]\n`
-        const timestamp_length = instruct.timestamp ? await tokenizer(timestamp_string) : 0
-
         const name_string = `${message.name}: `
         const name_length = instruct.names ? await tokenizer(name_string) : 0
 
-        const shard_length = swipe_len + instruct_len + name_length + timestamp_length + wrap_length
+        const shard_length = swipe_len + instruct_len + name_length + wrap_length
 
         // check if within context window
         if (message_acc_length + payloadLength + shard_length > maxLength && !bypassContextLength) {
@@ -312,8 +304,6 @@ export const buildTextCompletionContext = async ({
             : is_last
               ? instruct.last_output_prefix
               : instruct.output_prefix
-
-        if (instruct.timestamp) message_shard += timestamp_string
 
         if (instruct.names) message_shard += name_string
 
@@ -343,7 +333,6 @@ export const buildTextCompletionContext = async ({
     const examples = character?.mes_example
     if (
         first_message_reached &&
-        instruct.examples &&
         examples &&
         message_acc_length + payloadLength + characterCache.examples_length < maxLength
     ) {
@@ -374,12 +363,10 @@ export const buildTextCompletionContext = async ({
 const thinkRule = buildThinkRules()
 
 const getMacroRules = (instruct: InstructType) => {
-    const data: Macro[] = []
     if (instruct.hide_think_tags) {
-        data.concat(thinkRule)
+        return thinkRule
     }
-    // for expansion
-    return data
+    return []
 }
 
 const replaceMacrosInternal = (data: string, instruct: InstructType) => {
@@ -397,24 +384,19 @@ const getValidAttachments = (
         supportsAudio?: boolean
         supportsImages?: boolean
     },
-    instruct: InstructType,
     hasImage: boolean
 ) => {
     let hasImageNew = hasImage
     const audioAttachments = entry.attachments.filter(
-        (item) => item.type === 'audio' && instruct.send_audio && config.supportsAudio
+        (item) => item.type === 'audio' && config.supportsAudio
     )
 
     let imageAttachments: typeof entry.attachments = []
-    if (instruct.send_images && config.supportsImages) {
+    if (config.supportsImages) {
         const images = entry.attachments.filter((item) => item.type === 'image')
-        if (instruct.last_image_only && images.length > 0) {
-            if (!hasImageNew) {
-                hasImageNew = true
-                imageAttachments = [images[0]]
-            }
-        } else {
-            imageAttachments = images
+        if (images.length > 0 && !hasImageNew) {
+            hasImageNew = true
+            imageAttachments = [images[0]]
         }
     }
     const attachments = [...audioAttachments, ...imageAttachments]
@@ -478,13 +460,13 @@ export const getSystemPrompt = ({
         },
         {
             macro: '{{personality}}',
-            value: instruct.personality ? (character?.personality ?? '') : '',
-            length: instruct.personality ? characterCache.personality_length : 0,
+            value: character?.personality ?? '',
+            length: characterCache.personality_length,
         },
         {
             macro: '{{scenario}}',
-            value: instruct.scenario ? (character?.scenario ?? '') : '',
-            length: instruct.scenario ? characterCache.scenario_length : 0,
+            value: character?.scenario ?? '',
+            length: characterCache.scenario_length,
         },
     ]
     macros.forEach((m) => {

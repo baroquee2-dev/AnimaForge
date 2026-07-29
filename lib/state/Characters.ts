@@ -998,15 +998,18 @@ export namespace Characters {
             const cardDefaultDir = `${Paths.document.uri}appAssets/${card.filename}`
             try {
                 Logger.info(`Importing default card: ${card.filename}`)
-                if (!fileExists(cardDefaultDir)) {
-                    const localUri = await resolveBundledAssetFileUri(card.asset)
-                    if (!localUri) {
-                        throw new Error(`Missing local URI for ${card.filename}`)
-                    }
-                    const copied = await copyFile({ from: localUri, to: cardDefaultDir })
-                    if (!copied || !fileExists(cardDefaultDir)) {
-                        throw new Error(`Failed to copy ${card.filename} into appAssets`)
-                    }
+                // Always refresh appAssets from the bundled asset so regenerate
+                // does not keep a stale portrait from a previous install.
+                const localUri = await resolveBundledAssetFileUri(card.asset)
+                if (!localUri) {
+                    throw new Error(`Missing local URI for ${card.filename}`)
+                }
+                if (fileExists(cardDefaultDir)) {
+                    deleteFile(cardDefaultDir)
+                }
+                const copied = await copyFile({ from: localUri, to: cardDefaultDir })
+                if (!copied || !fileExists(cardDefaultDir)) {
+                    throw new Error(`Failed to copy ${card.filename} into appAssets`)
                 }
                 await createCharacterFromV2JSON(card.card, cardDefaultDir)
             } catch (e) {
