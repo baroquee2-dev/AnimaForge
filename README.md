@@ -152,6 +152,92 @@ MiseChat 的原始碼公開於本 GitHub Repository。
 使用、修改或再散布 MiseChat 時，除 AGPL-3.0 外，亦應遵守適用於相關第三方元件及資產的授權條款。
 
 
+## 使用方式
+
+可從本專案的 [Releases](https://github.com/baroquee2-dev/MiseChat/releases) 頁面下載並安裝最新 APK。
+
+<i>目前以 Android 為主；iOS 尚未提供正式建置。</i>
+
+## 開發與建置
+
+### Android
+
+若要在本機執行開發版，可依下列步驟：
+
+- 安裝任意 **Java 17 / 21** SDK
+- 透過 **Android Studio** 安裝 `android-sdk`
+- 複製本專案：
+
+```
+git clone https://github.com/baroquee2-dev/MiseChat.git
+cd MiseChat
+```
+
+- 安裝相依套件並以 Expo 執行：
+
+```
+npm install
+npx expo run:android
+```
+
+或使用專案腳本（會以開發變體建置，App 名稱顯示為 `MiseChat (DEV)`）：
+
+```
+npm run dev:android
+```
+
+#### 建置 APK
+
+需要 **Node.js**、**Java 17/21 SDK** 與 **Android SDK**。
+
+##### 方法一：Expo EAS 本機建置
+
+Expo 使用 EAS 建置 App；官方文件以 Linux 環境為主，Windows 使用者也可改用下方的 Gradle 方式。
+
+1. Clone 本專案。
+2. 將 `eas.json.example` 重新命名為 `eas.json`。
+3. 修改 `"ANDROID_SDK_ROOT"`，指向本機的 Android SDK 目錄。
+4. 執行：
+
+```
+npm install
+eas build --platform android --local
+```
+
+##### 方法二：Gradle 直接建置（適合 Windows）
+
+1. 先產生原生專案（請勿帶 `APP_VARIANT=development`，否則會得到 DEV 版）：
+
+```
+npx expo prebuild --platform android --clean
+```
+
+2. 進入 `android` 目錄並建置 Release APK，例如只編譯 `arm64-v8a`：
+
+```
+cd android
+./gradlew app:assembleRelease -PreactNativeArchitectures=arm64-v8a
+```
+
+Windows PowerShell / CMD 可改用：
+
+```
+cd android
+gradlew app:assembleRelease -PreactNativeArchitectures=arm64-v8a
+```
+
+產出的 APK 通常位於：
+
+```
+android/app/build/outputs/apk/release/
+```
+
+> **注意：** 若環境變數設了 `APP_VARIANT=development`，或使用 `npm run prebuild` / `npm run dev:android`，建置結果會是開發用套件（`MiseChat (DEV)`、`com.baroquee2.misechat.dev`）。正式版請不要帶入此變數。
+
+### iOS
+
+目前尚未提供正式支援。
+
 ## 額外說明
 
 我是 GitHub 的新手，目前仍在熟悉 GitHub 的使用方式與開源專案的相關慣例。
@@ -288,6 +374,92 @@ This project may include or depend on other open-source software, libraries, ima
 Such materials may be subject to their own copyright, trademark, and license terms, and all applicable rights remain with their respective owners.
 
 When using, modifying, or redistributing MiseChat, you are responsible for complying with any applicable third-party licenses in addition to the AGPL-3.0.
+
+## Usage
+
+Download and install the latest APK from this project's [Releases](https://github.com/baroquee2-dev/MiseChat/releases) page.
+
+<i>Android is the primary target; iOS builds are not currently provided.</i>
+
+## Development
+
+### Android
+
+To run a development build, follow these steps:
+
+- Install any **Java 17 / 21** SDK of your choosing
+- Install `android-sdk` via **Android Studio**
+- Clone the repo:
+
+```
+git clone https://github.com/baroquee2-dev/MiseChat.git
+cd MiseChat
+```
+
+- Install dependencies via npm and run via Expo:
+
+```
+npm install
+npx expo run:android
+```
+
+Or use the project script (this builds the development variant, shown as `MiseChat (DEV)`):
+
+```
+npm run dev:android
+```
+
+#### Building an APK
+
+Requires **Node.js**, a **Java 17/21 SDK**, and the **Android SDK**.
+
+##### Option 1: Expo EAS local build
+
+Expo uses EAS to build apps. The documented flow assumes a Linux environment; on Windows you may prefer the Gradle option below.
+
+1. Clone the repo.
+2. Rename `eas.json.example` to `eas.json`.
+3. Modify `"ANDROID_SDK_ROOT"` to point to your Android SDK directory.
+4. Run:
+
+```
+npm install
+eas build --platform android --local
+```
+
+##### Option 2: Build with Gradle (handy on Windows)
+
+1. Generate the native project (do **not** set `APP_VARIANT=development`, or you will get a DEV build):
+
+```
+npx expo prebuild --platform android --clean
+```
+
+2. Enter the `android` directory and build a release APK, for example arm64-v8a only:
+
+```
+cd android
+./gradlew app:assembleRelease -PreactNativeArchitectures=arm64-v8a
+```
+
+On Windows PowerShell / CMD:
+
+```
+cd android
+gradlew app:assembleRelease -PreactNativeArchitectures=arm64-v8a
+```
+
+The APK is typically written to:
+
+```
+android/app/build/outputs/apk/release/
+```
+
+> **Note:** If `APP_VARIANT=development` is set, or you use `npm run prebuild` / `npm run dev:android`, the result is a development package (`MiseChat (DEV)`, `com.baroquee2.misechat.dev`). Omit that variable for a production-named build.
+
+### iOS
+
+Currently not supported.
 
 ## Additional Note
 
