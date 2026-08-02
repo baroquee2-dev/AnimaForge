@@ -2,6 +2,7 @@ import { SamplerID } from '@lib/constants/SamplerData'
 import { buildRequest } from '@lib/engine/API/RequestBuilder'
 import { APIManager } from '@lib/engine/API/APIManagerState'
 import { SSEFetch } from '@lib/engine/SSEFetch'
+import i18n from '@lib/i18n'
 import { useAppModeStore } from '@lib/state/AppMode'
 import { Instructs } from '@lib/state/Instructs'
 import { Logger } from '@lib/state/Logger'
@@ -15,15 +16,10 @@ import type { ChatEntry } from '@lib/state/Chat'
 const MAX_SUMMARY_LENGTH = 1_200
 const MAX_SOURCE_LENGTH = 6_000
 
-const summaryInstruction = `你現在是對話摘要器，不是聊天角色。
-
-請依據「目前摘要」與「本輪對話」重新整理一份完整摘要。
-只保留後續對話需要知道的劇情進展、重要事件、角色關係、偏好、承諾、未解決問題與目前情境。移除寒暄、重複內容與沒有後續影響的細節。若新資訊與舊摘要衝突，以新資訊為準。不得猜測或補充對話中未出現的內容。
-
-以客觀、精簡的繁體中文撰寫，控制在 600 字內。只輸出摘要正文，不要標題、Markdown、說明或角色扮演。`
+const getSummaryInstruction = () => i18n.t('chat.summaryInstruction')
 
 const clip = (value: string, maxLength: number) =>
-    value.length > maxLength ? value.slice(0, maxLength) + '\n[內容已截斷]' : value
+    value.length > maxLength ? value.slice(0, maxLength) + `\n${i18n.t('chat.summaryTruncated')}` : value
 
 const getLastTurn = (messages: ChatEntry[]) => {
     const assistantIndex = messages.findLastIndex((entry) => {
@@ -45,25 +41,26 @@ const getLastTurn = (messages: ChatEntry[]) => {
 const formatTurn = (turn: ChatEntry[]) =>
     clip(
         turn
-            .map((entry) => `${entry.name}：${entry.swipes[entry.swipe_id]?.swipe.trim() ?? ''}`)
+            .map((entry) => `${entry.name}: ${entry.swipes[entry.swipe_id]?.swipe.trim() ?? ''}`)
             .join('\n'),
         MAX_SOURCE_LENGTH
     )
 
 const buildSummaryInput = (previousSummary: string, turn: ChatEntry[]) => {
-    return `${summaryInstruction}
+    const instruction = getSummaryInstruction()
+    return `${instruction}
 
-目前摘要：
+${i18n.t('chat.summaryCurrentLabel')}:
 <previous_summary>
-${clip(previousSummary.trim() || '尚無摘要。', MAX_SUMMARY_LENGTH)}
+${clip(previousSummary.trim() || i18n.t('chat.summaryEmpty'), MAX_SUMMARY_LENGTH)}
 </previous_summary>
 
-本輪對話：
+${i18n.t('chat.summaryTurnLabel')}:
 <current_turn>
 ${formatTurn(turn)}
 </current_turn>
 
-請輸出更新後的完整摘要：`
+${i18n.t('chat.summaryOutputLabel')}`
 }
 
 const cleanSummary = (summary: string) => {
@@ -72,7 +69,7 @@ const cleanSummary = (summary: string) => {
             .trim()
             .replace(/^```(?:text|markdown)?\s*/i, '')
             .replace(/```$/i, '')
-            .replace(/^摘要[：:]\s*/i, '')
+            .replace(/^(?:摘要|Summary)\s*[：:]\s*/i, '')
             .trim(),
         MAX_SUMMARY_LENGTH
     )
@@ -89,16 +86,17 @@ const getRemoteFields = () => {
 
 const buildPrompt = (config: APIConfiguration, input: string): string | Message[] => {
     const completionType = config.request.completionType
+    const instruction = getSummaryInstruction()
     if (completionType.type === 'textCompletions') return input
 
     return [
         {
             role: completionType.systemRole,
-            [completionType.contentName]: summaryInstruction,
+            [completionType.contentName]: instruction,
         },
         {
             role: completionType.userRole,
-            [completionType.contentName]: input.replace(summaryInstruction, '').trim(),
+            [completionType.contentName]: input.replace(instruction, '').trim(),
         },
     ]
 }
@@ -136,7 +134,7 @@ const generateRemoteSummary = async (input: string) => {
         apiConfig: summaryConfig,
         apiValues: values,
         samplers,
-        instruct: { ...instruct, system_prompt: summaryInstruction },
+        instruct: { ...instruct, system_prompt: getSummaryInstruction() },
         prompt,
         stopSequence: [],
     })

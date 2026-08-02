@@ -371,7 +371,7 @@ const thinkRule = buildThinkRules()
 
 const formatSummaryContext = (summary?: string) => {
     if (!summary?.trim()) return ''
-    return `\n\n<chat_summary>\n以下是本聊天先前內容的摘要，僅作為背景事實使用：\n${summary.trim()}\n</chat_summary>`
+    return `\n\n<chat_summary>\n${i18n.t('chat.summaryContextIntro')}\n${summary.trim()}\n</chat_summary>`
 }
 
 const getMacroRules = (instruct: InstructType) => {
