@@ -126,6 +126,8 @@ const ChatScreen = () => {
         chat.character_id = charId
         chat.scroll_offset = 0
         chat.auto_summary = false
+        chat.summary = ''
+        chat.summary_updated_at = null
         delete chat.id
         chat.messages = chat.messages.map((message) => {
             delete message.id

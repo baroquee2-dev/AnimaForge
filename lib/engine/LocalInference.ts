@@ -351,6 +351,30 @@ const runLocalCompletion = async (
         })
 }
 
+export const generateLocalSummary = async (prompt: string, maxTokens: number = 384) => {
+    const context = Llama.useLlamaModelStore.getState().context
+    if (!context) {
+        Logger.warn('Skipping chat summary because no local model is loaded')
+        return
+    }
+
+    const localConfig = Llama.useLlamaPreferencesStore.getState().config
+    const payloadFields = getSamplerFields(maxTokens)
+
+    const result = await context.completion(
+        {
+            ...payloadFields,
+            temperature: 0.2,
+            n_predict: maxTokens,
+            prompt,
+            stop: [],
+            n_threads: localConfig.threads,
+        },
+        () => {}
+    )
+    return (result.content || result.text).trim()
+}
+
 const localAPIValues: APIValues = {
     endpoint: '',
     modelEndpoint: '',
@@ -473,6 +497,7 @@ const obtainFields = async (): Promise<ContextBuilderParams | void> => {
             character: Object.assign({}, characterCard),
             user: Object.assign({}, userCard),
             messages: [...messages],
+            summary: chatState.data?.summary,
             chatTokenizer: async (entry, index) => {
                 // IMPORTANT - we use -1 for dummy entries
                 if (entry.id === -1) return 0

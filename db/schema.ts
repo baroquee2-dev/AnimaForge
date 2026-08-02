@@ -103,6 +103,8 @@ export const chats = sqliteTable('chats', {
     name: text('name').notNull().default('New Chat'),
     scroll_offset: integer('scroll_offset', { mode: 'number' }).notNull().default(0),
     auto_summary: integer('auto_summary', { mode: 'boolean' }).notNull().default(false),
+    summary: text('summary').notNull().default(''),
+    summary_updated_at: integer('summary_updated_at', { mode: 'number' }),
 })
 
 export const chatEntries = sqliteTable('chat_entries', {

@@ -36,6 +36,7 @@ export interface ContextBuilderParams {
     chatTokenizer: (entry: ChatEntry, index: number) => Promise<number>
     maxLength: number
     cache: TokenCache
+    summary?: string
     bypassContextLength?: boolean
     messageLoader?: MessageLoader
 }
@@ -68,6 +69,7 @@ export const buildChatCompletionContext = async ({
     character,
     user,
     cache,
+    summary,
     instruct,
     tokenizer,
     chatTokenizer,
@@ -91,8 +93,10 @@ export const buildChatCompletionContext = async ({
         usePrefix,
     })
 
-    const initial = systemPrompt
-    let total_length = systemPromptLength
+    const summaryContext = formatSummaryContext(summary)
+    const summaryLength = summaryContext ? await tokenizer(summaryContext) : 0
+    const initial = systemPrompt + summaryContext
+    let total_length = systemPromptLength + summaryLength
     let first_message_reached = false
 
     const payload: Message[] = [
@@ -223,6 +227,7 @@ export const buildTextCompletionContext = async ({
     character,
     user,
     cache,
+    summary,
     instruct,
     tokenizer,
     chatTokenizer,
@@ -244,8 +249,10 @@ export const buildTextCompletionContext = async ({
         useSuffix,
     })
 
-    let payload = systemPrompt
-    const payloadLength = systemPromptLength
+    const summaryContext = formatSummaryContext(summary)
+    const summaryLength = summaryContext ? await tokenizer(summaryContext) : 0
+    let payload = systemPrompt + summaryContext
+    const payloadLength = systemPromptLength + summaryLength
 
     // suffix must be delayed for example messages
     let message_acc = ``
@@ -361,6 +368,11 @@ export const buildTextCompletionContext = async ({
 }
 
 const thinkRule = buildThinkRules()
+
+const formatSummaryContext = (summary?: string) => {
+    if (!summary?.trim()) return ''
+    return `\n\n<chat_summary>\n以下是本聊天先前內容的摘要，僅作為背景事實使用：\n${summary.trim()}\n</chat_summary>`
+}
 
 const getMacroRules = (instruct: InstructType) => {
     if (instruct.hide_think_tags) {

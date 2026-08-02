@@ -8,6 +8,7 @@ import i18n from '@lib/i18n'
 
 import { db as database } from '@db'
 import { Tokenizer } from '@lib/engine/Tokenizer'
+import { generateChatSummary } from '@lib/summary/ChatSummary'
 import { replaceMacros } from '@lib/state/Macros'
 import { AppDirectory, copyFile, deleteFile, fileInfo } from '@lib/utils/File'
 import { convertToFormatInstruct } from '@lib/utils/TextFormat'
@@ -194,6 +195,25 @@ export namespace Chats {
             const cachedSwipeId = useInference.getState().currentSwipeId
             Logger.info(`Saving Chat`)
             await get().updateFromBuffer(cachedSwipeId)
+            const chat = get().data
+            const output = get().buffer.data
+            if (chat?.auto_summary && output.trim()) {
+                Logger.info(`Generating summary for chat ${chat.id}`)
+                const summary = await generateChatSummary(chat.summary, chat.messages)
+                if (summary) {
+                    const updatedAt = Date.now()
+                    await db.mutate.updateChatSummary(chat.id, summary, updatedAt)
+                    set((state) => ({
+                        data: state.data
+                            ? {
+                                  ...state.data,
+                                  summary,
+                                  summary_updated_at: updatedAt,
+                              }
+                            : state.data,
+                    }))
+                }
+            }
             useInference.getState().stopGenerating()
             get().setBuffer({ data: '' })
         },
@@ -841,6 +861,17 @@ export namespace Chats {
                 await database
                     .update(chats)
                     .set({ auto_summary: enabled })
+                    .where(eq(chats.id, chatId))
+            }
+
+            export const updateChatSummary = async (
+                chatId: number,
+                summary: string,
+                updatedAt: number
+            ) => {
+                await database
+                    .update(chats)
+                    .set({ summary, summary_updated_at: updatedAt })
                     .where(eq(chats.id, chatId))
             }
 

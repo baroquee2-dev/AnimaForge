@@ -55,6 +55,8 @@ export const ChatImportSchema = z.object({
     user_id: z.number().nullable(),
     scroll_offset: z.number(),
     auto_summary: z.boolean().default(false),
+    summary: z.string().default(''),
+    summary_updated_at: z.number().nullable().default(null),
     messages: z.array(MessageSchema),
 })
 
