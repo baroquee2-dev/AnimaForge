@@ -1,11 +1,14 @@
-import { Ionicons } from '@expo/vector-icons'
-import { StyleSheet, Text, View } from 'react-native'
+import { AntDesign, Ionicons } from '@expo/vector-icons'
+import { useRouter } from 'expo-router'
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import Animated from 'react-native-reanimated'
+import { useTranslation } from 'react-i18next'
 
+import Drawer from '@components/views/Drawer'
+import { drawerItemEntrance } from '@lib/animations/chatAnimations'
 import { Chats } from '@lib/state/Chat'
 import { Theme } from '@lib/theme/ThemeManager'
 
-import { drawerItemEntrance } from '@lib/animations/chatAnimations'
 import ChatEditPopup from './ChatDrawerOptions'
 
 type ListItem = Awaited<ReturnType<typeof Chats.db.query.chatListQuery>>[0]
@@ -17,36 +20,63 @@ type ChatDrawerItemProps = {
 }
 
 const ChatDrawerItem: React.FC<ChatDrawerItemProps> = ({ item, onLoad, index }) => {
+    const { t } = useTranslation()
     const styles = useStyles()
+    const router = useRouter()
     const { spacing, color } = Theme.useTheme()
     const date = new Date(item.last_modified ?? 0)
     const { chatId } = Chats.useChat()
+    const setShow = Drawer.useDrawerStore((state) => state.setShow)
+    const hasSummary = !!item.summary?.trim()
+    const isActive = item.id === chatId
+
+    const handleEditSummary = () => {
+        setShow(Drawer.ID.CHATLIST, false)
+        router.push({
+            pathname: '/screens/ChatSummaryEditorScreen',
+            params: {
+                chatId: String(item.id),
+                chatName: item.name,
+            },
+        })
+    }
+
     return (
-        <Animated.View entering={drawerItemEntrance(index)}>
-            <ChatEditPopup item={item} onPress={() => onLoad(item.id)}>
-                <View style={item.id === chatId ? styles.chatItemActive : styles.chatItem}>
-                <View
-                    style={{ flex: 1, paddingHorizontal: spacing.xs, paddingVertical: spacing.m }}>
-                    <Text style={styles.title}>{item.name}</Text>
-                    <View
-                        style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            marginTop: spacing.xl,
-                            justifyContent: 'space-between',
-                        }}>
-                        <View style={{ flexDirection: 'row' }}>
-                            <Ionicons name="chatbox" size={20} color={color.text._400} />
-                            <Text style={styles.smallTextChat}>{item.entryCount}</Text>
-                        </View>
-                        <View style={{ flexDirection: 'row' }}>
-                            <Text style={styles.smallText}>{date.toLocaleDateString()}</Text>
-                            <Text style={styles.smallText}>{date.toLocaleTimeString()}</Text>
+        <Animated.View entering={drawerItemEntrance(index)} style={styles.wrapper}>
+            <View style={[styles.card, isActive && styles.cardActive]}>
+                <ChatEditPopup item={item} onPress={() => onLoad(item.id)}>
+                    <View style={styles.chatBody}>
+                        <Text style={styles.title}>{item.name}</Text>
+                        <View style={styles.metaRow}>
+                            <View style={styles.metaGroup}>
+                                <Ionicons name="chatbox" size={18} color={color.text._400} />
+                                <Text style={styles.metaText}>{item.entryCount}</Text>
+                            </View>
+                            <View style={styles.metaGroup}>
+                                <Text style={styles.metaText}>{date.toLocaleDateString()}</Text>
+                                <Text style={styles.metaText}>{date.toLocaleTimeString()}</Text>
+                            </View>
                         </View>
                     </View>
-                </View>
+                </ChatEditPopup>
+
+                {hasSummary && (
+                    <TouchableOpacity
+                        style={styles.summaryAction}
+                        onPress={handleEditSummary}
+                        accessibilityRole="button"
+                        accessibilityLabel={t('chat.editSummary')}>
+                        <View style={styles.summaryBadge}>
+                            <AntDesign name="profile" size={14} color={color.primary._200} />
+                            <Text style={styles.summaryBadgeText}>{t('chat.summaryBadge')}</Text>
+                        </View>
+                        <View style={styles.summaryActionLabel}>
+                            <Text style={styles.summaryActionText}>{t('chat.editSummary')}</Text>
+                            <AntDesign name="edit" size={14} color={color.primary._400} />
+                        </View>
+                    </TouchableOpacity>
+                )}
             </View>
-        </ChatEditPopup>
         </Animated.View>
     )
 }
@@ -57,38 +87,74 @@ const useStyles = () => {
     const { color, spacing, borderWidth, borderRadius, fontSize } = Theme.useTheme()
 
     return StyleSheet.create({
+        wrapper: {
+            marginBottom: spacing.m,
+        },
+        card: {
+            borderRadius: borderRadius.m,
+            borderWidth: borderWidth.m,
+            borderColor: color.neutral._100,
+            overflow: 'hidden',
+        },
+        cardActive: {
+            borderColor: color.primary._500,
+        },
+        chatBody: {
+            paddingHorizontal: spacing.l,
+            paddingVertical: spacing.m,
+        },
         title: {
             color: color.text._100,
             fontSize: fontSize.l,
         },
-
-        chatItem: {
-            alignItems: 'center',
+        metaRow: {
             flexDirection: 'row',
+            alignItems: 'center',
+            marginTop: spacing.l,
+            justifyContent: 'space-between',
+        },
+        metaGroup: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            columnGap: spacing.s,
+        },
+        metaText: {
+            color: color.text._400,
+            fontSize: fontSize.s,
+        },
+        summaryAction: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingHorizontal: spacing.l,
+            paddingVertical: spacing.m,
+            borderTopWidth: StyleSheet.hairlineWidth,
+            borderTopColor: color.neutral._300,
+            backgroundColor: color.neutral._200,
+        },
+        summaryBadge: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            columnGap: spacing.s,
             paddingHorizontal: spacing.m,
-            flex: 1,
-            marginBottom: spacing.m,
+            paddingVertical: spacing.s,
             borderRadius: borderRadius.m,
-            borderWidth: borderWidth.m,
-            borderColor: color.neutral._100,
+            backgroundColor: color.primary._800,
         },
-
-        chatItemActive: {
-            alignItems: 'center',
+        summaryBadgeText: {
+            color: color.primary._200,
+            fontSize: fontSize.s,
+            fontWeight: '600',
+        },
+        summaryActionLabel: {
             flexDirection: 'row',
-            paddingHorizontal: spacing.m,
-            flex: 1,
-            marginBottom: spacing.m,
-            borderRadius: spacing.m,
-            borderWidth: borderWidth.m,
-            borderColor: color.primary._500,
+            alignItems: 'center',
+            columnGap: spacing.s,
         },
-        smallText: { color: color.text._400, marginLeft: spacing.l },
-        smallTextChat: { color: color.text._400, marginLeft: spacing.sm },
-
-        editButton: {
-            paddingHorizontal: spacing.m,
-            justifyContent: 'center',
+        summaryActionText: {
+            color: color.primary._400,
+            fontSize: fontSize.s,
+            fontWeight: '600',
         },
     })
 }

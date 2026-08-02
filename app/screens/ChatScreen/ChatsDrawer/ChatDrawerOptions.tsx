@@ -1,9 +1,11 @@
 import React, { ReactNode, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useRouter } from 'expo-router'
 import { useShallow } from 'zustand/react/shallow'
 
 import Alert from '@components/views/Alert'
 import ContextMenu from '@components/views/ContextMenu'
+import Drawer from '@components/views/Drawer'
 import InputSheet from '@components/views/InputSheet'
 import i18n from '@lib/i18n'
 import { Characters } from '@lib/state/Characters'
@@ -19,7 +21,9 @@ type ChatEditPopupProps = {
 
 const ChatEditPopup: React.FC<ChatEditPopupProps> = ({ item, children, onPress }) => {
     const { t } = useTranslation()
+    const router = useRouter()
     const [showRename, setShowRename] = useState<boolean>(false)
+    const setShow = Drawer.useDrawerStore((state) => state.setShow)
 
     const { charName, charId } = Characters.useCharacterStore(
         useShallow((state) => ({
@@ -141,10 +145,29 @@ const ChatEditPopup: React.FC<ChatEditPopupProps> = ({ item, children, onPress }
                             close()
                         },
                     },
+                    ...(item.summary?.trim()
+                        ? [
+                              {
+                                  label: t('chat.editSummary'),
+                                  icon: 'book' as const,
+                                  onPress: (close: () => void) => {
+                                      setShow(Drawer.ID.CHATLIST, false)
+                                      close()
+                                      router.push({
+                                          pathname: '/screens/ChatSummaryEditorScreen',
+                                          params: {
+                                              chatId: String(item.id),
+                                              chatName: item.name,
+                                          },
+                                      })
+                                  },
+                              },
+                          ]
+                        : []),
                     {
                         label: t('common.delete'),
                         icon: 'delete',
-                        variant: 'warning',
+                        variant: 'warning' as const,
                         onPress: handleDeleteChat,
                     },
                     {

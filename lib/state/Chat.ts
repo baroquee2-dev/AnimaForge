@@ -90,6 +90,7 @@ export interface ChatState {
     deleteEntry: (index: number) => Promise<void>
     renameChat: (chatId: number, name: string) => void
     setAutoSummary: (enabled: boolean) => Promise<void>
+    setChatSummary: (chatId: number, summary: string) => Promise<void>
     // swipe data
     swipe: (index: number, direction: number) => Promise<boolean>
     addSwipe: (index: number, message?: string) => Promise<number | void>
@@ -539,6 +540,21 @@ export namespace Chats {
                 data: state.data ? { ...state.data, auto_summary: enabled } : state.data,
             }))
         },
+        setChatSummary: async (chatId: number, summary: string) => {
+            const trimmed = summary.trim()
+            const updatedAt = trimmed ? Date.now() : null
+            await db.mutate.updateChatSummary(chatId, trimmed, updatedAt)
+            set((state) => {
+                if (!state.data || state.data.id !== chatId) return state
+                return {
+                    data: {
+                        ...state.data,
+                        summary: trimmed,
+                        summary_updated_at: updatedAt,
+                    },
+                }
+            })
+        },
     }))
 
     export namespace db {
@@ -867,7 +883,7 @@ export namespace Chats {
             export const updateChatSummary = async (
                 chatId: number,
                 summary: string,
-                updatedAt: number
+                updatedAt: number | null
             ) => {
                 await database
                     .update(chats)
