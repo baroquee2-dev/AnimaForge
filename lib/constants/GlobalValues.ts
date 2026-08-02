@@ -29,7 +29,6 @@ export enum AppSettings {
     UseTagHider = 'settings-usetaghider',
     SaveScrollPosition = 'settings-savescrollposition',
     AutoGenerateTitle = 'settings-auto-generate-title',
-    AutoSummary = 'settings-auto-summary',
     KeepAwake = 'settings-keep-awake',
 }
 
@@ -62,7 +61,6 @@ export const AppSettingsDefault: Record<AppSettings, boolean> = {
     [AppSettings.UseTagHider]: true,
     [AppSettings.SaveScrollPosition]: false,
     [AppSettings.AutoGenerateTitle]: true,
-    [AppSettings.AutoSummary]: false,
     [AppSettings.KeepAwake]: true,
 }
 

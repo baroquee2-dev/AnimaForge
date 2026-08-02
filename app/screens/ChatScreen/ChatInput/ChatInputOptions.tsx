@@ -2,18 +2,23 @@ import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { StyleSheet } from 'react-native'
-import { useMMKVBoolean } from 'react-native-mmkv'
+import { useShallow } from 'zustand/react/shallow'
 
 import ContextMenu from '@components/views/ContextMenu'
 import Drawer from '@components/views/Drawer'
-import { AppSettings } from '@lib/constants/GlobalValues'
+import { Chats } from '@lib/state/Chat'
 import { Theme } from '@lib/theme/ThemeManager'
 
 const ChatOptions = () => {
     const router = useRouter()
     const styles = useStyles()
     const { t } = useTranslation()
-    const [autoSummary, setAutoSummary] = useMMKVBoolean(AppSettings.AutoSummary)
+    const { autoSummary, setAutoSummary } = Chats.useChatState(
+        useShallow((state) => ({
+            autoSummary: state.data?.auto_summary ?? false,
+            setAutoSummary: state.setAutoSummary,
+        }))
+    )
 
     const setShow = Drawer.useDrawerStore((state) => state.setShow)
 
