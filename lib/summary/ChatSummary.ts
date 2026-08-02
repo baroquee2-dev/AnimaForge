@@ -27,27 +27,37 @@ const getSummaryInstruction = () => i18n.t('chat.summaryInstruction')
 const clip = (value: string, maxLength: number) =>
     value.length > maxLength ? value.slice(0, maxLength) + `\n${i18n.t('chat.summaryTruncated')}` : value
 
-const getLastTurn = (messages: ChatEntry[]) => {
-    const assistantIndex = messages.findLastIndex((entry) => {
-        const swipe = entry.swipes[entry.swipe_id]?.swipe
-        return !entry.is_user && !!swipe?.trim()
-    })
+const getEntryText = (entry: ChatEntry) => entry.swipes[entry.swipe_id]?.swipe?.trim() ?? ''
+
+/**
+ * Collect the message window that should update the rolling summary:
+ * everything after the previous non-empty assistant reply, through the latest
+ * assistant reply. This covers first greetings, multi-user bursts, and normal turns.
+ */
+const getSummaryWindow = (messages: ChatEntry[]) => {
+    const assistantIndex = messages.findLastIndex(
+        (entry) => !entry.is_user && !!getEntryText(entry)
+    )
     if (assistantIndex < 0) return
 
-    const userIndex = messages.findLastIndex(
-        (entry, index) =>
-            index < assistantIndex && entry.is_user && !!entry.swipes[entry.swipe_id]?.swipe.trim()
-    )
-    if (userIndex < 0) return
+    let previousAssistantIndex = -1
+    for (let i = assistantIndex - 1; i >= 0; i--) {
+        if (!messages[i].is_user && !!getEntryText(messages[i])) {
+            previousAssistantIndex = i
+            break
+        }
+    }
 
-    return [messages[userIndex], messages[assistantIndex]]
+    const window = messages
+        .slice(previousAssistantIndex + 1, assistantIndex + 1)
+        .filter((entry) => !!getEntryText(entry))
+
+    return window.length > 0 ? window : undefined
 }
 
 const formatTurn = (turn: ChatEntry[]) =>
     clip(
-        turn
-            .map((entry) => `${entry.name}: ${entry.swipes[entry.swipe_id]?.swipe.trim() ?? ''}`)
-            .join('\n'),
+        turn.map((entry) => `${entry.name}: ${getEntryText(entry)}`).join('\n'),
         MAX_SOURCE_LENGTH
     )
 
@@ -116,7 +126,19 @@ const disableStream = (payload: unknown) => {
     return { ...(payload as Record<string, unknown>), stream: false }
 }
 
+const hasProviderError = (data: unknown) => {
+    if (!data || typeof data !== 'object') return false
+    const root = data as Record<string, any>
+    if (root.error != null) return true
+    if (Array.isArray(root.errors) && root.errors.length > 0) return true
+    if (typeof root.message === 'string' && /error|fail|invalid/i.test(root.message) && !root.choices)
+        return true
+    return false
+}
+
 const extractCompletionText = (data: unknown, pattern: string | string[]) => {
+    if (hasProviderError(data)) return ''
+
     const nested = getNestedValue(data, pattern)
     if (typeof nested === 'string' && nested.trim()) return nested
 
@@ -199,21 +221,47 @@ const generateRemoteSummary = async (input: string) => {
         return
     }
 
-    const data = await response.json()
+    let data: unknown
+    try {
+        data = await response.json()
+    } catch (error) {
+        Logger.warn(`Skipping chat summary because the provider returned invalid JSON: ${error}`)
+        return
+    }
+
+    if (hasProviderError(data)) {
+        Logger.warn(
+            `Skipping chat summary because the provider returned an error payload: ${JSON.stringify(
+                data
+            ).slice(0, 200)}`
+        )
+        return
+    }
+
     const content = extractCompletionText(data, config.request.responseParsePattern)
-    return content ? cleanSummary(content) : undefined
+    const cleaned = content ? cleanSummary(content) : ''
+    if (!cleaned.trim()) {
+        Logger.warn('Skipping chat summary because the provider returned an empty completion')
+        return
+    }
+    return cleaned
 }
 
 export const generateChatSummary = async (previousSummary: string, messages: ChatEntry[]) => {
-    const turn = getLastTurn(messages)
+    const turn = getSummaryWindow(messages)
     if (!turn) return
 
+    const instruction = getSummaryInstruction()
     const input = buildSummaryInput(previousSummary, turn)
+    const userContent = input.replace(instruction, '').trim()
     try {
         let output: string | undefined
         if (useAppModeStore.getState().appMode === 'local') {
             const { generateLocalSummary } = await import('@lib/engine/LocalInference')
-            output = await generateLocalSummary(input)
+            output = await generateLocalSummary({
+                system: instruction,
+                user: userContent || input,
+            })
         } else {
             output = await generateRemoteSummary(input)
         }
@@ -240,7 +288,7 @@ export const scheduleChatSummaryUpdate = (params: {
         try {
             Logger.info(`Generating summary for chat ${chatId}`)
             const summary = await generateChatSummary(previousSummary, messages)
-            if (!summary) return
+            if (!summary?.trim()) return
             if (activeSummaryJobs.get(chatId) !== jobId) {
                 Logger.debug(`Discarding superseded summary job for chat ${chatId}`)
                 return

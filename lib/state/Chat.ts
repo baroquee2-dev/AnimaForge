@@ -123,9 +123,11 @@ type InferenceStateType = {
     abortFunction: () => void | Promise<void>
     nowGenerating: boolean
     generationAborted: boolean
+    generationFailed: boolean
     currentSwipeId?: number
     startGenerating: (swipeId: number) => void
     stopGenerating: () => void
+    markGenerationFailed: () => void
     setAbort: (fn: () => void | Promise<void>) => void
 }
 
@@ -172,13 +174,20 @@ export const useInference = create<InferenceStateType>((set, get) => ({
     },
     nowGenerating: false,
     generationAborted: false,
+    generationFailed: false,
     currentSwipeId: undefined,
     startGenerating: (swipeId: number) =>
-        set({ currentSwipeId: swipeId, nowGenerating: true, generationAborted: false }),
+        set({
+            currentSwipeId: swipeId,
+            nowGenerating: true,
+            generationAborted: false,
+            generationFailed: false,
+        }),
     stopGenerating: () => {
         set({ nowGenerating: false, currentSwipeId: undefined })
         if (mmkv.getBoolean(AppSettings.NotifyOnComplete)) sendGenerateCompleteNotification()
     },
+    markGenerationFailed: () => set({ generationFailed: true }),
     setAbort: (fn) => {
         set({
             abortFunction: async () => {
@@ -201,12 +210,17 @@ export namespace Chats {
             const inferenceState = useInference.getState()
             const cachedSwipeId = inferenceState.currentSwipeId
             const wasAborted = inferenceState.generationAborted
+            const wasFailed = inferenceState.generationFailed
             Logger.info(`Saving Chat`)
             await get().updateFromBuffer(cachedSwipeId)
             const chat = get().data
             const output = get().buffer.data
             const shouldSummarize =
-                !!chat?.auto_summary && !!output.trim() && !wasAborted && !!chat.id
+                !!chat?.auto_summary &&
+                !!output.trim() &&
+                !wasAborted &&
+                !wasFailed &&
+                !!chat.id
 
             const summaryChatId = chat?.id
             const previousSummary = chat?.summary ?? ''
