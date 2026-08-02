@@ -8,7 +8,7 @@ import i18n from '@lib/i18n'
 
 import { db as database } from '@db'
 import { Tokenizer } from '@lib/engine/Tokenizer'
-import { scheduleChatSummaryUpdate } from '@lib/summary/ChatSummary'
+import { scheduleChatSummaryUpdate, SUMMARY_EVERY_N_TURNS } from '@lib/summary/ChatSummary'
 import { replaceMacros } from '@lib/state/Macros'
 import { AppDirectory, copyFile, deleteFile, fileInfo } from '@lib/utils/File'
 import { convertToFormatInstruct } from '@lib/utils/TextFormat'
@@ -231,12 +231,31 @@ export namespace Chats {
 
             if (!shouldSummarize || !summaryChatId) return
 
+            const nextTurnCount = Math.min(
+                SUMMARY_EVERY_N_TURNS,
+                (chat?.summary_turn_count ?? 0) + 1
+            )
+            await db.mutate.setSummaryTurnCount(summaryChatId, nextTurnCount)
+            set((state) => {
+                if (!state.data || state.data.id !== summaryChatId) return state
+                return {
+                    data: {
+                        ...state.data,
+                        summary_turn_count: nextTurnCount,
+                    },
+                }
+            })
+
+            if (nextTurnCount < SUMMARY_EVERY_N_TURNS) return
+
             scheduleChatSummaryUpdate({
                 chatId: summaryChatId,
                 previousSummary,
                 messages: messagesSnapshot,
+                turnCount: SUMMARY_EVERY_N_TURNS,
                 persist: async (chatId, summary, updatedAt) => {
                     await db.mutate.updateChatSummary(chatId, summary, updatedAt)
+                    await db.mutate.setSummaryTurnCount(chatId, 0)
                 },
                 onApplied: (chatId, summary, updatedAt) => {
                     set((state) => {
@@ -246,6 +265,7 @@ export namespace Chats {
                                 ...state.data,
                                 summary,
                                 summary_updated_at: updatedAt,
+                                summary_turn_count: 0,
                             },
                         }
                     })
@@ -922,6 +942,13 @@ export namespace Chats {
                 await database
                     .update(chats)
                     .set({ summary, summary_updated_at: updatedAt })
+                    .where(eq(chats.id, chatId))
+            }
+
+            export const setSummaryTurnCount = async (chatId: number, turnCount: number) => {
+                await database
+                    .update(chats)
+                    .set({ summary_turn_count: turnCount })
                     .where(eq(chats.id, chatId))
             }
 

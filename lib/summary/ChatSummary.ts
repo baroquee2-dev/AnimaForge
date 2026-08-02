@@ -16,6 +16,8 @@ import type { ChatEntry } from '@lib/state/Chat'
 
 const MAX_SUMMARY_LENGTH = 1_200
 const MAX_SOURCE_LENGTH = 6_000
+/** How many user→assistant turns between automatic summary updates. */
+export const SUMMARY_EVERY_N_TURNS = 5
 
 type SummaryPersist = (chatId: number, summary: string, updatedAt: number) => Promise<void>
 
@@ -29,27 +31,46 @@ const clip = (value: string, maxLength: number) =>
 
 const getEntryText = (entry: ChatEntry) => entry.swipes[entry.swipe_id]?.swipe?.trim() ?? ''
 
-/**
- * Collect the message window that should update the rolling summary:
- * everything after the previous non-empty assistant reply, through the latest
- * assistant reply. This covers first greetings, multi-user bursts, and normal turns.
- */
-const getSummaryWindow = (messages: ChatEntry[]) => {
-    const assistantIndex = messages.findLastIndex(
-        (entry) => !entry.is_user && !!getEntryText(entry)
-    )
-    if (assistantIndex < 0) return
-
-    let previousAssistantIndex = -1
-    for (let i = assistantIndex - 1; i >= 0; i--) {
-        if (!messages[i].is_user && !!getEntryText(messages[i])) {
-            previousAssistantIndex = i
-            break
-        }
+const findPreviousAssistantIndex = (messages: ChatEntry[], beforeIndex: number) => {
+    for (let i = beforeIndex - 1; i >= 0; i--) {
+        if (!messages[i].is_user && !!getEntryText(messages[i])) return i
     }
+    return -1
+}
+
+/**
+ * Indexes of assistant messages that complete a user→assistant turn.
+ */
+const getUserAssistantTurnEnds = (messages: ChatEntry[]) => {
+    const ends: number[] = []
+    for (let i = 0; i < messages.length; i++) {
+        if (messages[i].is_user || !getEntryText(messages[i])) continue
+        const previousAssistantIndex = findPreviousAssistantIndex(messages, i)
+        const hasUser = messages
+            .slice(previousAssistantIndex + 1, i)
+            .some((entry) => entry.is_user && !!getEntryText(entry))
+        if (hasUser) ends.push(i)
+    }
+    return ends
+}
+
+/**
+ * Collect up to N user→assistant turns from the end of the chat
+ * (everything after the assistant before the first selected turn).
+ */
+const getLastNTurns = (messages: ChatEntry[], turnCount: number) => {
+    if (turnCount <= 0) return
+
+    const ends = getUserAssistantTurnEnds(messages)
+    if (ends.length === 0) return
+
+    const selectedEnds = ends.slice(-turnCount)
+    const firstEnd = selectedEnds[0]
+    const previousAssistantIndex = findPreviousAssistantIndex(messages, firstEnd)
+    const lastEnd = selectedEnds[selectedEnds.length - 1]
 
     const window = messages
-        .slice(previousAssistantIndex + 1, assistantIndex + 1)
+        .slice(previousAssistantIndex + 1, lastEnd + 1)
         .filter((entry) => !!getEntryText(entry))
 
     return window.length > 0 ? window : undefined
@@ -247,8 +268,12 @@ const generateRemoteSummary = async (input: string) => {
     return cleaned
 }
 
-export const generateChatSummary = async (previousSummary: string, messages: ChatEntry[]) => {
-    const turn = getSummaryWindow(messages)
+export const generateChatSummary = async (
+    previousSummary: string,
+    messages: ChatEntry[],
+    turnCount: number = SUMMARY_EVERY_N_TURNS
+) => {
+    const turn = getLastNTurns(messages, turnCount)
     if (!turn) return
 
     const instruction = getSummaryInstruction()
@@ -277,17 +302,25 @@ export const scheduleChatSummaryUpdate = (params: {
     chatId: number
     previousSummary: string
     messages: ChatEntry[]
+    turnCount?: number
     persist: SummaryPersist
     onApplied?: (chatId: number, summary: string, updatedAt: number) => void
 }) => {
-    const { chatId, previousSummary, messages, persist, onApplied } = params
+    const {
+        chatId,
+        previousSummary,
+        messages,
+        turnCount = SUMMARY_EVERY_N_TURNS,
+        persist,
+        onApplied,
+    } = params
     const jobId = ++summaryJobSeq
     activeSummaryJobs.set(chatId, jobId)
 
     void (async () => {
         try {
-            Logger.info(`Generating summary for chat ${chatId}`)
-            const summary = await generateChatSummary(previousSummary, messages)
+            Logger.info(`Generating summary for chat ${chatId} (${turnCount} turns)`)
+            const summary = await generateChatSummary(previousSummary, messages, turnCount)
             if (!summary?.trim()) return
             if (activeSummaryJobs.get(chatId) !== jobId) {
                 Logger.debug(`Discarding superseded summary job for chat ${chatId}`)
