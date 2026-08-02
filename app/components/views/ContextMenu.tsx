@@ -435,8 +435,18 @@ const useStyles = () => {
             marginLeft: 'auto',
         },
         statusDotActive: {
-            backgroundColor: color.primary._500,
-            boxShadow: [{ offsetX: 0, offsetY: 0, color: color.primary._500, blurRadius: 6 }],
+            backgroundColor: color.quote,
+            borderWidth: 1,
+            borderColor: color.text._100,
+            boxShadow: [
+                {
+                    offsetX: 0,
+                    offsetY: 0,
+                    color: color.quote,
+                    blurRadius: 10,
+                    spreadDistance: 1,
+                },
+            ],
         },
         statusDotInactive: {
             backgroundColor: color.neutral._500,

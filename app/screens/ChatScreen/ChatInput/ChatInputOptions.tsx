@@ -26,15 +26,6 @@ const ChatOptions = () => {
             buttons={[
                 {
                     onPress: (close) => {
-                        setAutoSummary(!autoSummary)
-                        close()
-                    },
-                    label: t('chat.autoSummary'),
-                    icon: 'book',
-                    status: autoSummary,
-                },
-                {
-                    onPress: (close) => {
                         close()
                         router.back()
                     },
@@ -56,6 +47,15 @@ const ChatOptions = () => {
                     },
                     label: t('chat.chatHistory'),
                     icon: 'paper-clip',
+                },
+                {
+                    onPress: (close) => {
+                        setAutoSummary(!autoSummary)
+                        close()
+                    },
+                    label: t('chat.autoSummary'),
+                    icon: 'book',
+                    status: autoSummary,
                 },
             ]}
             placement="top">
