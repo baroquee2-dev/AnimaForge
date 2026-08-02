@@ -1,7 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ScrollView, StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import ThemedButton from '@components/buttons/ThemedButton'
@@ -90,26 +90,24 @@ const ChatSummaryEditorScreen = () => {
     return (
         <SafeAreaView edges={['bottom']} style={styles.container}>
             <HeaderTitle title={t('chat.editSummary')} />
-            <ScrollView
-                contentContainerStyle={styles.content}
-                keyboardShouldPersistTaps="handled"
-                showsVerticalScrollIndicator={false}>
+            <View style={styles.header}>
                 {!!chatName && (
                     <Text style={styles.chatName} numberOfLines={2}>
                         {chatName}
                     </Text>
                 )}
                 <Text style={styles.hint}>{t('chat.editSummaryHint')}</Text>
-                <ThemedTextInput
-                    multiline
-                    value={text}
-                    onChangeText={setText}
-                    editable={!loading && !saving}
-                    placeholder={t('chat.summaryPlaceholder')}
-                    containerStyle={styles.inputContainer}
-                    style={styles.input}
-                />
-            </ScrollView>
+            </View>
+            <ThemedTextInput
+                multiline
+                scrollEnabled
+                value={text}
+                onChangeText={setText}
+                editable={!loading && !saving}
+                placeholder={t('chat.summaryPlaceholder')}
+                containerStyle={styles.inputContainer}
+                style={styles.input}
+            />
             <View style={styles.actions}>
                 <ThemedButton
                     label={t('chat.deleteSummary')}
@@ -137,11 +135,10 @@ const useStyles = () => {
             flex: 1,
             backgroundColor: color.neutral._100,
         },
-        content: {
+        header: {
             paddingHorizontal: spacing.xl,
             paddingTop: spacing.l,
-            paddingBottom: spacing.xl2,
-            flexGrow: 1,
+            paddingBottom: spacing.m,
         },
         chatName: {
             color: color.text._100,
@@ -151,14 +148,14 @@ const useStyles = () => {
         hint: {
             color: color.text._400,
             fontSize: fontSize.s,
-            marginBottom: spacing.l,
         },
         inputContainer: {
-            flex: 0,
-            minHeight: 280,
+            flex: 1,
+            paddingHorizontal: spacing.xl,
+            minHeight: 0,
         },
         input: {
-            minHeight: 280,
+            flex: 1,
             textAlignVertical: 'top',
         },
         actions: {
