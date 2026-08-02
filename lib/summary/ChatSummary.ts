@@ -1,7 +1,8 @@
+import { fetch } from 'expo/fetch'
+
 import { SamplerID } from '@lib/constants/SamplerData'
 import { buildRequest } from '@lib/engine/API/RequestBuilder'
 import { APIManager } from '@lib/engine/API/APIManagerState'
-import { SSEFetch } from '@lib/engine/SSEFetch'
 import i18n from '@lib/i18n'
 import { useAppModeStore } from '@lib/state/AppMode'
 import { Instructs } from '@lib/state/Instructs'
@@ -16,6 +17,11 @@ import type { ChatEntry } from '@lib/state/Chat'
 const MAX_SUMMARY_LENGTH = 1_200
 const MAX_SOURCE_LENGTH = 6_000
 
+type SummaryPersist = (chatId: number, summary: string, updatedAt: number) => Promise<void>
+
+let summaryJobSeq = 0
+const activeSummaryJobs = new Map<number, number>()
+
 const getSummaryInstruction = () => i18n.t('chat.summaryInstruction')
 
 const clip = (value: string, maxLength: number) =>
@@ -29,13 +35,12 @@ const getLastTurn = (messages: ChatEntry[]) => {
     if (assistantIndex < 0) return
 
     const userIndex = messages.findLastIndex(
-        (entry, index) => index < assistantIndex && entry.is_user && !!entry.swipes[entry.swipe_id]?.swipe.trim()
+        (entry, index) =>
+            index < assistantIndex && entry.is_user && !!entry.swipes[entry.swipe_id]?.swipe.trim()
     )
     if (userIndex < 0) return
 
-    const user = messages[userIndex]
-    const assistant = messages[assistantIndex]
-    return [user, assistant]
+    return [messages[userIndex], messages[assistantIndex]]
 }
 
 const formatTurn = (turn: ChatEntry[]) =>
@@ -106,6 +111,33 @@ const getHeaders = (config: APIConfiguration, values: APIValues) => {
     return { [config.request.authHeader]: config.request.authPrefix + values.key }
 }
 
+const disableStream = (payload: unknown) => {
+    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return payload
+    return { ...(payload as Record<string, unknown>), stream: false }
+}
+
+const extractCompletionText = (data: unknown, pattern: string | string[]) => {
+    const nested = getNestedValue(data, pattern)
+    if (typeof nested === 'string' && nested.trim()) return nested
+
+    if (!data || typeof data !== 'object') return ''
+
+    const root = data as Record<string, any>
+    const candidates = [
+        root?.choices?.[0]?.message?.content,
+        root?.choices?.[0]?.text,
+        root?.content?.[0]?.text,
+        root?.content,
+        root?.output_text,
+        root?.text,
+        root?.response,
+    ]
+    for (const candidate of candidates) {
+        if (typeof candidate === 'string' && candidate.trim()) return candidate
+    }
+    return ''
+}
+
 const generateRemoteSummary = async (input: string) => {
     const fields = getRemoteFields()
     if (!fields) {
@@ -113,8 +145,10 @@ const generateRemoteSummary = async (input: string) => {
         return
     }
     const { config, values, instruct } = fields
-    if (config.request.requestType !== 'stream') {
-        Logger.warn(`Skipping chat summary because ${config.name} does not support streaming summaries`)
+    if (config.request.requestType === 'horde') {
+        Logger.warn(
+            `Skipping chat summary because ${config.name} (Horde) is not supported for auto summary`
+        )
         return
     }
 
@@ -140,32 +174,34 @@ const generateRemoteSummary = async (input: string) => {
     })
     if (!payload) return
 
-    return await new Promise<string>((resolve) => {
-        let output = ''
-        const sse = new SSEFetch()
-        const finish = () => resolve(cleanSummary(output))
+    const bodyObject =
+        typeof payload === 'string'
+            ? disableStream(JSON.parse(payload))
+            : disableStream(payload)
 
-        sse.setOnEvent((event) => {
-            try {
-                const content = getNestedValue(JSON.parse(event), config.request.responseParsePattern)
-                if (typeof content === 'string') output += content
-            } catch {
-                // Some providers send non-JSON keepalive events.
-            }
-        })
-        sse.setOnClose(finish)
-        sse.setOnError(finish)
-        sse.start({
-            endpoint: values.endpoint,
-            body: typeof payload === 'string' ? payload : JSON.stringify(payload),
-            method: 'POST',
-            headers: {
-                accept: 'application/json',
-                'Content-Type': 'application/json',
-                ...getHeaders(config, values),
-            },
-        })
+    const response = await fetch(values.endpoint, {
+        method: 'POST',
+        headers: {
+            accept: 'application/json',
+            'Content-Type': 'application/json',
+            ...getHeaders(config, values),
+        },
+        body: JSON.stringify(bodyObject),
     })
+
+    if (!response.ok) {
+        const errorText = await response.text().catch(() => '')
+        Logger.warn(
+            `Skipping chat summary because the provider returned ${response.status}${
+                errorText ? `: ${errorText.slice(0, 200)}` : ''
+            }`
+        )
+        return
+    }
+
+    const data = await response.json()
+    const content = extractCompletionText(data, config.request.responseParsePattern)
+    return content ? cleanSummary(content) : undefined
 }
 
 export const generateChatSummary = async (previousSummary: string, messages: ChatEntry[]) => {
@@ -186,4 +222,39 @@ export const generateChatSummary = async (previousSummary: string, messages: Cha
         Logger.warn(`Failed to generate chat summary: ${error}`)
         return
     }
+}
+
+/** Background rolling summary with per-chat race protection. */
+export const scheduleChatSummaryUpdate = (params: {
+    chatId: number
+    previousSummary: string
+    messages: ChatEntry[]
+    persist: SummaryPersist
+    onApplied?: (chatId: number, summary: string, updatedAt: number) => void
+}) => {
+    const { chatId, previousSummary, messages, persist, onApplied } = params
+    const jobId = ++summaryJobSeq
+    activeSummaryJobs.set(chatId, jobId)
+
+    void (async () => {
+        try {
+            Logger.info(`Generating summary for chat ${chatId}`)
+            const summary = await generateChatSummary(previousSummary, messages)
+            if (!summary) return
+            if (activeSummaryJobs.get(chatId) !== jobId) {
+                Logger.debug(`Discarding superseded summary job for chat ${chatId}`)
+                return
+            }
+            const updatedAt = Date.now()
+            await persist(chatId, summary, updatedAt)
+            if (activeSummaryJobs.get(chatId) !== jobId) return
+            onApplied?.(chatId, summary, updatedAt)
+        } catch (error) {
+            Logger.warn(`Failed to schedule chat summary: ${error}`)
+        } finally {
+            if (activeSummaryJobs.get(chatId) === jobId) {
+                activeSummaryJobs.delete(chatId)
+            }
+        }
+    })()
 }

@@ -8,7 +8,7 @@ import i18n from '@lib/i18n'
 
 import { db as database } from '@db'
 import { Tokenizer } from '@lib/engine/Tokenizer'
-import { generateChatSummary } from '@lib/summary/ChatSummary'
+import { scheduleChatSummaryUpdate } from '@lib/summary/ChatSummary'
 import { replaceMacros } from '@lib/state/Macros'
 import { AppDirectory, copyFile, deleteFile, fileInfo } from '@lib/utils/File'
 import { convertToFormatInstruct } from '@lib/utils/TextFormat'
@@ -122,6 +122,7 @@ export interface ChatState {
 type InferenceStateType = {
     abortFunction: () => void | Promise<void>
     nowGenerating: boolean
+    generationAborted: boolean
     currentSwipeId?: number
     startGenerating: (swipeId: number) => void
     stopGenerating: () => void
@@ -165,12 +166,15 @@ export const sendGenerateCompleteNotification = async () => {
 }
 
 export const useInference = create<InferenceStateType>((set, get) => ({
-    abortFunction: () => {
+    abortFunction: async () => {
+        set({ generationAborted: true })
         get().stopGenerating()
     },
     nowGenerating: false,
+    generationAborted: false,
     currentSwipeId: undefined,
-    startGenerating: (swipeId: number) => set({ currentSwipeId: swipeId, nowGenerating: true }),
+    startGenerating: (swipeId: number) =>
+        set({ currentSwipeId: swipeId, nowGenerating: true, generationAborted: false }),
     stopGenerating: () => {
         set({ nowGenerating: false, currentSwipeId: undefined })
         if (mmkv.getBoolean(AppSettings.NotifyOnComplete)) sendGenerateCompleteNotification()
@@ -178,6 +182,7 @@ export const useInference = create<InferenceStateType>((set, get) => ({
     setAbort: (fn) => {
         set({
             abortFunction: async () => {
+                set({ generationAborted: true })
                 await fn()
             },
         })
@@ -193,30 +198,45 @@ export namespace Chats {
         },
         // TODO : Replace this function
         stopGenerating: async () => {
-            const cachedSwipeId = useInference.getState().currentSwipeId
+            const inferenceState = useInference.getState()
+            const cachedSwipeId = inferenceState.currentSwipeId
+            const wasAborted = inferenceState.generationAborted
             Logger.info(`Saving Chat`)
             await get().updateFromBuffer(cachedSwipeId)
             const chat = get().data
             const output = get().buffer.data
-            if (chat?.auto_summary && output.trim()) {
-                Logger.info(`Generating summary for chat ${chat.id}`)
-                const summary = await generateChatSummary(chat.summary, chat.messages)
-                if (summary) {
-                    const updatedAt = Date.now()
-                    await db.mutate.updateChatSummary(chat.id, summary, updatedAt)
-                    set((state) => ({
-                        data: state.data
-                            ? {
-                                  ...state.data,
-                                  summary,
-                                  summary_updated_at: updatedAt,
-                              }
-                            : state.data,
-                    }))
-                }
-            }
+            const shouldSummarize =
+                !!chat?.auto_summary && !!output.trim() && !wasAborted && !!chat.id
+
+            const summaryChatId = chat?.id
+            const previousSummary = chat?.summary ?? ''
+            const messagesSnapshot = chat?.messages ? [...chat.messages] : []
+
             useInference.getState().stopGenerating()
             get().setBuffer({ data: '' })
+
+            if (!shouldSummarize || !summaryChatId) return
+
+            scheduleChatSummaryUpdate({
+                chatId: summaryChatId,
+                previousSummary,
+                messages: messagesSnapshot,
+                persist: async (chatId, summary, updatedAt) => {
+                    await db.mutate.updateChatSummary(chatId, summary, updatedAt)
+                },
+                onApplied: (chatId, summary, updatedAt) => {
+                    set((state) => {
+                        if (!state.data || state.data.id !== chatId) return state
+                        return {
+                            data: {
+                                ...state.data,
+                                summary,
+                                summary_updated_at: updatedAt,
+                            },
+                        }
+                    })
+                },
+            })
         },
         load: async (chatId, overrideScrollOffset) => {
             const data = (await db.query.chat(chatId)) as ChatData | undefined
