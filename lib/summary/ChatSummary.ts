@@ -17,7 +17,7 @@ import type { ChatEntry } from '@lib/state/Chat'
 const MAX_SUMMARY_LENGTH = 1_200
 const MAX_SOURCE_LENGTH = 6_000
 /** How many user→assistant turns between automatic summary updates. */
-export const SUMMARY_EVERY_N_TURNS = 5
+export const SUMMARY_EVERY_N_TURNS = 10
 
 type SummaryPersist = (chatId: number, summary: string, updatedAt: number) => Promise<void>
 
