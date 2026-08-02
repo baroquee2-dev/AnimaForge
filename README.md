@@ -3,6 +3,10 @@
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](./LICENSE)
 [![Forked from ChatterUI](https://img.shields.io/badge/Forked_from-ChatterUI-orange.svg)](https://github.com/Vali-98/ChatterUI)
 
+> **繁體中文：** 目前已釋出正式的 **0.1** 版本，可直接至以下網址下載 APK 檔（目前僅支援 Android）：  
+> **English:** The official **0.1** release is available. Download the APK here (Android only for now):  
+> https://github.com/baroquee2-dev/MiseChat/releases/tag/MiseChat_0.1.0
+
 <p align="center">
   <strong>Language / 語言</strong><br />
   <a href="#chinese">繁體中文</a>
