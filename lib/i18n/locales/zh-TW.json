@@ -75,6 +75,7 @@
         "mainMenu": "角色列表",
         "editCharacter": "編輯角色",
         "chatHistory": "聊天紀錄",
+        "autoSummary": "自動摘要",
         "search": "搜尋",
         "chats": "聊天",
         "searchPlaceholder": "搜尋訊息...",

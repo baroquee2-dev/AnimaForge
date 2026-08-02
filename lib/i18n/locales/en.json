@@ -75,6 +75,7 @@
         "mainMenu": "Character List",
         "editCharacter": "Edit Character",
         "chatHistory": "Chat History",
+        "autoSummary": "Auto Summary",
         "search": "Search",
         "chats": "Chats",
         "searchPlaceholder": "Search for message...",
