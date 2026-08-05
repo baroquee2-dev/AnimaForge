@@ -264,6 +264,13 @@ export namespace Chats {
                 return
             }
 
+            const triggerReasons: string[] = []
+            if (nextTurnCount >= SUMMARY_EVERY_N_TURNS) triggerReasons.push('turn count')
+            if (nextCharCount >= SUMMARY_EVERY_N_CHARS) triggerReasons.push('character count')
+            Logger.info(
+                `Summary triggered for chat ${summaryChatId}: ${triggerReasons.join(' + ')} (turns: ${nextTurnCount}/${SUMMARY_EVERY_N_TURNS}, chars: ${nextCharCount}/${SUMMARY_EVERY_N_CHARS})`
+            )
+
             scheduleChatSummaryUpdate({
                 chatId: summaryChatId,
                 previousSummary,
