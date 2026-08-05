@@ -1,23 +1,22 @@
 import { fetch } from 'expo/fetch'
 
 import { SamplerID } from '@lib/constants/SamplerData'
-import { buildRequest } from '@lib/engine/API/RequestBuilder'
+import type { APIConfiguration, APIValues } from '@lib/engine/API/APIBuilder.types'
 import { APIManager } from '@lib/engine/API/APIManagerState'
+import type { Message } from '@lib/engine/API/ContextBuilder'
+import { buildRequest } from '@lib/engine/API/RequestBuilder'
 import i18n from '@lib/i18n'
 import { useAppModeStore } from '@lib/state/AppMode'
+import type { ChatEntry } from '@lib/state/Chat'
 import { Instructs } from '@lib/state/Instructs'
 import { Logger } from '@lib/state/Logger'
 import { SamplersManager } from '@lib/state/SamplerState'
 import { getNestedValue } from '@lib/utils/Parsing'
 
-import type { Message } from '@lib/engine/API/ContextBuilder'
-import type { APIConfiguration, APIValues } from '@lib/engine/API/APIBuilder.types'
-import type { ChatEntry } from '@lib/state/Chat'
-
 const MAX_SUMMARY_LENGTH = 1_200
 const MAX_SOURCE_LENGTH = 6_000
 /** How many user→assistant turns between automatic summary updates. */
-export const SUMMARY_EVERY_N_TURNS = 10
+export const SUMMARY_EVERY_N_TURNS = 20
 
 type SummaryPersist = (chatId: number, summary: string, updatedAt: number) => Promise<void>
 
@@ -27,7 +26,9 @@ const activeSummaryJobs = new Map<number, number>()
 const getSummaryInstruction = () => i18n.t('chat.summaryInstruction')
 
 const clip = (value: string, maxLength: number) =>
-    value.length > maxLength ? value.slice(0, maxLength) + `\n${i18n.t('chat.summaryTruncated')}` : value
+    value.length > maxLength
+        ? value.slice(0, maxLength) + `\n${i18n.t('chat.summaryTruncated')}`
+        : value
 
 const getEntryText = (entry: ChatEntry) => entry.swipes[entry.swipe_id]?.swipe?.trim() ?? ''
 
@@ -77,10 +78,7 @@ const getLastNTurns = (messages: ChatEntry[], turnCount: number) => {
 }
 
 const formatTurn = (turn: ChatEntry[]) =>
-    clip(
-        turn.map((entry) => `${entry.name}: ${getEntryText(entry)}`).join('\n'),
-        MAX_SOURCE_LENGTH
-    )
+    clip(turn.map((entry) => `${entry.name}: ${getEntryText(entry)}`).join('\n'), MAX_SOURCE_LENGTH)
 
 const buildSummaryInput = (previousSummary: string, turn: ChatEntry[]) => {
     const instruction = getSummaryInstruction()
@@ -152,7 +150,11 @@ const hasProviderError = (data: unknown) => {
     const root = data as Record<string, any>
     if (root.error != null) return true
     if (Array.isArray(root.errors) && root.errors.length > 0) return true
-    if (typeof root.message === 'string' && /error|fail|invalid/i.test(root.message) && !root.choices)
+    if (
+        typeof root.message === 'string' &&
+        /error|fail|invalid/i.test(root.message) &&
+        !root.choices
+    )
         return true
     return false
 }
@@ -218,9 +220,7 @@ const generateRemoteSummary = async (input: string) => {
     if (!payload) return
 
     const bodyObject =
-        typeof payload === 'string'
-            ? disableStream(JSON.parse(payload))
-            : disableStream(payload)
+        typeof payload === 'string' ? disableStream(JSON.parse(payload)) : disableStream(payload)
 
     const response = await fetch(values.endpoint, {
         method: 'POST',

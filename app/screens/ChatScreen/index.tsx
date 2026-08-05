@@ -1,7 +1,7 @@
 import { useFocusEffect } from 'expo-router'
+import type { NativeStackNavigationOptions } from 'expo-router'
 import { useCallback, useEffect, useMemo } from 'react'
 import { StyleSheet, View } from 'react-native'
-import type { NativeStackNavigationOptions } from 'expo-router'
 import { useReanimatedKeyboardAnimation } from 'react-native-keyboard-controller'
 import Animated, { FadeIn, useAnimatedStyle } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -129,6 +129,7 @@ const ChatScreen = () => {
         chat.summary = ''
         chat.summary_updated_at = null
         chat.summary_turn_count = 0
+        chat.summary_char_count = 0
         delete chat.id
         chat.messages = chat.messages.map((message) => {
             delete message.id
@@ -209,7 +210,10 @@ const ChatScreen = () => {
 
                 <View style={{ flex: 1, paddingBottom: insets.bottom + 4, zIndex: 1 }}>
                     <Animated.View style={animatedStyle}>
-                        <HeaderTitle animation="slide_from_right" screenOptions={immersiveScreenOptions} />
+                        <HeaderTitle
+                            animation="slide_from_right"
+                            screenOptions={immersiveScreenOptions}
+                        />
                         <HeaderButton
                             headerLeft={renderHeaderButtonLeft}
                             headerRight={renderHeaderButtonRight}

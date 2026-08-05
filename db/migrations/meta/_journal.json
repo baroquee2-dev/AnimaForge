@@ -155,6 +155,13 @@
       "when": 1785660000000,
       "tag": "0021_summary_turn_count",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "6",
+      "when": 1785660000001,
+      "tag": "0022_summary_char_count",
+      "breakpoints": true
     }
   ]
 }

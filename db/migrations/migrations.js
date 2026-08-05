@@ -23,6 +23,7 @@ import m0018 from './0018_instruct_formats.sql';
 import m0019 from './0019_spicy_tag.sql';
 import m0020 from './0020_same_speedball.sql';
 import m0021 from './0021_summary_turn_count.sql';
+import m0022 from './0022_summary_char_count.sql';
 
   export default {
     journal,
@@ -48,7 +49,8 @@ m0017,
 m0018,
 m0019,
 m0020,
-m0021
+m0021,
+m0022
     }
   }
   

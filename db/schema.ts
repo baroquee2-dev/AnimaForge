@@ -106,6 +106,7 @@ export const chats = sqliteTable('chats', {
     summary: text('summary').notNull().default(''),
     summary_updated_at: integer('summary_updated_at', { mode: 'number' }),
     summary_turn_count: integer('summary_turn_count', { mode: 'number' }).notNull().default(0),
+    summary_char_count: integer('summary_char_count', { mode: 'number' }).notNull().default(0),
 })
 
 export const chatEntries = sqliteTable('chat_entries', {

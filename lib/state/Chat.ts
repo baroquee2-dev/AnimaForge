@@ -4,12 +4,12 @@ import * as Notifications from 'expo-notifications'
 import mime from 'mime/lite'
 import { create } from 'zustand'
 import { useShallow } from 'zustand/react/shallow'
-import i18n from '@lib/i18n'
 
 import { db as database } from '@db'
 import { Tokenizer } from '@lib/engine/Tokenizer'
-import { scheduleChatSummaryUpdate, SUMMARY_EVERY_N_TURNS } from '@lib/summary/ChatSummary'
+import i18n from '@lib/i18n'
 import { replaceMacros } from '@lib/state/Macros'
+import { scheduleChatSummaryUpdate, SUMMARY_EVERY_N_TURNS } from '@lib/summary/ChatSummary'
 import { AppDirectory, copyFile, deleteFile, fileInfo } from '@lib/utils/File'
 import { convertToFormatInstruct } from '@lib/utils/TextFormat'
 import {
@@ -43,6 +43,21 @@ export interface ChatEntry extends ChatEntryType {
 export interface ChatData extends ChatType {
     messages: ChatEntry[]
     autoScroll?: { cause: 'search' | 'saveScroll'; index: number }
+}
+
+const SUMMARY_EVERY_N_CHARS = 1000
+
+const getCurrentTurnCharCount = (messages: ChatEntry[]): number => {
+    if (messages.length === 0) return 0
+
+    let charCount = 0
+    for (let i = messages.length - 1; i >= 0; i--) {
+        // Stop when we reach the previous assistant message (not the current last one)
+        if (!messages[i].is_user && i !== messages.length - 1) break
+        const text = messages[i].swipes[messages[i].swipe_id]?.swipe ?? ''
+        charCount += text.length
+    }
+    return charCount
 }
 
 interface ChatSearchQueryResult {
@@ -216,11 +231,7 @@ export namespace Chats {
             const chat = get().data
             const output = get().buffer.data
             const shouldSummarize =
-                !!chat?.auto_summary &&
-                !!output.trim() &&
-                !wasAborted &&
-                !wasFailed &&
-                !!chat.id
+                !!chat?.auto_summary && !!output.trim() && !wasAborted && !wasFailed && !!chat.id
 
             const summaryChatId = chat?.id
             const previousSummary = chat?.summary ?? ''
@@ -231,31 +242,37 @@ export namespace Chats {
 
             if (!shouldSummarize || !summaryChatId) return
 
-            const nextTurnCount = Math.min(
-                SUMMARY_EVERY_N_TURNS,
-                (chat?.summary_turn_count ?? 0) + 1
-            )
-            await db.mutate.setSummaryTurnCount(summaryChatId, nextTurnCount)
-            set((state) => {
-                if (!state.data || state.data.id !== summaryChatId) return state
-                return {
-                    data: {
-                        ...state.data,
-                        summary_turn_count: nextTurnCount,
-                    },
-                }
-            })
+            const nextTurnCount = (chat?.summary_turn_count ?? 0) + 1
+            const nextCharCount =
+                (chat?.summary_char_count ?? 0) + getCurrentTurnCharCount(messagesSnapshot)
+            const shouldTriggerSummary =
+                nextTurnCount >= SUMMARY_EVERY_N_TURNS || nextCharCount >= SUMMARY_EVERY_N_CHARS
 
-            if (nextTurnCount < SUMMARY_EVERY_N_TURNS) return
+            if (!shouldTriggerSummary) {
+                await db.mutate.setSummaryTurnCount(summaryChatId, nextTurnCount)
+                await db.mutate.setSummaryCharCount(summaryChatId, nextCharCount)
+                set((state) => {
+                    if (!state.data || state.data.id !== summaryChatId) return state
+                    return {
+                        data: {
+                            ...state.data,
+                            summary_turn_count: nextTurnCount,
+                            summary_char_count: nextCharCount,
+                        },
+                    }
+                })
+                return
+            }
 
             scheduleChatSummaryUpdate({
                 chatId: summaryChatId,
                 previousSummary,
                 messages: messagesSnapshot,
-                turnCount: SUMMARY_EVERY_N_TURNS,
+                turnCount: nextTurnCount,
                 persist: async (chatId, summary, updatedAt) => {
                     await db.mutate.updateChatSummary(chatId, summary, updatedAt)
                     await db.mutate.setSummaryTurnCount(chatId, 0)
+                    await db.mutate.setSummaryCharCount(chatId, 0)
                 },
                 onApplied: (chatId, summary, updatedAt) => {
                     set((state) => {
@@ -266,6 +283,7 @@ export namespace Chats {
                                 summary,
                                 summary_updated_at: updatedAt,
                                 summary_turn_count: 0,
+                                summary_char_count: 0,
                             },
                         }
                     })
@@ -949,6 +967,13 @@ export namespace Chats {
                 await database
                     .update(chats)
                     .set({ summary_turn_count: turnCount })
+                    .where(eq(chats.id, chatId))
+            }
+
+            export const setSummaryCharCount = async (chatId: number, charCount: number) => {
+                await database
+                    .update(chats)
+                    .set({ summary_char_count: charCount })
                     .where(eq(chats.id, chatId))
             }
 
