@@ -13,7 +13,8 @@ import { Logger } from '@lib/state/Logger'
 import { SamplersManager } from '@lib/state/SamplerState'
 import { getNestedValue } from '@lib/utils/Parsing'
 
-const MAX_SUMMARY_LENGTH = 1_200
+const MAX_SUMMARY_LENGTH = 2_400
+const MAX_INPUT_SUMMARY_LENGTH = 1_200
 const MAX_SOURCE_LENGTH = 6_000
 /** How many user→assistant turns between automatic summary updates. */
 export const SUMMARY_EVERY_N_TURNS = 20
@@ -29,6 +30,28 @@ const clip = (value: string, maxLength: number) =>
     value.length > maxLength
         ? value.slice(0, maxLength) + `\n${i18n.t('chat.summaryTruncated')}`
         : value
+
+/**
+ * Truncate text at a natural boundary without adding a truncation marker.
+ * Used for stored summaries so that future summary passes are not confused
+ * by an injected "[truncated]" token.
+ */
+const truncateAtBoundary = (value: string, maxLength: number): string => {
+    if (value.length <= maxLength) return value
+
+    const truncated = value.slice(0, maxLength)
+    const lastBoundary = Math.max(
+        truncated.lastIndexOf('。'),
+        truncated.lastIndexOf('.'),
+        truncated.lastIndexOf('！'),
+        truncated.lastIndexOf('!'),
+        truncated.lastIndexOf('？'),
+        truncated.lastIndexOf('?'),
+        truncated.lastIndexOf('\n')
+    )
+    if (lastBoundary > maxLength * 0.7) return truncated.slice(0, lastBoundary + 1).trim()
+    return truncated.trim()
+}
 
 const getEntryText = (entry: ChatEntry) => entry.swipes[entry.swipe_id]?.swipe?.trim() ?? ''
 
@@ -82,11 +105,17 @@ const formatTurn = (turn: ChatEntry[]) =>
 
 const buildSummaryInput = (previousSummary: string, turn: ChatEntry[]) => {
     const instruction = getSummaryInstruction()
+    const trimmedSummary = previousSummary.trim() || i18n.t('chat.summaryEmpty')
+    const wasClipped = trimmedSummary.length > MAX_INPUT_SUMMARY_LENGTH
+    const summarySection = wasClipped
+        ? `${trimmedSummary.slice(0, MAX_INPUT_SUMMARY_LENGTH)}\n${i18n.t('chat.summaryTruncated')}`
+        : trimmedSummary
+
     return `${instruction}
 
 ${i18n.t('chat.summaryCurrentLabel')}:
 <previous_summary>
-${clip(previousSummary.trim() || i18n.t('chat.summaryEmpty'), MAX_SUMMARY_LENGTH)}
+${summarySection}
 </previous_summary>
 
 ${i18n.t('chat.summaryTurnLabel')}:
@@ -98,7 +127,7 @@ ${i18n.t('chat.summaryOutputLabel')}`
 }
 
 const cleanSummary = (summary: string) => {
-    return clip(
+    return truncateAtBoundary(
         summary
             .trim()
             .replace(/^```(?:text|markdown)?\s*/i, '')
