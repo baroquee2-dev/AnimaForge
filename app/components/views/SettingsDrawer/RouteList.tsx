@@ -104,14 +104,14 @@ const getPaths = (remote: boolean): ButtonData[] => [
         icon: 'sound',
     },
     {
-        nameKey: 'nav.characterMemory',
-        path: '/screens/CharacterMemoryScreen' as Href,
-        icon: 'book',
-    },
-    {
         nameKey: 'nav.settings',
         path: '/screens/AppSettingsScreen',
         icon: 'setting',
+    },
+    {
+        nameKey: 'nav.characterMemory',
+        path: '/screens/CharacterMemoryScreen' as Href,
+        icon: 'book',
     },
     {
         nameKey: 'nav.logs',
