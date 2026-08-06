@@ -145,7 +145,7 @@
         "models": "Models",
         "tts": "TTS",
         "characterMemory": "Character Memory",
-        "logs": "Logs",
+        "logs": "System Logs",
         "about": "About",
         "settings": "Settings"
     },
