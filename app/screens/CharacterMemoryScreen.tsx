@@ -37,7 +37,7 @@ const CharacterMemoryScreen = () => {
         setShowCharacterSheet(false)
         const opened = await openChatForCharacter(character.id)
         if (!opened) return
-        router.push('/screens/ChatScreen')
+        router.replace('/screens/ChatScreen')
         Drawer.useDrawerStore.getState().setShow(Drawer.ID.CHATLIST, true)
     }
 
