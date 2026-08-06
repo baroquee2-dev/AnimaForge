@@ -75,7 +75,7 @@
         "mainMenu": "Character List",
         "editCharacter": "Edit Character",
         "chatHistory": "Chat History",
-        "autoSummary": "Auto Summary",
+        "autoSummary": "AI Auto Summary",
         "editSummary": "Edit Summary",
         "summaryBadge": "Summary",
         "summaryInstruction": "You are a conversation summarizer, not a chat character.\n\nUsing the current summary and this turn, rewrite one complete summary. Write in third person, objectively, and in chronological order. Keep only what is needed for later replies, prioritized as: promises and commitments, changes in character relationships, important events, character preferences and habits, emotional states, unresolved issues, and current situation.\n\nIf the current summary is too long, drop older or less important details to make room for the new information. Keep what is recent and still relevant to future replies. Remove greetings, repetition, and details with no lasting effect. If information in the old summary is still correct and relevant, keep it as-is. If new information conflicts with the old summary, prefer the new information. Do not invent anything that did not appear in the dialogue.\n\nWrite the summary in the same language as <current_turn>. If the turn mixes languages, follow the language used in the character's replies. Keep it objective and concise (about 600 words or equivalent). Output only the summary body—no title, Markdown, explanation, dialogue, or roleplay.",
