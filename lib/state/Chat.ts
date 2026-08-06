@@ -45,7 +45,7 @@ export interface ChatData extends ChatType {
     autoScroll?: { cause: 'search' | 'saveScroll'; index: number }
 }
 
-const SUMMARY_EVERY_N_CHARS = 1000
+const SUMMARY_EVERY_N_CHARS = 2000
 
 const getCurrentTurnCharCount = (messages: ChatEntry[]): number => {
     if (messages.length === 0) return 0
