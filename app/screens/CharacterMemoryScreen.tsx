@@ -26,7 +26,7 @@ const CharacterMemoryScreen = () => {
     const [autoSummary, setAutoSummary] = useMMKVBoolean(AppSettings.AutoSummary)
     const [showCharacterSheet, setShowCharacterSheet] = useState(false)
 
-    const { data } = useLiveQuery(Characters.db.query.cardListQuery('character', 'modified'), [])
+    const { data } = useLiveQuery(Characters.db.query.charactersWithSummary(), [])
     const charactersWithChats = useMemo(
         () => (data ?? []).filter((item) => item.chats.length > 0),
         [data]

@@ -1,5 +1,5 @@
 import { extractPngTextChunk, replacePngTextChunk } from '@vali98/react-native-png-utils'
-import { and, asc, desc, eq, gte, inArray, like, notExists, notInArray, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, gte, inArray, like, ne, notExists, notInArray, sql } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import * as DocumentPicker from 'expo-document-picker'
 import { Paths } from 'expo-file-system'
@@ -380,6 +380,29 @@ export namespace Characters {
                     },
                     where: (characters, { eq }) => eq(characters.type, type),
                     orderBy: orderBy === 'id' ? characters.id : desc(characters.last_modified),
+                })
+            }
+
+            export const charactersWithSummary = () => {
+                return database.query.characters.findMany({
+                    columns: {
+                        id: true,
+                        name: true,
+                        image_id: true,
+                        last_modified: true,
+                    },
+                    with: {
+                        chats: {
+                            columns: {
+                                id: true,
+                            },
+                            where: (chats, { ne }) => ne(chats.summary, ''),
+                            limit: 1,
+                            orderBy: desc(chats.last_modified),
+                        },
+                    },
+                    where: (characters, { eq }) => eq(characters.type, 'character'),
+                    orderBy: desc(characters.last_modified),
                 })
             }
 
