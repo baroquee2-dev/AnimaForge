@@ -144,6 +144,7 @@
         "api": "API",
         "models": "Models",
         "tts": "TTS",
+        "characterMemory": "Character Memory",
         "logs": "Logs",
         "about": "About",
         "settings": "Settings"
@@ -780,5 +781,8 @@
         "samplerExists": "Sampler Config \"{{name}}\" already exists!",
         "invalidFileType": "Invalid File Type!",
         "importFailed": "Failed to import: {{error}}"
+    },
+    "memory": {
+        "autoSummaryDesc": "When enabled, conversations will automatically generate a summary after reaching the configured turn or character threshold to serve as the character's long-term memory."
     }
 }

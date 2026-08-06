@@ -231,7 +231,11 @@ export namespace Chats {
             const chat = get().data
             const output = get().buffer.data
             const shouldSummarize =
-                !!chat?.auto_summary && !!output.trim() && !wasAborted && !wasFailed && !!chat.id
+                mmkv.getBoolean(AppSettings.AutoSummary) &&
+                !!output.trim() &&
+                !wasAborted &&
+                !wasFailed &&
+                !!chat?.id
 
             const summaryChatId = chat?.id
             const previousSummary = chat?.summary ?? ''

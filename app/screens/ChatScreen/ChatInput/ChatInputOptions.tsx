@@ -2,23 +2,15 @@ import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { StyleSheet } from 'react-native'
-import { useShallow } from 'zustand/react/shallow'
 
 import ContextMenu from '@components/views/ContextMenu'
 import Drawer from '@components/views/Drawer'
-import { Chats } from '@lib/state/Chat'
 import { Theme } from '@lib/theme/ThemeManager'
 
 const ChatOptions = () => {
     const router = useRouter()
     const styles = useStyles()
     const { t } = useTranslation()
-    const { autoSummary, setAutoSummary } = Chats.useChatState(
-        useShallow((state) => ({
-            autoSummary: state.data?.auto_summary ?? false,
-            setAutoSummary: state.setAutoSummary,
-        }))
-    )
 
     const setShow = Drawer.useDrawerStore((state) => state.setShow)
 
@@ -52,15 +44,6 @@ const ChatOptions = () => {
                     },
                     label: t('chat.chatHistory'),
                     icon: 'paper-clip',
-                },
-                {
-                    onPress: (close) => {
-                        setAutoSummary(!autoSummary)
-                        close()
-                    },
-                    label: t('chat.autoSummary'),
-                    icon: 'book',
-                    status: autoSummary,
                 },
             ]}
             placement="top">

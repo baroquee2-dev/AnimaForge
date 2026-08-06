@@ -144,6 +144,7 @@
         "api": "API",
         "models": "模型",
         "tts": "語音",
+        "characterMemory": "角色記憶管理",
         "logs": "日誌",
         "about": "關於",
         "settings": "設定"
@@ -780,5 +781,8 @@
         "samplerExists": "取樣器設定「{{name}}」已存在！",
         "invalidFileType": "無效的檔案類型！",
         "importFailed": "匯入失敗：{{error}}"
+    },
+    "memory": {
+        "autoSummaryDesc": "開啟後，對話會在達到設定的輪數或字數時自動產生摘要，作為角色的長期記憶。"
     }
 }

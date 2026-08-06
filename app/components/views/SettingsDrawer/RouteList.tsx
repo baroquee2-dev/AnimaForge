@@ -1,8 +1,8 @@
 import { AntDesign } from '@expo/vector-icons'
 import { Href, useRouter } from 'expo-router'
+import { useTranslation } from 'react-i18next'
 import { FlatList, StyleSheet, Text, TouchableOpacity } from 'react-native'
 import Animated, { Easing, SlideInLeft } from 'react-native-reanimated'
-import { useTranslation } from 'react-i18next'
 
 import { useAppMode } from '@lib/state/AppMode'
 import { Theme } from '@lib/theme/ThemeManager'
@@ -102,6 +102,11 @@ const getPaths = (remote: boolean): ButtonData[] => [
         nameKey: 'nav.tts',
         path: '/screens/TTSManagerScreen',
         icon: 'sound',
+    },
+    {
+        nameKey: 'nav.characterMemory',
+        path: '/screens/CharacterMemoryScreen' as Href,
+        icon: 'book',
     },
     {
         nameKey: 'nav.settings',
