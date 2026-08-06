@@ -1,7 +1,7 @@
 import { AntDesign } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FlatList, Text, TouchableOpacity, View } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
@@ -27,6 +27,10 @@ const CharacterMemoryScreen = () => {
     const [showCharacterSheet, setShowCharacterSheet] = useState(false)
 
     const { data } = useLiveQuery(Characters.db.query.cardListQuery('character', 'modified'), [])
+    const charactersWithChats = useMemo(
+        () => (data ?? []).filter((item) => item.chats.length > 0),
+        [data]
+    )
 
     const handleSelectCharacter = async (character: { id: number; name: string }) => {
         Logger.info(`Selected character for memory management: ${character.name} (${character.id})`)
@@ -116,7 +120,7 @@ const CharacterMemoryScreen = () => {
                     {t('memory.selectCharacter')}
                 </Text>
                 <FlatList
-                    data={data}
+                    data={charactersWithChats}
                     keyExtractor={(item) => item.id.toString()}
                     renderItem={({ item }) => (
                         <TouchableOpacity
