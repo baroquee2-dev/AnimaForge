@@ -785,6 +785,7 @@
     "memory": {
         "autoSummaryDesc": "開啟後，對話會在達到設定的輪數或字數時自動產生摘要，作為角色的長期記憶。",
         "contentManagement": "內容管理",
+        "contentManagementDesc": "選擇角色並手動編輯或檢視該角色的長期記憶內容。",
         "selectCharacter": "選擇角色"
     }
 }

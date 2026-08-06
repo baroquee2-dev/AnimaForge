@@ -1,3 +1,4 @@
+import { AntDesign } from '@expo/vector-icons'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -40,21 +41,61 @@ const CharacterMemoryScreen = () => {
                     onChangeValue={setAutoSummary}
                 />
 
-                <TouchableOpacity
-                    style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        paddingVertical: spacing.m,
-                        borderTopWidth: 1,
-                        borderTopColor: color.neutral._200,
-                    }}
-                    onPress={() => setShowCharacterSheet(true)}>
-                    <Text style={{ fontSize: fontSize.l, color: color.text._100 }}>
-                        {t('memory.contentManagement')}
-                    </Text>
-                    <Text style={{ fontSize: fontSize.xl, color: color.text._300 }}>›</Text>
-                </TouchableOpacity>
+                <View style={{ marginTop: spacing.xl2, marginBottom: spacing.m }}>
+                    <TouchableOpacity
+                        activeOpacity={0.7}
+                        style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            backgroundColor: color.neutral._200,
+                            borderRadius: borderRadius.xl,
+                            padding: spacing.l,
+                            shadowColor: color.shadow,
+                            boxShadow: [
+                                {
+                                    offsetX: 0,
+                                    offsetY: 4,
+                                    spreadDistance: 0,
+                                    color: color.shadow,
+                                    blurRadius: 10,
+                                },
+                            ],
+                        }}
+                        onPress={() => setShowCharacterSheet(true)}>
+                        <View
+                            style={{
+                                width: 44,
+                                height: 44,
+                                borderRadius: borderRadius.l,
+                                backgroundColor: `${color.primary._500}22`,
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                marginRight: spacing.m,
+                            }}>
+                            <AntDesign name="book" size={22} color={color.primary._500} />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <Text
+                                style={{
+                                    fontSize: fontSize.l,
+                                    fontWeight: '600',
+                                    color: color.text._100,
+                                }}>
+                                {t('memory.contentManagement')}
+                            </Text>
+                            <Text
+                                style={{
+                                    fontSize: fontSize.s,
+                                    color: color.text._300,
+                                    marginTop: spacing.xs,
+                                    lineHeight: Math.round(fontSize.s * 1.4),
+                                }}>
+                                {t('memory.contentManagementDesc')}
+                            </Text>
+                        </View>
+                        <AntDesign name="right" size={18} color={color.text._300} />
+                    </TouchableOpacity>
+                </View>
             </KeyboardAwareScrollView>
 
             <BottomSheet visible={showCharacterSheet} setVisible={setShowCharacterSheet}>

@@ -785,6 +785,7 @@
     "memory": {
         "autoSummaryDesc": "When enabled, conversations will automatically generate a summary after reaching the configured turn or character threshold to serve as the character's long-term memory.",
         "contentManagement": "Content Management",
+        "contentManagementDesc": "Select a character to manually edit or view its long-term memory content.",
         "selectCharacter": "Select Character"
     }
 }
