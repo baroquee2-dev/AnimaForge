@@ -1,4 +1,5 @@
 import { AntDesign } from '@expo/vector-icons'
+import { useRouter } from 'expo-router'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -10,7 +11,9 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import ThemedSwitch from '@components/input/ThemedSwitch'
 import Avatar from '@components/views/Avatar'
 import BottomSheet from '@components/views/BottomSheet'
+import Drawer from '@components/views/Drawer'
 import HeaderTitle from '@components/views/HeaderTitle'
+import { openChatForCharacter } from '@lib/chat/openChatForCharacter'
 import { AppSettings } from '@lib/constants/GlobalValues'
 import { Characters } from '@lib/state/Characters'
 import { Logger } from '@lib/state/Logger'
@@ -18,16 +21,20 @@ import { Theme } from '@lib/theme/ThemeManager'
 
 const CharacterMemoryScreen = () => {
     const { t } = useTranslation()
+    const router = useRouter()
     const { color, spacing, fontSize, borderRadius } = Theme.useTheme()
     const [autoSummary, setAutoSummary] = useMMKVBoolean(AppSettings.AutoSummary)
     const [showCharacterSheet, setShowCharacterSheet] = useState(false)
 
     const { data } = useLiveQuery(Characters.db.query.cardListQuery('character', 'modified'), [])
 
-    const handleSelectCharacter = (character: { id: number; name: string }) => {
+    const handleSelectCharacter = async (character: { id: number; name: string }) => {
         Logger.info(`Selected character for memory management: ${character.name} (${character.id})`)
         setShowCharacterSheet(false)
-        // TODO: Navigate to character-specific memory management
+        const opened = await openChatForCharacter(character.id)
+        if (!opened) return
+        router.push('/screens/ChatScreen')
+        Drawer.useDrawerStore.getState().setShow(Drawer.ID.CHATLIST, true)
     }
 
     return (
