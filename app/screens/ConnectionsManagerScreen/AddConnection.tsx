@@ -13,8 +13,9 @@ import MultiDropdownSheet from '@components/input/MultiDropdownSheet'
 import ThemedTextInput from '@components/input/ThemedTextInput'
 import { CLAUDE_VERSION } from '@lib/constants/GlobalValues'
 import { APIManagerValue, APIManager } from '@lib/engine/API/APIManagerState'
-import { Logger } from '@lib/state/Logger'
 import i18n from '@lib/i18n'
+import { LiteLLMModels } from '@lib/state/LiteLLMModels'
+import { Logger } from '@lib/state/Logger'
 import { Theme } from '@lib/theme/ThemeManager'
 import { getNestedValue } from '@lib/utils/Parsing'
 
@@ -37,6 +38,13 @@ const AddConnection = () => {
         active: true,
     })
     const [modelList, setModelList] = useState<any[]>([])
+    const selectedModelValue =
+        values.model && !Array.isArray(values.model)
+            ? getNestedValue(values.model, template.model.nameParser)
+            : undefined
+    const selectedModelName =
+        typeof selectedModelValue === 'string' ? selectedModelValue : undefined
+    const maxContextWindow = LiteLLMModels.useMaxContextWindow(template.name, selectedModelName)
 
     const handleGetModelList = useCallback(async () => {
         if (!template.features.useModel) return
@@ -206,6 +214,13 @@ const AddConnection = () => {
                                 variant="secondary"
                             />
                         </View>
+                        {maxContextWindow && (
+                            <Text numberOfLines={1} style={styles.hintText}>
+                                {t('api.maxContextWindowHint', {
+                                    tokens: maxContextWindow.toLocaleString(),
+                                })}
+                            </Text>
+                        )}
                     </View>
                 )}
 

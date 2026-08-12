@@ -16,6 +16,7 @@ import { APIValues } from '@lib/engine/API/APIBuilder.types'
 import { APIManager, APIManagerValue } from '@lib/engine/API/APIManagerState'
 import { useDebounce } from '@lib/hooks/Debounce'
 import i18n from '@lib/i18n'
+import { LiteLLMModels } from '@lib/state/LiteLLMModels'
 import { Logger } from '@lib/state/Logger'
 import { Theme } from '@lib/theme/ThemeManager'
 import { getNestedValue } from '@lib/utils/Parsing'
@@ -58,6 +59,14 @@ const ConnectionEditor: React.FC<ConnectionEditorProps> = ({
         }
         return match
     }, [close, getTemplates, values.configName])
+
+    const selectedModelValue =
+        values.model && !Array.isArray(values.model)
+            ? getNestedValue(values.model, template.model.nameParser)
+            : undefined
+    const selectedModelName =
+        typeof selectedModelValue === 'string' ? selectedModelValue : undefined
+    const maxContextWindow = LiteLLMModels.useMaxContextWindow(template.name, selectedModelName)
 
     const handleGetModelList = useCallback(
         async (nextValues: APIValues) => {
@@ -240,6 +249,13 @@ const ConnectionEditor: React.FC<ConnectionEditorProps> = ({
                                     variant="secondary"
                                 />
                             </View>
+                            {maxContextWindow && (
+                                <Text numberOfLines={1} style={styles.hintText}>
+                                    {t('api.maxContextWindowHint', {
+                                        tokens: maxContextWindow.toLocaleString(),
+                                    })}
+                                </Text>
+                            )}
                         </View>
                     )}
 

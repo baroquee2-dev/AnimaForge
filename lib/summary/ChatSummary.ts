@@ -18,6 +18,14 @@ const MAX_INPUT_SUMMARY_LENGTH = 1_200
 const MAX_SOURCE_LENGTH = 6_000
 /** How many user→assistant turns between automatic summary updates. */
 export const SUMMARY_EVERY_N_TURNS = 20
+/**
+ * Generation budget for summary requests. The prompt asks for ~600 CJK
+ * words across two sections, which can need well over 384 tokens depending
+ * on tokenizer. Too small a budget can also starve the final answer on
+ * reasoning models that spend part of it on hidden reasoning, which surfaces
+ * as an "empty completion" rather than a truncated one.
+ */
+const SUMMARY_GENERATED_LENGTH = 1_024
 
 type SummaryPersist = (chatId: number, summary: string, updatedAt: number) => Promise<void>
 
@@ -233,8 +241,13 @@ const generateRemoteSummary = async (input: string) => {
     const prompt = buildPrompt(summaryConfig, input)
     const samplers = {
         ...SamplersManager.getCurrentSampler(),
-        [SamplerID.GENERATED_LENGTH]: 384,
+        [SamplerID.GENERATED_LENGTH]: SUMMARY_GENERATED_LENGTH,
         [SamplerID.TEMPERATURE]: 0.2,
+        // Reasoning models otherwise inherit whatever effort the user's active
+        // sampler preset has, which can silently consume the entire
+        // generated-length budget on hidden reasoning and leave nothing for
+        // the actual summary (surfaces as "empty completion").
+        [SamplerID.REASONING_EFFORT]: 'disabled' as const,
         [SamplerID.REASONING_MAX_TOKENS]: 0,
         [SamplerID.REASONING_EXCLUDE]: true,
     }
@@ -312,10 +325,13 @@ export const generateChatSummary = async (
         let output: string | undefined
         if (useAppModeStore.getState().appMode === 'local') {
             const { generateLocalSummary } = await import('@lib/engine/LocalInference')
-            output = await generateLocalSummary({
-                system: instruction,
-                user: userContent || input,
-            })
+            output = await generateLocalSummary(
+                {
+                    system: instruction,
+                    user: userContent || input,
+                },
+                SUMMARY_GENERATED_LENGTH
+            )
         } else {
             output = await generateRemoteSummary(input)
         }
