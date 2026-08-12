@@ -58,7 +58,7 @@ export const ChatImportSchema = z.object({
     summary: z.string().default(''),
     summary_updated_at: z.number().nullable().default(null),
     summary_turn_count: z.number().default(0),
-    summary_char_count: z.number().default(0),
+    summary_token_count: z.number().default(0),
     messages: z.array(MessageSchema),
 })
 

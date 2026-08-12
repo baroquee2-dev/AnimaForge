@@ -134,6 +134,12 @@ export namespace LiteLLMModels {
     export const useMaxContextWindow = (providerName: string, modelName?: string) => {
         return useStore((state) => findMaxContextWindow(state.models, providerName, modelName))
     }
+
+    /** Non-hook equivalent of `useMaxContextWindow`, for use outside React render. */
+    export const getMaxContextWindow = (providerName: string, modelName?: string) => {
+        hydrate()
+        return findMaxContextWindow(useStore.getState().models, providerName, modelName)
+    }
 }
 
 const isModelMap = (value: unknown): value is LiteLLMModelMap => {

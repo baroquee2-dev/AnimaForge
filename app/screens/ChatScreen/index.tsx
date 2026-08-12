@@ -129,7 +129,7 @@ const ChatScreen = () => {
         chat.summary = ''
         chat.summary_updated_at = null
         chat.summary_turn_count = 0
-        chat.summary_char_count = 0
+        chat.summary_token_count = 0
         delete chat.id
         chat.messages = chat.messages.map((message) => {
             delete message.id

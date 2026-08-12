@@ -162,6 +162,13 @@
       "when": 1785660000001,
       "tag": "0022_summary_char_count",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "6",
+      "when": 1786531881209,
+      "tag": "0023_lying_swordsman",
+      "breakpoints": true
     }
   ]
 }

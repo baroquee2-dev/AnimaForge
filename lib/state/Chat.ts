@@ -7,9 +7,10 @@ import { useShallow } from 'zustand/react/shallow'
 
 import { db as database } from '@db'
 import { Tokenizer } from '@lib/engine/Tokenizer'
+import { getContextLimit } from '@lib/hooks/ContextLimit'
 import i18n from '@lib/i18n'
 import { replaceMacros } from '@lib/state/Macros'
-import { scheduleChatSummaryUpdate, SUMMARY_EVERY_N_TURNS } from '@lib/summary/ChatSummary'
+import { scheduleChatSummaryUpdate } from '@lib/summary/ChatSummary'
 import { AppDirectory, copyFile, deleteFile, fileInfo } from '@lib/utils/File'
 import { convertToFormatInstruct } from '@lib/utils/TextFormat'
 import {
@@ -45,19 +46,20 @@ export interface ChatData extends ChatType {
     autoScroll?: { cause: 'search' | 'saveScroll'; index: number }
 }
 
-const SUMMARY_EVERY_N_CHARS = 2000
+/** Trigger a summary once accumulated tokens since the last one reach this. */
+const SUMMARY_EVERY_N_TOKENS = 4000
+/** ...or once they reach this fraction of the current context window, whichever comes first. */
+const SUMMARY_CONTEXT_RATIO = 0.6
 
-const getCurrentTurnCharCount = (messages: ChatEntry[]): number => {
-    if (messages.length === 0) return 0
-
-    let charCount = 0
+/** Indexes (from the end) of messages belonging to the current, not-yet-summarized turn. */
+const getCurrentTurnIndexes = (messages: ChatEntry[]): number[] => {
+    const indexes: number[] = []
     for (let i = messages.length - 1; i >= 0; i--) {
         // Stop when we reach the previous assistant message (not the current last one)
         if (!messages[i].is_user && i !== messages.length - 1) break
-        const text = messages[i].swipes[messages[i].swipe_id]?.swipe ?? ''
-        charCount += text.length
+        indexes.push(i)
     }
-    return charCount
+    return indexes
 }
 
 interface ChatSearchQueryResult {
@@ -246,22 +248,31 @@ export namespace Chats {
 
             if (!shouldSummarize || !summaryChatId) return
 
+            let turnTokenCount = 0
+            for (const index of getCurrentTurnIndexes(messagesSnapshot)) {
+                turnTokenCount += await get().getTokenCount(index)
+            }
+
             const nextTurnCount = (chat?.summary_turn_count ?? 0) + 1
-            const nextCharCount =
-                (chat?.summary_char_count ?? 0) + getCurrentTurnCharCount(messagesSnapshot)
+            const nextTokenCount = (chat?.summary_token_count ?? 0) + turnTokenCount
+            const contextTriggerLimit = Math.floor(getContextLimit() * SUMMARY_CONTEXT_RATIO)
             const shouldTriggerSummary =
-                nextTurnCount >= SUMMARY_EVERY_N_TURNS || nextCharCount >= SUMMARY_EVERY_N_CHARS
+                nextTokenCount >= SUMMARY_EVERY_N_TOKENS ||
+                (contextTriggerLimit > 0 && nextTokenCount >= contextTriggerLimit)
 
             if (!shouldTriggerSummary) {
+                Logger.info(
+                    `Summary token count for chat ${summaryChatId}: ${nextTokenCount}/${SUMMARY_EVERY_N_TOKENS} (${SUMMARY_CONTEXT_RATIO * 100}% context: ${nextTokenCount}/${contextTriggerLimit})`
+                )
                 await db.mutate.setSummaryTurnCount(summaryChatId, nextTurnCount)
-                await db.mutate.setSummaryCharCount(summaryChatId, nextCharCount)
+                await db.mutate.setSummaryTokenCount(summaryChatId, nextTokenCount)
                 set((state) => {
                     if (!state.data || state.data.id !== summaryChatId) return state
                     return {
                         data: {
                             ...state.data,
                             summary_turn_count: nextTurnCount,
-                            summary_char_count: nextCharCount,
+                            summary_token_count: nextTokenCount,
                         },
                     }
                 })
@@ -269,10 +280,11 @@ export namespace Chats {
             }
 
             const triggerReasons: string[] = []
-            if (nextTurnCount >= SUMMARY_EVERY_N_TURNS) triggerReasons.push('turn count')
-            if (nextCharCount >= SUMMARY_EVERY_N_CHARS) triggerReasons.push('character count')
+            if (nextTokenCount >= SUMMARY_EVERY_N_TOKENS) triggerReasons.push('token count')
+            if (contextTriggerLimit > 0 && nextTokenCount >= contextTriggerLimit)
+                triggerReasons.push(`${SUMMARY_CONTEXT_RATIO * 100}% of context window`)
             Logger.info(
-                `Summary triggered for chat ${summaryChatId}: ${triggerReasons.join(' + ')} (turns: ${nextTurnCount}/${SUMMARY_EVERY_N_TURNS}, chars: ${nextCharCount}/${SUMMARY_EVERY_N_CHARS})`
+                `Summary triggered for chat ${summaryChatId}: ${triggerReasons.join(' + ')} (tokens: ${nextTokenCount}/${SUMMARY_EVERY_N_TOKENS}, ${SUMMARY_CONTEXT_RATIO * 100}% context: ${nextTokenCount}/${contextTriggerLimit})`
             )
 
             scheduleChatSummaryUpdate({
@@ -283,7 +295,7 @@ export namespace Chats {
                 persist: async (chatId, summary, updatedAt) => {
                     await db.mutate.updateChatSummary(chatId, summary, updatedAt)
                     await db.mutate.setSummaryTurnCount(chatId, 0)
-                    await db.mutate.setSummaryCharCount(chatId, 0)
+                    await db.mutate.setSummaryTokenCount(chatId, 0)
                 },
                 onApplied: (chatId, summary, updatedAt) => {
                     set((state) => {
@@ -294,7 +306,7 @@ export namespace Chats {
                                 summary,
                                 summary_updated_at: updatedAt,
                                 summary_turn_count: 0,
-                                summary_char_count: 0,
+                                summary_token_count: 0,
                             },
                         }
                     })
@@ -981,10 +993,10 @@ export namespace Chats {
                     .where(eq(chats.id, chatId))
             }
 
-            export const setSummaryCharCount = async (chatId: number, charCount: number) => {
+            export const setSummaryTokenCount = async (chatId: number, tokenCount: number) => {
                 await database
                     .update(chats)
-                    .set({ summary_char_count: charCount })
+                    .set({ summary_token_count: tokenCount })
                     .where(eq(chats.id, chatId))
             }
 
