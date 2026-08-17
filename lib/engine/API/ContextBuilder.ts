@@ -108,7 +108,11 @@ export const buildChatCompletionContext = async ({
     let hasImage = false
     const messageBuffer: Message[] = []
     let index = messages.length - 1
+    const hasSummary = !!summary?.trim()
+    let turnCount = 0
     for (const message of messages.reverse()) {
+        if (hasSummary && turnCount >= MAX_TURNS_WITH_SUMMARY) break
+
         const swipe_data = message.swipes[message.swipe_id]
         // special case for claude, prefill may be useful!
         const name_string = `${message.name} :`
@@ -177,6 +181,7 @@ export const buildChatCompletionContext = async ({
         }
         first_message_reached = index === 0
         total_length += len
+        if (message.is_user) turnCount++
         index--
     }
 
@@ -269,7 +274,11 @@ export const buildTextCompletionContext = async ({
 
     // we require lengths for names if use_names is enabled
     let hasMedia = false
+    const hasSummary = !!summary?.trim()
+    let turnCount = 0
     for (const message of messages.reverse()) {
+        if (hasSummary && turnCount >= MAX_TURNS_WITH_SUMMARY) break
+
         if (!hasMedia && message.attachments?.length) {
             hasMedia = true
         }
@@ -330,6 +339,7 @@ export const buildTextCompletionContext = async ({
         is_last = false
         message_acc_length += shard_length
         message_acc = message_shard + message_acc
+        if (message.is_user) turnCount++
         index--
     }
 
@@ -368,6 +378,9 @@ export const buildTextCompletionContext = async ({
 }
 
 const thinkRule = buildThinkRules()
+
+/** Once a summary exists, raw history is hard-capped to this many recent turns. */
+const MAX_TURNS_WITH_SUMMARY = 20
 
 const formatSummaryContext = (summary?: string) => {
     if (!summary?.trim()) return ''
