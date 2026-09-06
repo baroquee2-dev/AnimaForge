@@ -555,6 +555,7 @@ const obtainFields = async (): Promise<ContextBuilderParams | void> => {
             user: Object.assign({}, userCard),
             messages: [...messages],
             summary: chatState.data?.summary,
+            keyFacts: chatState.data?.keyFacts,
             chatTokenizer: async (entry, index) => {
                 // IMPORTANT - we use -1 for dummy entries
                 if (entry.id === -1) return 0

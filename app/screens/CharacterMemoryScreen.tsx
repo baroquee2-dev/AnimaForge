@@ -24,6 +24,9 @@ const CharacterMemoryScreen = () => {
     const router = useRouter()
     const { color, spacing, fontSize, borderRadius } = Theme.useTheme()
     const [autoSummary, setAutoSummary] = useMMKVBoolean(AppSettings.AutoSummary)
+    const [autoExtractKeyFacts, setAutoExtractKeyFacts] = useMMKVBoolean(
+        AppSettings.AutoExtractKeyFacts
+    )
     const [showCharacterSheet, setShowCharacterSheet] = useState(false)
 
     const { data } = useLiveQuery(Characters.db.query.charactersWithSummary(), [])
@@ -50,6 +53,13 @@ const CharacterMemoryScreen = () => {
                     description={t('memory.autoSummaryDesc')}
                     value={autoSummary}
                     onChangeValue={setAutoSummary}
+                />
+
+                <ThemedSwitch
+                    label={t('memory.autoExtractKeyFacts')}
+                    description={t('memory.autoExtractKeyFactsDesc')}
+                    value={autoExtractKeyFacts}
+                    onChangeValue={setAutoExtractKeyFacts}
                 />
 
                 <View style={{ marginTop: spacing.xl2, marginBottom: spacing.m }}>

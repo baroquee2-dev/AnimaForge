@@ -1,5 +1,5 @@
 import { relations } from 'drizzle-orm'
-import { integer, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { integer, primaryKey, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core'
 
 // TAVERN V2 SPEC
 
@@ -141,11 +141,63 @@ export const chatSwipes = sqliteTable('chat_swipes', {
     timings: text('timings', { mode: 'json' }).$type<CompletionTimings>(),
 })
 
+/**
+ * Fixed buckets for extracted key facts. The extractor names the fact itself but
+ * must place it in one of these, which keeps the editor groupable and stops the
+ * model from inventing a parallel taxonomy every run.
+ */
+export const CHAT_KEY_FACT_CATEGORIES = [
+    'identity',
+    'relationship',
+    'commitment',
+    'world',
+    'preference',
+] as const
+
+export const chatKeyFacts = sqliteTable(
+    'chat_key_facts',
+    {
+        id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
+        chat_id: integer('chat_id', { mode: 'number' })
+            .notNull()
+            .references(() => chats.id, { onDelete: 'cascade' }),
+        category: text('category', { enum: CHAT_KEY_FACT_CATEGORIES })
+            .notNull()
+            .default('identity'),
+        key: text('key').notNull(),
+        value: text('value').notNull(),
+        /** Why the fact changed, written when a later turn overwrites `value`. */
+        note: text('note').notNull().default(''),
+        previous_value: text('previous_value').notNull().default(''),
+        /** Superseded or fulfilled facts are kept and flagged rather than deleted. */
+        stale: integer('stale', { mode: 'boolean' }).notNull().default(false),
+        created_at: integer('created_at', { mode: 'number' })
+            .notNull()
+            .$defaultFn(() => Date.now()),
+        updated_at: integer('updated_at', { mode: 'number' })
+            .notNull()
+            .$defaultFn(() => Date.now()),
+    },
+    (table) => {
+        return {
+            chatKeyIdx: uniqueIndex('chat_key_facts_chat_id_key_idx').on(table.chat_id, table.key),
+        }
+    }
+)
+
 export const chatsRelations = relations(chats, ({ many, one }) => ({
     messages: many(chatEntries),
+    keyFacts: many(chatKeyFacts),
     character: one(characters, {
         fields: [chats.character_id],
         references: [characters.id],
+    }),
+}))
+
+export const chatKeyFactsRelations = relations(chatKeyFacts, ({ one }) => ({
+    chat: one(chats, {
+        fields: [chatKeyFacts.chat_id],
+        references: [chats.id],
     }),
 }))
 
@@ -398,6 +450,8 @@ export type ChatSwipe = typeof chatSwipes.$inferSelect
 export type ChatEntryType = typeof chatEntries.$inferSelect
 export type ChatType = typeof chats.$inferSelect
 export type ChatAttachmentType = typeof chatAttachments.$inferSelect
+export type ChatKeyFactType = typeof chatKeyFacts.$inferSelect
+export type ChatKeyFactCategory = (typeof CHAT_KEY_FACT_CATEGORIES)[number]
 
 export type CompletionTimings = {
     predicted_per_token_ms: number

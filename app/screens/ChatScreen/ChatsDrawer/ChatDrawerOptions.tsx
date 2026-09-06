@@ -165,6 +165,21 @@ const ChatEditPopup: React.FC<ChatEditPopupProps> = ({ item, children, onPress }
                           ]
                         : []),
                     {
+                        label: t('keyFacts.edit'),
+                        icon: 'tags' as const,
+                        onPress: (close: () => void) => {
+                            setShow(Drawer.ID.CHATLIST, false)
+                            close()
+                            router.push({
+                                pathname: '/screens/ChatKeyFactsEditorScreen',
+                                params: {
+                                    chatId: String(item.id),
+                                    chatName: item.name,
+                                },
+                            })
+                        },
+                    },
+                    {
                         label: t('common.delete'),
                         icon: 'delete',
                         variant: 'warning' as const,

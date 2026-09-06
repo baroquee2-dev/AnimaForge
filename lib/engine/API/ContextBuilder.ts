@@ -8,8 +8,10 @@ import { defaultSystemPromptFormat, InstructTokenCache, InstructType } from '@li
 import { Logger } from '@lib/state/Logger'
 import { replaceMacros } from '@lib/state/Macros'
 import { mmkv } from '@lib/storage/MMKV'
+import { formatKeyFactsForContext } from '@lib/summary/KeyFactsFormat'
 import { readBase64Async } from '@lib/utils/File'
 import { Macro } from '@lib/utils/Macros'
+import { ChatKeyFactType } from 'db/schema'
 
 import { APIConfiguration, APIValues } from './APIBuilder.types'
 
@@ -37,6 +39,7 @@ export interface ContextBuilderParams {
     maxLength: number
     cache: TokenCache
     summary?: string
+    keyFacts?: ChatKeyFactType[]
     bypassContextLength?: boolean
     messageLoader?: MessageLoader
 }
@@ -70,6 +73,7 @@ export const buildChatCompletionContext = async ({
     user,
     cache,
     summary,
+    keyFacts,
     instruct,
     tokenizer,
     chatTokenizer,
@@ -93,7 +97,7 @@ export const buildChatCompletionContext = async ({
         usePrefix,
     })
 
-    const summaryContext = formatSummaryContext(summary)
+    const summaryContext = formatSummaryContext(summary) + formatKeyFactsForContext(keyFacts)
     const summaryLength = summaryContext ? await tokenizer(summaryContext) : 0
     const initial = systemPrompt + summaryContext
     let total_length = systemPromptLength + summaryLength
@@ -233,6 +237,7 @@ export const buildTextCompletionContext = async ({
     user,
     cache,
     summary,
+    keyFacts,
     instruct,
     tokenizer,
     chatTokenizer,
@@ -254,7 +259,7 @@ export const buildTextCompletionContext = async ({
         useSuffix,
     })
 
-    const summaryContext = formatSummaryContext(summary)
+    const summaryContext = formatSummaryContext(summary) + formatKeyFactsForContext(keyFacts)
     const summaryLength = summaryContext ? await tokenizer(summaryContext) : 0
     let payload = systemPrompt + summaryContext
     const payloadLength = systemPromptLength + summaryLength

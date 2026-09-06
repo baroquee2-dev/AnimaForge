@@ -17,9 +17,10 @@ type ChatDrawerItemProps = {
     item: ListItem
     onLoad: (id: number) => void
     index: number
+    keyFactCount: number
 }
 
-const ChatDrawerItem: React.FC<ChatDrawerItemProps> = ({ item, onLoad, index }) => {
+const ChatDrawerItem: React.FC<ChatDrawerItemProps> = ({ item, onLoad, index, keyFactCount }) => {
     const { t } = useTranslation()
     const styles = useStyles()
     const router = useRouter()
@@ -30,10 +31,12 @@ const ChatDrawerItem: React.FC<ChatDrawerItemProps> = ({ item, onLoad, index }) 
     const hasSummary = !!item.summary?.trim()
     const isActive = item.id === chatId
 
-    const handleEditSummary = () => {
+    const openEditor = (
+        pathname: '/screens/ChatSummaryEditorScreen' | '/screens/ChatKeyFactsEditorScreen'
+    ) => {
         setShow(Drawer.ID.CHATLIST, false)
         router.push({
-            pathname: '/screens/ChatSummaryEditorScreen',
+            pathname: pathname,
             params: {
                 chatId: String(item.id),
                 chatName: item.name,
@@ -63,7 +66,7 @@ const ChatDrawerItem: React.FC<ChatDrawerItemProps> = ({ item, onLoad, index }) 
                 {hasSummary && (
                     <TouchableOpacity
                         style={styles.summaryAction}
-                        onPress={handleEditSummary}
+                        onPress={() => openEditor('/screens/ChatSummaryEditorScreen')}
                         accessibilityRole="button"
                         accessibilityLabel={t('chat.editSummary')}>
                         <View style={styles.summaryBadge}>
@@ -72,6 +75,25 @@ const ChatDrawerItem: React.FC<ChatDrawerItemProps> = ({ item, onLoad, index }) 
                         </View>
                         <View style={styles.summaryActionLabel}>
                             <Text style={styles.summaryActionText}>{t('chat.editSummary')}</Text>
+                            <AntDesign name="edit" size={14} color={color.primary._400} />
+                        </View>
+                    </TouchableOpacity>
+                )}
+
+                {keyFactCount > 0 && (
+                    <TouchableOpacity
+                        style={styles.summaryAction}
+                        onPress={() => openEditor('/screens/ChatKeyFactsEditorScreen')}
+                        accessibilityRole="button"
+                        accessibilityLabel={t('keyFacts.edit')}>
+                        <View style={styles.summaryBadge}>
+                            <AntDesign name="tags" size={14} color={color.primary._200} />
+                            <Text style={styles.summaryBadgeText}>
+                                {`${t('keyFacts.badge')} ${keyFactCount}`}
+                            </Text>
+                        </View>
+                        <View style={styles.summaryActionLabel}>
+                            <Text style={styles.summaryActionText}>{t('keyFacts.edit')}</Text>
                             <AntDesign name="edit" size={14} color={color.primary._400} />
                         </View>
                     </TouchableOpacity>

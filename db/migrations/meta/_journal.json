@@ -169,6 +169,13 @@
       "when": 1786531881209,
       "tag": "0023_lying_swordsman",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "6",
+      "when": 1788722811579,
+      "tag": "0024_chat_key_facts",
+      "breakpoints": true
     }
   ]
 }

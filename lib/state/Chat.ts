@@ -1,4 +1,4 @@
-import { and, count, desc, eq, getTableColumns, like, sql } from 'drizzle-orm'
+import { and, count, desc, eq, getTableColumns, inArray, like, sql } from 'drizzle-orm'
 import { randomUUID } from 'expo-crypto'
 import * as Notifications from 'expo-notifications'
 import mime from 'mime/lite'
@@ -11,6 +11,7 @@ import { getContextLimit } from '@lib/hooks/ContextLimit'
 import i18n from '@lib/i18n'
 import { replaceMacros } from '@lib/state/Macros'
 import { scheduleChatSummaryUpdate } from '@lib/summary/ChatSummary'
+import { KeyFactOp, MAX_KEY_FACTS_PER_CHAT, scheduleKeyFactsUpdate } from '@lib/summary/KeyFacts'
 import { AppDirectory, copyFile, deleteFile, fileInfo } from '@lib/utils/File'
 import { convertToFormatInstruct } from '@lib/utils/TextFormat'
 import {
@@ -18,6 +19,8 @@ import {
     ChatAttachmentType,
     chatEntries,
     ChatEntryType,
+    chatKeyFacts,
+    ChatKeyFactType,
     chats,
     ChatSwipe,
     chatSwipes,
@@ -43,6 +46,7 @@ export interface ChatEntry extends ChatEntryType {
 
 export interface ChatData extends ChatType {
     messages: ChatEntry[]
+    keyFacts: ChatKeyFactType[]
     autoScroll?: { cause: 'search' | 'saveScroll'; index: number }
 }
 
@@ -108,6 +112,7 @@ export interface ChatState {
     renameChat: (chatId: number, name: string) => void
     setAutoSummary: (enabled: boolean) => Promise<void>
     setChatSummary: (chatId: number, summary: string) => Promise<void>
+    refreshKeyFacts: (chatId: number) => Promise<void>
     // swipe data
     swipe: (index: number, direction: number) => Promise<boolean>
     addSwipe: (index: number, message?: string) => Promise<number | void>
@@ -232,21 +237,24 @@ export namespace Chats {
             await get().updateFromBuffer(cachedSwipeId)
             const chat = get().data
             const output = get().buffer.data
-            const shouldSummarize =
-                mmkv.getBoolean(AppSettings.AutoSummary) &&
+            const autoSummary = !!mmkv.getBoolean(AppSettings.AutoSummary)
+            const autoKeyFacts = !!mmkv.getBoolean(AppSettings.AutoExtractKeyFacts)
+            const shouldTrackMemory =
+                (autoSummary || autoKeyFacts) &&
                 !!output.trim() &&
                 !wasAborted &&
                 !wasFailed &&
                 !!chat?.id
 
-            const summaryChatId = chat?.id
+            const memoryChatId = chat?.id
             const previousSummary = chat?.summary ?? ''
+            const previousKeyFacts = chat?.keyFacts ? [...chat.keyFacts] : []
             const messagesSnapshot = chat?.messages ? [...chat.messages] : []
 
             useInference.getState().stopGenerating()
             get().setBuffer({ data: '' })
 
-            if (!shouldSummarize || !summaryChatId) return
+            if (!shouldTrackMemory || !memoryChatId) return
 
             let turnTokenCount = 0
             for (const index of getCurrentTurnIndexes(messagesSnapshot)) {
@@ -262,12 +270,12 @@ export namespace Chats {
 
             if (!shouldTriggerSummary) {
                 Logger.info(
-                    `Summary token count for chat ${summaryChatId}: ${nextTokenCount}/${SUMMARY_EVERY_N_TOKENS} (${SUMMARY_CONTEXT_RATIO * 100}% context: ${nextTokenCount}/${contextTriggerLimit})`
+                    `Summary token count for chat ${memoryChatId}: ${nextTokenCount}/${SUMMARY_EVERY_N_TOKENS} (${SUMMARY_CONTEXT_RATIO * 100}% context: ${nextTokenCount}/${contextTriggerLimit})`
                 )
-                await db.mutate.setSummaryTurnCount(summaryChatId, nextTurnCount)
-                await db.mutate.setSummaryTokenCount(summaryChatId, nextTokenCount)
+                await db.mutate.setSummaryTurnCount(memoryChatId, nextTurnCount)
+                await db.mutate.setSummaryTokenCount(memoryChatId, nextTokenCount)
                 set((state) => {
-                    if (!state.data || state.data.id !== summaryChatId) return state
+                    if (!state.data || state.data.id !== memoryChatId) return state
                     return {
                         data: {
                             ...state.data,
@@ -284,37 +292,62 @@ export namespace Chats {
             if (contextTriggerLimit > 0 && nextTokenCount >= contextTriggerLimit)
                 triggerReasons.push(`${SUMMARY_CONTEXT_RATIO * 100}% of context window`)
             Logger.info(
-                `Summary triggered for chat ${summaryChatId}: ${triggerReasons.join(' + ')} (tokens: ${nextTokenCount}/${SUMMARY_EVERY_N_TOKENS}, ${SUMMARY_CONTEXT_RATIO * 100}% context: ${nextTokenCount}/${contextTriggerLimit})`
+                `Memory update triggered for chat ${memoryChatId}: ${triggerReasons.join(' + ')} (tokens: ${nextTokenCount}/${SUMMARY_EVERY_N_TOKENS}, ${SUMMARY_CONTEXT_RATIO * 100}% context: ${nextTokenCount}/${contextTriggerLimit})`
             )
 
-            scheduleChatSummaryUpdate({
-                chatId: summaryChatId,
-                previousSummary,
-                messages: messagesSnapshot,
-                turnCount: nextTurnCount,
-                persist: async (chatId, summary, updatedAt) => {
-                    await db.mutate.updateChatSummary(chatId, summary, updatedAt)
-                    await db.mutate.setSummaryTurnCount(chatId, 0)
-                    await db.mutate.setSummaryTokenCount(chatId, 0)
-                },
-                onApplied: (chatId, summary, updatedAt) => {
-                    set((state) => {
-                        if (!state.data || state.data.id !== chatId) return state
-                        return {
-                            data: {
-                                ...state.data,
-                                summary,
-                                summary_updated_at: updatedAt,
-                                summary_turn_count: 0,
-                                summary_token_count: 0,
-                            },
-                        }
-                    })
-                },
+            // Both jobs read this window, so the counters reset here rather than in
+            // either job's persist step. A failed run waits for the next threshold
+            // instead of retrying against a possibly broken provider every turn.
+            await db.mutate.setSummaryTurnCount(memoryChatId, 0)
+            await db.mutate.setSummaryTokenCount(memoryChatId, 0)
+            set((state) => {
+                if (!state.data || state.data.id !== memoryChatId) return state
+                return {
+                    data: { ...state.data, summary_turn_count: 0, summary_token_count: 0 },
+                }
             })
+
+            if (autoSummary)
+                scheduleChatSummaryUpdate({
+                    chatId: memoryChatId,
+                    previousSummary: previousSummary,
+                    messages: messagesSnapshot,
+                    turnCount: nextTurnCount,
+                    persist: async (chatId, summary, updatedAt) => {
+                        await db.mutate.updateChatSummary(chatId, summary, updatedAt)
+                    },
+                    onApplied: (chatId, summary, updatedAt) => {
+                        set((state) => {
+                            if (!state.data || state.data.id !== chatId) return state
+                            return {
+                                data: {
+                                    ...state.data,
+                                    summary: summary,
+                                    summary_updated_at: updatedAt,
+                                },
+                            }
+                        })
+                    },
+                })
+
+            if (autoKeyFacts)
+                scheduleKeyFactsUpdate({
+                    chatId: memoryChatId,
+                    facts: previousKeyFacts,
+                    messages: messagesSnapshot,
+                    turnCount: nextTurnCount,
+                    persist: db.mutate.applyKeyFactOps,
+                    onApplied: (chatId, keyFacts) => {
+                        set((state) => {
+                            if (!state.data || state.data.id !== chatId) return state
+                            return { data: { ...state.data, keyFacts } }
+                        })
+                    },
+                })
         },
         load: async (chatId, overrideScrollOffset) => {
             const data = (await db.query.chat(chatId)) as ChatData | undefined
+            if (data) data.keyFacts = await db.query.keyFacts(chatId)
 
             if (data?.user_id && mmkv.getBoolean(AppSettings.AutoLoadUser)) {
                 const userID = Characters.useUserStore.getState().id
@@ -650,6 +683,14 @@ export namespace Chats {
                 }
             })
         },
+        refreshKeyFacts: async (chatId: number) => {
+            if (get().data?.id !== chatId) return
+            const keyFacts = await db.query.keyFacts(chatId)
+            set((state) => {
+                if (!state.data || state.data.id !== chatId) return state
+                return { data: { ...state.data, keyFacts } }
+            })
+        },
     }))
 
     export namespace db {
@@ -751,6 +792,26 @@ export namespace Chats {
                 return result.map((item) => {
                     return { ...item, sendDate: new Date(item.sendDate * 1000) }
                 })
+            }
+
+            export const keyFacts = async (chatId: number) => {
+                return await database.query.chatKeyFacts.findMany({
+                    where: eq(chatKeyFacts.chat_id, chatId),
+                    orderBy: chatKeyFacts.id,
+                })
+            }
+
+            /** Live-queryable fact counts for every chat of a character. */
+            export const keyFactCountQuery = (charId: number) => {
+                return database
+                    .select({
+                        chatId: chatKeyFacts.chat_id,
+                        factCount: count(chatKeyFacts.id),
+                    })
+                    .from(chatKeyFacts)
+                    .innerJoin(chats, eq(chats.id, chatKeyFacts.chat_id))
+                    .where(eq(chats.character_id, charId))
+                    .groupBy(chatKeyFacts.chat_id)
             }
 
             export const chatWithoutId = async (chatId: number, limit?: number) => {
@@ -961,6 +1022,17 @@ export namespace Chats {
 
                 result.last_modified = Date.now()
                 const newChatid = await cloneChat(result)
+                if (!newChatid) return newChatid
+
+                const facts = await query.keyFacts(chatId)
+                if (facts.length > 0) {
+                    await database.insert(chatKeyFacts).values(
+                        facts.map(({ id, chat_id, ...fact }) => ({
+                            ...fact,
+                            chat_id: newChatid,
+                        }))
+                    )
+                }
                 return newChatid
             }
 
@@ -984,6 +1056,142 @@ export namespace Chats {
                     .update(chats)
                     .set({ summary, summary_updated_at: updatedAt })
                     .where(eq(chats.id, chatId))
+            }
+
+            /**
+             * Drop the least useful rows once a chat exceeds the cap: stale facts
+             * first, then whichever active facts have gone longest without a change.
+             */
+            const pruneKeyFacts = async (chatId: number) => {
+                const rows = await database
+                    .select({
+                        id: chatKeyFacts.id,
+                        stale: chatKeyFacts.stale,
+                        updated_at: chatKeyFacts.updated_at,
+                    })
+                    .from(chatKeyFacts)
+                    .where(eq(chatKeyFacts.chat_id, chatId))
+                if (rows.length <= MAX_KEY_FACTS_PER_CHAT) return
+
+                const victims = rows
+                    .sort(
+                        (a, b) => Number(b.stale) - Number(a.stale) || a.updated_at - b.updated_at
+                    )
+                    .slice(0, rows.length - MAX_KEY_FACTS_PER_CHAT)
+                await database.delete(chatKeyFacts).where(
+                    inArray(
+                        chatKeyFacts.id,
+                        victims.map((item) => item.id)
+                    )
+                )
+            }
+
+            /**
+             * Apply extractor output. Facts are keyed by name within a chat, so a
+             * repeated key overwrites in place and keeps the old value plus the
+             * model's reason for the change.
+             */
+            export const applyKeyFactOps = async (chatId: number, ops: KeyFactOp[]) => {
+                const existing = await query.keyFacts(chatId)
+                const byKey = new Map(existing.map((fact) => [fact.key, fact]))
+                const now = Date.now()
+
+                for (const op of ops) {
+                    const current = byKey.get(op.key)
+
+                    if (op.op === 'stale') {
+                        if (!current || current.stale) continue
+                        const changes = {
+                            stale: true,
+                            note: op.note || current.note,
+                            updated_at: now,
+                        }
+                        await database
+                            .update(chatKeyFacts)
+                            .set(changes)
+                            .where(eq(chatKeyFacts.id, current.id))
+                        byKey.set(op.key, { ...current, ...changes })
+                        continue
+                    }
+
+                    if (!current) {
+                        // Tracked in byKey because a single batch can carry more than
+                        // one op for the same key, and (chat_id, key) is unique.
+                        const [inserted] = await database
+                            .insert(chatKeyFacts)
+                            .values({
+                                chat_id: chatId,
+                                category: op.category,
+                                key: op.key,
+                                value: op.value,
+                                note: op.note,
+                                created_at: now,
+                                updated_at: now,
+                            })
+                            .returning()
+                        byKey.set(op.key, inserted)
+                        continue
+                    }
+
+                    if (current.value === op.value && !current.stale) continue
+                    const changes = {
+                        category: op.category,
+                        value: op.value,
+                        note: op.note,
+                        previous_value: current.value,
+                        stale: false,
+                        updated_at: now,
+                    }
+                    await database
+                        .update(chatKeyFacts)
+                        .set(changes)
+                        .where(eq(chatKeyFacts.id, current.id))
+                    byKey.set(op.key, { ...current, ...changes })
+                }
+
+                await pruneKeyFacts(chatId)
+                return await query.keyFacts(chatId)
+            }
+
+            export const upsertKeyFact = async (
+                chatId: number,
+                fact: Pick<ChatKeyFactType, 'category' | 'key' | 'value' | 'note' | 'stale'> & {
+                    id?: number
+                }
+            ) => {
+                const now = Date.now()
+                if (fact.id) {
+                    await database
+                        .update(chatKeyFacts)
+                        .set({
+                            category: fact.category,
+                            key: fact.key,
+                            value: fact.value,
+                            note: fact.note,
+                            stale: fact.stale,
+                            updated_at: now,
+                        })
+                        .where(eq(chatKeyFacts.id, fact.id))
+                    return
+                }
+                await database.insert(chatKeyFacts).values({
+                    chat_id: chatId,
+                    category: fact.category,
+                    key: fact.key,
+                    value: fact.value,
+                    note: fact.note,
+                    stale: fact.stale,
+                    created_at: now,
+                    updated_at: now,
+                })
+            }
+
+            export const deleteKeyFact = async (factId: number) => {
+                await database.delete(chatKeyFacts).where(eq(chatKeyFacts.id, factId))
+            }
+
+            export const deleteAllKeyFacts = async (chatId: number) => {
+                await database.delete(chatKeyFacts).where(eq(chatKeyFacts.chat_id, chatId))
             }
 
             export const setSummaryTurnCount = async (chatId: number, turnCount: number) => {
