@@ -2,7 +2,7 @@ import { AntDesign } from '@expo/vector-icons'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import ThemedButton from '@components/buttons/ThemedButton'
@@ -263,7 +263,13 @@ const ChatKeyFactsEditorScreen = () => {
 
             <BottomSheet visible={!!draft} setVisible={(v) => !v && setDraft(undefined)}>
                 {draft && (
-                    <View style={{ rowGap: spacing.l }}>
+                    <ScrollView
+                        // The sheet caps at 70% of the screen; without flexShrink the
+                        // scroll view keeps its full content height and gets clipped
+                        // instead of scrolling.
+                        style={{ flexShrink: 1 }}
+                        contentContainerStyle={{ rowGap: spacing.l }}
+                        keyboardShouldPersistTaps="handled">
                         <Text style={styles.sheetTitle}>
                             {draft.id ? t('keyFacts.editFact') : t('keyFacts.newFact')}
                         </Text>
@@ -274,15 +280,19 @@ const ChatKeyFactsEditorScreen = () => {
                             modalTitle={t('keyFacts.categoryLabel')}
                             onChangeValue={(category) => setDraft({ ...draft, category })}
                         />
+                        {/* ThemedTextInput defaults to flex:1, which collapses every
+                            field to zero height when they are stacked in a column. */}
                         <ThemedTextInput
                             label={t('keyFacts.keyLabel')}
                             placeholder={t('keyFacts.keyPlaceholder')}
+                            containerStyle={{ flex: 0 }}
                             value={draft.key}
                             onChangeText={(key) => setDraft({ ...draft, key })}
                         />
                         <ThemedTextInput
                             label={t('keyFacts.valueLabel')}
                             placeholder={t('keyFacts.valuePlaceholder')}
+                            containerStyle={{ flex: 0 }}
                             numberOfLines={3}
                             value={draft.value}
                             onChangeText={(value) => setDraft({ ...draft, value })}
@@ -290,6 +300,7 @@ const ChatKeyFactsEditorScreen = () => {
                         <ThemedTextInput
                             label={t('keyFacts.noteLabel')}
                             placeholder={t('keyFacts.notePlaceholder')}
+                            containerStyle={{ flex: 0 }}
                             numberOfLines={2}
                             value={draft.note}
                             onChangeText={(note) => setDraft({ ...draft, note })}
@@ -305,7 +316,7 @@ const ChatKeyFactsEditorScreen = () => {
                             variant={saving ? 'disabled' : 'secondary'}
                             onPress={handleSaveDraft}
                         />
-                    </View>
+                    </ScrollView>
                 )}
             </BottomSheet>
         </SafeAreaView>
