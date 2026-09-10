@@ -1,0 +1,1 @@
+ALTER TABLE `chats` ADD `auto_summary` integer DEFAULT false NOT NULL;

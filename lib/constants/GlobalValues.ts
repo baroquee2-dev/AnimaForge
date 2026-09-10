@@ -30,6 +30,8 @@ export enum AppSettings {
     SaveScrollPosition = 'settings-savescrollposition',
     AutoGenerateTitle = 'settings-auto-generate-title',
     KeepAwake = 'settings-keep-awake',
+    AutoSummary = 'settings-auto-summary',
+    AutoExtractKeyFacts = 'settings-auto-extract-key-facts',
 }
 
 /**
@@ -62,6 +64,8 @@ export const AppSettingsDefault: Record<AppSettings, boolean> = {
     [AppSettings.SaveScrollPosition]: false,
     [AppSettings.AutoGenerateTitle]: true,
     [AppSettings.KeepAwake]: true,
+    [AppSettings.AutoSummary]: false,
+    [AppSettings.AutoExtractKeyFacts]: false,
 }
 
 export const CLAUDE_VERSION = '2023-06-01'

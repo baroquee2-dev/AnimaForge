@@ -19,6 +19,7 @@ import { PortalHost } from '@components/views/Portal'
 import '@lib/i18n'
 import { useAppStateNotificationObserver } from '@lib/notifications/Notifications'
 import { useDialogueFontsStore } from '@lib/state/DialogueFonts'
+import { LiteLLMModels } from '@lib/state/LiteLLMModels'
 import { Theme } from '@lib/theme/ThemeManager'
 
 SplashScreen.preventAutoHideAsync()
@@ -45,6 +46,7 @@ const Layout = () => {
     }, [fontsLoaded, setFontsReady])
 
     useAppStateNotificationObserver()
+    LiteLLMModels.useDailyRefresh()
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
             <KeyboardProvider>

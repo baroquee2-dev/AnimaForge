@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
-import { StyleSheet } from 'react-native'
 import { useTranslation } from 'react-i18next'
+import { StyleSheet } from 'react-native'
 
 import ContextMenu from '@components/views/ContextMenu'
 import Drawer from '@components/views/Drawer'

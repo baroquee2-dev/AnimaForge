@@ -1,6 +1,6 @@
 import { FlashList } from '@shopify/flash-list'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated'
 import { useTranslation } from 'react-i18next'
@@ -24,6 +24,13 @@ const ChatsDrawer = () => {
     const styles = useStyles()
     const { charId } = Characters.useCharacterStore(useShallow((state) => ({ charId: state.id })))
     const { data } = useLiveQuery(Chats.db.query.chatListQuery(charId ?? 0), [charId])
+    const { data: factCounts } = useLiveQuery(Chats.db.query.keyFactCountQuery(charId ?? 0), [
+        charId,
+    ])
+    const factCountByChat = useMemo(
+        () => new Map((factCounts ?? []).map((row) => [row.chatId, row.factCount])),
+        [factCounts]
+    )
     const setShow = Drawer.useDrawerStore((state) => state.setShow)
     const showChats = Drawer.useDrawerStore((state) => state.values?.[Drawer.ID.CHATLIST])
     const setShowDrawer = (b: boolean) => {
@@ -114,6 +121,7 @@ const ChatsDrawer = () => {
                                     item={item}
                                     onLoad={handleLoadChat}
                                     index={index}
+                                    keyFactCount={factCountByChat.get(item.id) ?? 0}
                                 />
                             )}
                             showsVerticalScrollIndicator={false}

@@ -48,6 +48,7 @@ export type ContextMenuButtonProps = {
     textColor?: string
     variant?: 'normal' | 'warning'
     disabled?: boolean
+    status?: boolean
 }
 
 export interface ContextMenuProps extends ViewProps {
@@ -375,6 +376,16 @@ const MenuList = ({
                                     }>
                                     {item.label}
                                 </Text>
+                                {item.status !== undefined && (
+                                    <View
+                                        style={[
+                                            styles.statusDot,
+                                            item.status
+                                                ? styles.statusDotActive
+                                                : styles.statusDotInactive,
+                                        ]}
+                                    />
+                                )}
                             </Pressable>
 
                             {hasSubmenu && openKey === key && (
@@ -416,6 +427,29 @@ const useStyles = () => {
         },
         menuTextError: {
             color: color.error._300,
+        },
+        statusDot: {
+            width: 10,
+            height: 10,
+            borderRadius: 5,
+            marginLeft: 'auto',
+        },
+        statusDotActive: {
+            backgroundColor: color.quote,
+            borderWidth: 1,
+            borderColor: color.text._100,
+            boxShadow: [
+                {
+                    offsetX: 0,
+                    offsetY: 0,
+                    color: color.quote,
+                    blurRadius: 10,
+                    spreadDistance: 1,
+                },
+            ],
+        },
+        statusDotInactive: {
+            backgroundColor: color.neutral._500,
         },
     })
 }

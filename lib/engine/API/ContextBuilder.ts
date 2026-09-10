@@ -8,8 +8,10 @@ import { defaultSystemPromptFormat, InstructTokenCache, InstructType } from '@li
 import { Logger } from '@lib/state/Logger'
 import { replaceMacros } from '@lib/state/Macros'
 import { mmkv } from '@lib/storage/MMKV'
+import { formatKeyFactsForContext } from '@lib/summary/KeyFactsFormat'
 import { readBase64Async } from '@lib/utils/File'
 import { Macro } from '@lib/utils/Macros'
+import { ChatKeyFactType } from 'db/schema'
 
 import { APIConfiguration, APIValues } from './APIBuilder.types'
 
@@ -36,6 +38,8 @@ export interface ContextBuilderParams {
     chatTokenizer: (entry: ChatEntry, index: number) => Promise<number>
     maxLength: number
     cache: TokenCache
+    summary?: string
+    keyFacts?: ChatKeyFactType[]
     bypassContextLength?: boolean
     messageLoader?: MessageLoader
 }
@@ -68,6 +72,8 @@ export const buildChatCompletionContext = async ({
     character,
     user,
     cache,
+    summary,
+    keyFacts,
     instruct,
     tokenizer,
     chatTokenizer,
@@ -91,8 +97,10 @@ export const buildChatCompletionContext = async ({
         usePrefix,
     })
 
-    const initial = systemPrompt
-    let total_length = systemPromptLength
+    const summaryContext = formatSummaryContext(summary) + formatKeyFactsForContext(keyFacts)
+    const summaryLength = summaryContext ? await tokenizer(summaryContext) : 0
+    const initial = systemPrompt + summaryContext
+    let total_length = systemPromptLength + summaryLength
     let first_message_reached = false
 
     const payload: Message[] = [
@@ -104,7 +112,11 @@ export const buildChatCompletionContext = async ({
     let hasImage = false
     const messageBuffer: Message[] = []
     let index = messages.length - 1
+    const hasSummary = !!summary?.trim()
+    let turnCount = 0
     for (const message of messages.reverse()) {
+        if (hasSummary && turnCount >= MAX_TURNS_WITH_SUMMARY) break
+
         const swipe_data = message.swipes[message.swipe_id]
         // special case for claude, prefill may be useful!
         const name_string = `${message.name} :`
@@ -173,6 +185,7 @@ export const buildChatCompletionContext = async ({
         }
         first_message_reached = index === 0
         total_length += len
+        if (message.is_user) turnCount++
         index--
     }
 
@@ -223,6 +236,8 @@ export const buildTextCompletionContext = async ({
     character,
     user,
     cache,
+    summary,
+    keyFacts,
     instruct,
     tokenizer,
     chatTokenizer,
@@ -244,8 +259,10 @@ export const buildTextCompletionContext = async ({
         useSuffix,
     })
 
-    let payload = systemPrompt
-    const payloadLength = systemPromptLength
+    const summaryContext = formatSummaryContext(summary) + formatKeyFactsForContext(keyFacts)
+    const summaryLength = summaryContext ? await tokenizer(summaryContext) : 0
+    let payload = systemPrompt + summaryContext
+    const payloadLength = systemPromptLength + summaryLength
 
     // suffix must be delayed for example messages
     let message_acc = ``
@@ -262,7 +279,11 @@ export const buildTextCompletionContext = async ({
 
     // we require lengths for names if use_names is enabled
     let hasMedia = false
+    const hasSummary = !!summary?.trim()
+    let turnCount = 0
     for (const message of messages.reverse()) {
+        if (hasSummary && turnCount >= MAX_TURNS_WITH_SUMMARY) break
+
         if (!hasMedia && message.attachments?.length) {
             hasMedia = true
         }
@@ -323,6 +344,7 @@ export const buildTextCompletionContext = async ({
         is_last = false
         message_acc_length += shard_length
         message_acc = message_shard + message_acc
+        if (message.is_user) turnCount++
         index--
     }
 
@@ -361,6 +383,14 @@ export const buildTextCompletionContext = async ({
 }
 
 const thinkRule = buildThinkRules()
+
+/** Once a summary exists, raw history is hard-capped to this many recent turns. */
+const MAX_TURNS_WITH_SUMMARY = 20
+
+const formatSummaryContext = (summary?: string) => {
+    if (!summary?.trim()) return ''
+    return `\n\n<chat_summary>\n${i18n.t('chat.summaryContextIntro')}\n${summary.trim()}\n</chat_summary>`
+}
 
 const getMacroRules = (instruct: InstructType) => {
     if (instruct.hide_think_tags) {

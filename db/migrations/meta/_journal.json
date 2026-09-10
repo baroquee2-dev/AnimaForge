@@ -134,6 +134,48 @@
       "when": 1785259394291,
       "tag": "0018_instruct_formats",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "6",
+      "when": 1785654928105,
+      "tag": "0019_spicy_tag",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "6",
+      "when": 1785656006074,
+      "tag": "0020_same_speedball",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "6",
+      "when": 1785660000000,
+      "tag": "0021_summary_turn_count",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "6",
+      "when": 1785660000001,
+      "tag": "0022_summary_char_count",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "6",
+      "when": 1786531881209,
+      "tag": "0023_lying_swordsman",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "6",
+      "when": 1788722811579,
+      "tag": "0024_chat_key_facts",
+      "breakpoints": true
     }
   ]
 }

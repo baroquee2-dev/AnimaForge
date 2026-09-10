@@ -16,4 +16,5 @@ export enum Storage {
     CharacterSearch = 'storage-character-search',
     ChatStyle = 'storage-chat-text-styling',
     Language = 'language-storage',
+    LiteLLMModels = 'litellm-models-storage',
 }

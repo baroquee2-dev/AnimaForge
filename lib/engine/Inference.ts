@@ -265,6 +265,8 @@ async function obtainFields(): Promise<APIBuilderParams | void> {
             character: Object.assign({}, characterCard),
             user: Object.assign({}, userCard),
             messages: [...messages],
+            summary: chatState.data?.summary,
+            keyFacts: chatState.data?.keyFacts,
             stopSequence: stopSequence,
             stopGenerating: () => {},
             chatTokenizer: async (entry, index) => {

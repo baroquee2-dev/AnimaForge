@@ -3,6 +3,7 @@ import i18n from '@lib/i18n'
 
 import { AppSettings, APP_NAME, CLAUDE_VERSION, GITHUB_REPOSITORY } from '@lib/constants/GlobalValues'
 import { SSEFetch } from '@lib/engine/SSEFetch'
+import { useInference } from '@lib/state/Chat'
 import { Logger } from '@lib/state/Logger'
 import { mmkv } from '@lib/storage/MMKV'
 import { getNestedValue } from '@lib/utils/Parsing'
@@ -42,6 +43,8 @@ export const buildAndSendRequest = async ({
     character,
     user,
     messages,
+    summary,
+    keyFacts,
     stopSequence,
     stopGenerating,
     chatTokenizer,
@@ -60,6 +63,8 @@ export const buildAndSendRequest = async ({
             character,
             user,
             messages,
+            summary,
+            keyFacts,
             chatTokenizer,
             tokenizer,
             messageLoader,
@@ -251,12 +256,14 @@ const hordeResponse = (senderParams: SenderParams) => {
 
         if (request.status === 401) {
             Logger.error(`Invalid API Key`)
+            useInference.getState().markGenerationFailed()
             senderParams.stopGenerating()
             return
         }
 
         if (request.status !== 202) {
             Logger.error(`Horde Request failed.`)
+            useInference.getState().markGenerationFailed()
             senderParams.stopGenerating()
             const body = await request.json()
             Logger.error(JSON.stringify(body))
@@ -284,6 +291,7 @@ const hordeResponse = (senderParams: SenderParams) => {
 
             if (response.status === 400) {
                 Logger.error(`Response failed.`)
+                useInference.getState().markGenerationFailed()
                 senderParams.stopGenerating()
                 Logger.error((await response.json())?.message)
                 return
@@ -316,6 +324,7 @@ const readableStreamResponse = async (senderParams: SenderParams) => {
             if (a?.error) {
                 Logger.errorToast(i18n.t('toast.sseError'))
                 Logger.error(data)
+                useInference.getState().markGenerationFailed()
             }
         } catch {}
         senderParams.onEvent(data)
@@ -323,6 +332,7 @@ const readableStreamResponse = async (senderParams: SenderParams) => {
 
     sse.setOnError(() => {
         Logger.errorToast(i18n.t('toast.generationFailed'))
+        useInference.getState().markGenerationFailed()
         closeStream()
     })
 

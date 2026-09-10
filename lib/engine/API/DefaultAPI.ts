@@ -759,8 +759,8 @@ export const defaultTemplates: APIConfiguration[] = [
         },
 
         ui: {
-            editableCompletionPath: true,
-            editableModelPath: true,
+            editableCompletionPath: false,
+            editableModelPath: false,
             selectableModel: true,
             display: {
                 name: 'Google AI Studio',

@@ -347,8 +347,89 @@ const runLocalCompletion = async (
         .completion({ ...payload, n_threads: engineData.threads }, outputStream, outputCompleted)
         .catch((error) => {
             Logger.errorToast(i18n.t('toast.failedGenerateLocal', { error }))
+            useInference.getState().markGenerationFailed()
             stopGenerating()
         })
+}
+
+export type LocalSummaryInput = {
+    system: string
+    user: string
+}
+
+const restoreLocalSessionAfterSummary = async () => {
+    // Summary runs on the same llama context and invalidates any in-memory prefix.
+    // Mark cache dirty, then reload the last chat session from disk when available.
+    KV.useKVStore.getState().setKvCacheLoaded(false)
+    if (!mmkv.getBoolean(AppSettings.SaveLocalKV)) return
+
+    const restored = await Llama.useLlamaModelStore.getState().loadKV()
+    if (restored) {
+        KV.useKVStore.getState().setKvCacheLoaded(true)
+        Logger.debug('Restored local KV cache after chat summary')
+    } else {
+        Logger.warn('Could not restore local KV cache after chat summary')
+    }
+}
+
+const buildLocalSummaryPrompt = async (input: LocalSummaryInput) => {
+    const fallback = `${input.system}\n\n${input.user}`
+    if (!mmkv.getBoolean(AppSettings.UseModelTemplate)) return fallback
+
+    const context = Llama.useLlamaModelStore.getState().context
+    if (!context?.getFormattedChat) return fallback
+
+    try {
+        const messages = [
+            { role: 'system', content: input.system },
+            { role: 'user', content: input.user },
+        ]
+        const result = await context.getFormattedChat(messages, null, {
+            jinja: true,
+            enable_thinking: false,
+        })
+        if (typeof result === 'string' && result.trim()) return result
+        if (result && typeof result === 'object' && typeof result.prompt === 'string' && result.prompt.trim()) {
+            return result.prompt
+        }
+    } catch (error) {
+        Logger.warn(`Failed to format local summary with model template: ${error}`)
+    }
+    return fallback
+}
+
+export const generateLocalSummary = async (
+    input: LocalSummaryInput | string,
+    maxTokens: number = 384
+) => {
+    const context = Llama.useLlamaModelStore.getState().context
+    if (!context) {
+        Logger.warn('Skipping chat summary because no local model is loaded')
+        return
+    }
+
+    const localConfig = Llama.useLlamaPreferencesStore.getState().config
+    const payloadFields = getSamplerFields(maxTokens)
+    const structured: LocalSummaryInput =
+        typeof input === 'string' ? { system: '', user: input } : input
+    const prompt = await buildLocalSummaryPrompt(structured)
+
+    try {
+        const result = await context.completion(
+            {
+                ...payloadFields,
+                temperature: 0.2,
+                n_predict: maxTokens,
+                prompt,
+                stop: [],
+                n_threads: localConfig.threads,
+            },
+            () => {}
+        )
+        return (result.content || result.text).trim()
+    } finally {
+        await restoreLocalSessionAfterSummary()
+    }
 }
 
 const localAPIValues: APIValues = {
@@ -473,6 +554,8 @@ const obtainFields = async (): Promise<ContextBuilderParams | void> => {
             character: Object.assign({}, characterCard),
             user: Object.assign({}, userCard),
             messages: [...messages],
+            summary: chatState.data?.summary,
+            keyFacts: chatState.data?.keyFacts,
             chatTokenizer: async (entry, index) => {
                 // IMPORTANT - we use -1 for dummy entries
                 if (entry.id === -1) return 0

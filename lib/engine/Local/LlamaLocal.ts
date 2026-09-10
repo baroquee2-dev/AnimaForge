@@ -280,14 +280,16 @@ export namespace Llama {
                     callback(data.token)
                 })
                 .then(async ({ text, timings }: CompletionOutput) => {
+                    // Persist chat KV before UI teardown / background summary so summary
+                    // can restore a clean session afterwards.
+                    if (mmkv.getBoolean(AppSettings.SaveLocalKV)) {
+                        await get().saveKV(params.prompt, params.media_paths ?? [])
+                    }
                     completed(text, timings)
                     Logger.info(
                         `\n---- Start Chat ${get().chatCount} ----\n${textTimings(timings)}\n---- End Chat ${get().chatCount} ----\n`
                     )
                     set({ chatCount: get().chatCount + 1 })
-                    if (mmkv.getBoolean(AppSettings.SaveLocalKV)) {
-                        await get().saveKV(params.prompt, params.media_paths ?? [])
-                    }
                 })
         },
         stopCompletion: async () => {
